@@ -34,4 +34,4 @@ $SUDO mkdir -p $PREFIX/usr/share/applications/
     echo Exec=$PREFIX/usr/bin/leagueoflegends
     echo Icon=$PREFIX/usr/share/icons/hicolor/48x48/apps/leagueoflegends.png
     echo StartupWMClass=LoLLauncher.exe
-} | $SUDO tee /usr/share/applications/leagueoflegends.desktop
+} | $SUDO tee $PREFIX/usr/share/applications/leagueoflegends.desktop

@@ -10,7 +10,7 @@ case $1 in
     PREFIX=*) PREFIX="${1//PREFIX=/}";;
 esac
 
-cd "$(dirname $0)" || exit 1
+cd "$(dirname "$0")" || exit 1
 if [ "$PREFIX" == "/" ]; then
     if [ "$UID" != "0" ]; then
         [ ! -f /usr/bin/sudo ] && ERRO "Run by root or install sudo!"
@@ -20,11 +20,11 @@ if [ "$PREFIX" == "/" ]; then
     fi
 fi
 
-$SUDO install -Dm644 ./leagueoflegends.conf     $PREFIX/etc/leagueoflegends.conf
-$SUDO install -Dm755 ./leagueoflegends          $PREFIX/usr/bin/leagueoflegends
-$SUDO install -Dm644 ./leagueoflegends.png      $PREFIX/usr/share/icons/hicolor/48x48/apps/leagueoflegends.png
+$SUDO install -Dm644 ./leagueoflegends.conf     "$PREFIX/etc/leagueoflegends.conf"
+$SUDO install -Dm755 ./leagueoflegends          "$PREFIX/usr/bin/leagueoflegends"
+$SUDO install -Dm644 ./leagueoflegends.png      "$PREFIX/usr/share/icons/hicolor/48x48/apps/leagueoflegends.png"
 
-$SUDO mkdir -p $PREFIX/usr/share/applications/
+$SUDO mkdir -p "$PREFIX/usr/share/applications/"
 {
     echo "[Desktop Entry]"
     echo Name=League Of Legends
@@ -32,4 +32,4 @@ $SUDO mkdir -p $PREFIX/usr/share/applications/
     echo Type=Application
     echo Exec=leagueoflegends
     echo Icon=leagueoflegends
-} | $SUDO tee $PREFIX/usr/share/applications/leagueoflegends.desktop
+} | $SUDO tee "$PREFIX/usr/share/applications/leagueoflegends.desktop"

@@ -24,4 +24,4 @@ By this you do the trick and script will think what lol has been installed
 
 Black Login Screen:
 - Workaround - Not found
-- Try change random winecfg settings until it's fixed, after return it to default and all works good (example try run with virtualdesktop), if someone know solution let me know.
+- Try change random winecfg settings until it's fixed (example try run with virtualdesktop), after return settings to default, all must works good , if someone know simple solution let me know.

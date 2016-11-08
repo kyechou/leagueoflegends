@@ -27,11 +27,9 @@ $SUDO install -Dm644 ./leagueoflegends.png      $PREFIX/usr/share/icons/hicolor/
 $SUDO mkdir -p $PREFIX/usr/share/applications/
 {
     echo "[Desktop Entry]"
-    echo Encoding=UTF-8
     echo Name=League Of Legeds
     echo Comment=League Of Legeds Game
     echo Type=Application
-    echo Exec=$PREFIX/usr/bin/leagueoflegends
-    echo Icon=$PREFIX/usr/share/icons/hicolor/48x48/apps/leagueoflegends.png
-    echo StartupWMClass=LoLLauncher.exe
+    echo Exec=leagueoflegends
+    echo Icon=/usr/share/icons/hicolor/48x48/apps/leagueoflegends.png
 } | $SUDO tee $PREFIX/usr/share/applications/leagueoflegends.desktop

@@ -23,7 +23,9 @@ INFO "Last tested version: wine-1.9.21 (Staging)"
 
 ################################################################################
 # Some vars
-export WINEPREFIX WINEARCH PREFIXCOMMAND LOL_LAUNCHER_NAME
+export WINEPREFIX WINEARCH
+export PREFIXCOMMAND LOL_LAUNCHER_NAME LOL_INSTALL_PATH
+
 INSTALLER_FILE_NAME="LeagueOfLegendsBaseEUW.exe"
 INSTALLER_URL="http://l3cdn.riotgames.com/Installer/SingleFileInstall/$INSTALLER_FILE_NAME"
 
@@ -40,6 +42,7 @@ fi
 # 1 - wine configured need to install LoL
 # 2 - LoL Installer downloaded
 # 3 - LoL Launcher Installed
+# 4 - LoL Launcher Placed to Unix friendly path
 
 if [ ! -d "$WINEPREFIX" ]; then
     INFO "Wine prefix not exist"
@@ -78,31 +81,35 @@ fi
 
 ################################################################################
 # Check if LoL installed
-if [ ! -f "$WINEPREFIX/drive_c/LoL/$LOL_LAUNCHER_NAME" ]; then
+export LOL_LAUNCHER_PATH
+
+if [ ! -f "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" ]; then
     TMP="$(mktemp)"
-    find "$WINEPREFIX/drive_c" -name "$LOL_LAUNCHER_NAME" > $TMP
-    read -r LOL_LAUNCHER_PATH < $TMP
+
+    find "$WINEPREFIX/drive_c/" -name "$LOL_LAUNCHER_NAME" > "$TMP"
+    read -r LOL_LAUNCHER_PATH < "$TMP"
+
+    [ ! -f "$LOL_LAUNCHER_PATH" ] && ERRO "Can't find LoL Launcher!"
     rm $TMP
-
-    if [ ! -f "$LOL_LAUNCHER_PATH" ]; then
-        ERRO "Can't find LoL Launcher!"
-    fi
-
-    if [ ! -d "$WINEPREFIX/drive_c/LoL" ]; then
-        WARN "Move LoL Dir for remove spaces"
-        TMP="$(mktemp)"
-        dirname "$LOL_LAUNCHER_PATH" > "$TMP"
-        read -r LOL_DIR < $TMP
-        rm $TMP
-        mv -v "$LOL_DIR" "$WINEPREFIX/drive_c/LoL"
-    fi
 fi
 
+if [ ! -d "$LOL_INSTALL_PATH" ]; then
+    WARN "Move LoL dir for remove spaces in path"
+    TMP="$(mktemp)"
+    dirname "$LOL_LAUNCHER_PATH" > "$TMP"
+    read -r LOL_DIR < "$TMP"
+    rm "$TMP"
+
+    mv -v "$LOL_DIR/" "$LOL_INSTALL_PATH/"
+
+    echo 4 > "$WINEPREFIX/STATUS"
+fi
+
+echo ---
+WIN_PATH="$(winepath -w $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME)"
+
+INFO "LoL Launcher path: $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME"
 INFO "All okay, let's enjoy!"
-INFO "Try to run $LOL_LAUNCHER_NAME"
+INFO "Try to run: $LOL_LAUNCHER_NAME"
 
-if [ -z "$PREFIXCOMMAND" ]; then
-    wine "C:/LoL/$LOL_LAUNCHER_NAME"
-else
-    $PREFIXCOMMAND wine "C:/LoL/$LOL_LAUNCHER_NAME"
-fi
+$PREFIXCOMMAND wine "$WIN_PATH"

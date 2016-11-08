@@ -25,6 +25,7 @@ INFO "Last tested version: wine-1.9.21 (Staging) enabled CSMT"
 # Some vars
 export WINEPREFIX WINEARCH
 export PREFIXCOMMAND LOL_LAUNCHER_NAME LOL_INSTALL_PATH
+export LOL_OpenGL
 
 INSTALLER_FILE_NAME="LeagueOfLegendsBaseEUW.exe"
 INSTALLER_URL="http://l3cdn.riotgames.com/Installer/SingleFileInstall/$INSTALLER_FILE_NAME"
@@ -104,6 +105,38 @@ if [ ! -d "$LOL_INSTALL_PATH" ]; then
 
     echo 4 > "$WINEPREFIX/STATUS"
 fi
+
+dos2unix(){ sed $'s/\r$//'; }
+unix2dos(){ sed $'s/$/\r/'; }
+
+LOL_game_cfg=$LOL_INSTALL_PATH/Config/game.cfg
+if [ ! -f "$LOL_game_cfg" ]; then
+    INFO "Ignore OpenGL setting"
+    LOL_OpenGL=2
+fi
+
+case "$LOL_OpenGL" in
+    0)
+        if grep -q x3d_platform=1 "$LOL_game_cfg"; then
+            TMP="$(mktemp)"
+            dos2unix > "$TMP" < "$LOL_game_cfg"
+            sed -i 's/x3d_platform=1//g' "$TMP"
+            unix2dos > "$LOL_game_cfg" < "$TMP"
+            rm "$TMP"
+            INFO "Disable OpenGL in game.cfg"
+        fi
+    ;;
+    1)
+        if ! grep -q x3d_platform=1 "$LOL_game_cfg"; then
+            TMP="$(mktemp)"
+            dos2unix > "$TMP" < "$LOL_game_cfg"
+            sed -i 's/\[General\]/\[General\]\n x3d_platform=1/g' "$TMP"
+            unix2dos > "$LOL_game_cfg" < "$TMP"
+            rm "$TMP"
+            INFO "Enable OpenGL in game.cfg"
+        fi
+    ;;
+esac
 
 echo ---
 WIN_PATH="$(winepath -w $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME)"

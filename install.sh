@@ -27,9 +27,9 @@ $SUDO install -Dm644 ./leagueoflegends.png      $PREFIX/usr/share/icons/hicolor/
 $SUDO mkdir -p $PREFIX/usr/share/applications/
 {
     echo "[Desktop Entry]"
-    echo Name=League Of Legeds
-    echo Comment=League Of Legeds Game
+    echo Name=League Of Legends
+    echo Comment=League Of Legends Game
     echo Type=Application
     echo Exec=leagueoflegends
-    echo Icon=/usr/share/icons/hicolor/48x48/apps/leagueoflegends.png
+    echo Icon=leagueoflegends
 } | $SUDO tee $PREFIX/usr/share/applications/leagueoflegends.desktop

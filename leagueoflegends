@@ -1,0 +1,108 @@
+#!/bin/bash
+################################################################################
+# Logging functions
+INFO(){ echo -n "INFO: "; echo "$@" ;}
+WARN(){ echo -n "WARN: "; echo "$@" ;}
+ERRO(){ echo -n "ERRO: "; echo -n "$@" ; echo " Abort!"; exit 1;}
+
+################################################################################
+# Check some deps
+bin_exist(){
+    if [ -f $(whereis -b $1 | cut -d' ' -f2) ]; then
+        INFO "INFO: $1 checked"
+    else
+        ERRO "Missing ${1}!"
+    fi
+}
+
+bin_exist wine
+bin_exist winetricks
+
+################################################################################
+INFO "Last tested version: wine-1.9.21 (Staging)"
+
+################################################################################
+# Some vars
+export WINEPREFIX WINEARCH PREFIXCOMMAND LOL_LAUNCHER_NAME
+INSTALLER_FILE_NAME="LeagueOfLegendsBaseEUW.exe"
+INSTALLER_URL="http://l3cdn.riotgames.com/Installer/SingleFileInstall/$INSTALLER_FILE_NAME"
+
+################################################################################
+# Initialization
+if [ ! -f /etc/leagueoflegends.conf ]; then
+    ERRO "Missing /etc/leagueoflegends.conf !"
+fi
+
+. /etc/leagueoflegends.conf
+
+################################################################################
+# Status mapping
+# 1 - wine configured need to install LoL
+# 2 - LoL Installer downloaded
+# 3 - LoL Launcher Installed
+
+if [ ! -d "$WINEPREFIX" ]; then
+    INFO "Wine prefix not exist"
+    INFO "So try reinstall it"
+    winetricks -q corefonts vcrun2005 vcrun2008 d3dx9 || ERRO "Something went wrong!"
+    INFO "Make user dirs isolated"
+    find -H "$WINEPREFIX/drive_c/users/" -type l -delete
+    echo 1 > "$WINEPREFIX/STATUS"
+    INFO "Created: $WINEPREFIX"
+fi
+
+################################################################################
+[ -f "$WINEPREFIX/STATUS" ] && read -r STATUS < "$WINEPREFIX/STATUS"
+
+if [ "$STATUS" == "1" ]; then
+    wget $INSTALLER_URL -O "$WINEPREFIX/drive_c/$INSTALLER_FILE_NAME" || ERRO "Installer download filed!"
+    echo 2 > "$WINEPREFIX/STATUS"
+    INFO "LoL Installer downloaded"
+fi
+
+################################################################################
+[ -f "$WINEPREFIX/STATUS" ] && read -r STATUS < "$WINEPREFIX/STATUS"
+
+if [ "$STATUS" == "2" ]; then
+    INFO "Set wine version to Win7 for installing"
+    winetricks win7
+
+    wine "C:/$INSTALLER_FILE_NAME" || ERRO "Install fails!"
+
+    INFO "Set wineversion to WinXP as install completed"
+    winetricks winxp
+
+    INFO "LoL Installed"
+    echo 3 > "$WINEPREFIX/STATUS"
+fi
+
+################################################################################
+# Check if LoL installed
+if [ ! -f "$WINEPREFIX/drive_c/LoL/$LOL_LAUNCHER_NAME" ]; then
+    TMP="$(mktemp)"
+    find "$WINEPREFIX/drive_c" -name "$LOL_LAUNCHER_NAME" > $TMP
+    read -r LOL_LAUNCHER_PATH < $TMP
+    rm $TMP
+
+    if [ ! -f "$LOL_LAUNCHER_PATH" ]; then
+        ERRO "Can't find LoL Launcher!"
+    fi
+
+    if [ ! -d "$WINEPREFIX/drive_c/LoL" ]; then
+        WARN "Move LoL Dir for remove spaces"
+        TMP="$(mktemp)"
+        dirname "$LOL_LAUNCHER_PATH" > "$TMP"
+        read -r LOL_DIR < $TMP
+        rm $TMP
+        mv -v "$LOL_DIR" "$WINEPREFIX/drive_c/LoL"
+    fi
+fi
+
+INFO "All okay, let's enjoy!"
+INFO "Try to run $LOL_LAUNCHER_NAME"
+
+if [ -z "$PREFIXCOMMAND" ]; then
+    wine "C:/LoL/$LOL_LAUNCHER_NAME"
+else
+    $PREFIXCOMMAND wine "C:/LoL/$LOL_LAUNCHER_NAME"
+fi

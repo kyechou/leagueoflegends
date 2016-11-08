@@ -86,11 +86,11 @@ export LOL_LAUNCHER_PATH
 if [ ! -f "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" ]; then
     TMP="$(mktemp)"
 
-    find "$WINEPREFIX/drive_c/" -name "$LOL_LAUNCHER_NAME" > "$TMP"
+    find -H "$WINEPREFIX/drive_c/" -name "$LOL_LAUNCHER_NAME" > "$TMP"
     read -r LOL_LAUNCHER_PATH < "$TMP"
 
     [ ! -f "$LOL_LAUNCHER_PATH" ] && ERRO "Can't find LoL Launcher!"
-    rm $TMP
+    rm "$TMP"
 fi
 
 if [ ! -d "$LOL_INSTALL_PATH" ]; then

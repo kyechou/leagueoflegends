@@ -19,3 +19,9 @@ If you want move from previous LoL installation:
 - If launcher don't start automaticaly, run script/desktop app again
 
 By this you do the trick and script will think what lol has been installed
+
+# Know problems
+
+Black Login Screen:
+- Workaround - Not found
+- Try change random winecfg settings until it's fixed, after return it to default and all works good (example try run with virtualdesktop), if someone know solution let me know.

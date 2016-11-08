@@ -8,7 +8,7 @@ ERRO(){ echo -n "ERRO: "; echo -n "$@" ; echo " Abort!"; exit 1;}
 ################################################################################
 # Check some deps
 bin_exist(){
-    if [ -f $(whereis -b $1 | cut -d' ' -f2) ]; then
+    if command -v "$1" &> /dev/null; then
         INFO "INFO: $1 checked"
     else
         ERRO "Missing ${1}!"
@@ -139,7 +139,10 @@ case "$LOL_OpenGL" in
 esac
 
 echo ---
-WIN_PATH="$(winepath -w $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME)"
+TMP="$(mktemp)"
+winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP"
+read -r WIN_PATH < "$TMP"
+rm "$TMP"
 
 INFO "LoL Launcher path: $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME"
 INFO "All okay, let's enjoy!"

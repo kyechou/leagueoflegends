@@ -27,8 +27,8 @@ $SUDO install -Dm644 ./leagueoflegends.desktop  "$PREFIX/usr/share/applications/
 
 # Install Tiny Launcher
 for file in ./Launcher/*.exe; do
-    $SUDO install -Dm644 "$file" "$PREFIX/var/lib/leagueoflegends/$(basename $file)"
+    $SUDO install -Dm644 "$file" "$PREFIX/var/lib/leagueoflegends/$(basename "$file")"
 done
 for file in ./Launcher/RADS/system/*; do
-    $SUDO install -Dm644 "$file" "$PREFIX/var/lib/leagueoflegends/RADS/system/$(basename $file)"
+    $SUDO install -Dm644 "$file" "$PREFIX/var/lib/leagueoflegends/RADS/system/$(basename "$file")"
 done

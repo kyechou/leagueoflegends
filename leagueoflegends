@@ -24,128 +24,117 @@ INFO "Last tested version: wine-1.9.21 (Staging) enabled CSMT"
 ################################################################################
 # Some vars
 export WINEPREFIX WINEARCH
-export PREFIXCOMMAND LOL_LAUNCHER_NAME LOL_INSTALL_PATH
+export PREFIXCOMMAND TMP
 export LOL_OpenGL
+export LOL_LAUNCHER_NAME LOL_INSTALL_PATH LOL_LAUNCHER_PATH
+export LOL_RUN_LOG
 
-INSTALLER_FILE_NAME="LeagueOfLegendsBaseEUW.exe"
-INSTALLER_URL="http://l3cdn.riotgames.com/Installer/SingleFileInstall/$INSTALLER_FILE_NAME"
-
+TMP="$(mktemp -u)"
 ################################################################################
 # Initialization
-if [ ! -f /etc/leagueoflegends.conf ]; then
-    ERRO "Missing /etc/leagueoflegends.conf !"
-fi
+CONF=/etc/leagueoflegends.conf
+[ ! -f "$CONF" ] && ERRO "Missing: ${CONF}"
+INFO "Reading Config"
+# shellcheck source=leagueoflegends.conf
+source "$CONF"
 
-. /etc/leagueoflegends.conf
-
-################################################################################
-# Status mapping
-# 1 - wine configured need to install LoL
-# 2 - LoL Installer downloaded
-# 3 - LoL Launcher Installed
-# 4 - LoL Launcher Placed to Unix friendly path
-
+echo ---
+INFO "Check: $WINEPREFIX"
 if [ ! -d "$WINEPREFIX" ]; then
     INFO "Wine prefix not exist"
-    INFO "So try reinstall it"
-    winetricks -q corefonts vcrun2005 vcrun2008 d3dx9 || ERRO "Something went wrong!"
+    INFO "So try recreate it"
+
+    wineboot &> /dev/null
+
     INFO "Make user dirs isolated"
     find -H "$WINEPREFIX/drive_c/users/" -type l -delete
-    echo 1 > "$WINEPREFIX/STATUS"
+
     INFO "Created: $WINEPREFIX"
 fi
 
-################################################################################
-[ -f "$WINEPREFIX/STATUS" ] && read -r STATUS < "$WINEPREFIX/STATUS"
+echo ---
+INFO "Check: if configured"
+REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
+for mod in "${REQ_MOD[@]}"; do
+    if ! grep -q "$mod" "$WINEPREFIX/winetricks.log"; then
+        winetricks -q "$mod" || ERRO "Something went wrong!"
+    fi
+done
 
-if [ "$STATUS" == "1" ]; then
-    wget $INSTALLER_URL -O "$WINEPREFIX/drive_c/$INSTALLER_FILE_NAME" || ERRO "Installer download filed!"
-    echo 2 > "$WINEPREFIX/STATUS"
-    INFO "LoL Installer downloaded"
-fi
+rm_w(){ [ -f "$1" ] && rm "$1"; }
 
-################################################################################
-[ -f "$WINEPREFIX/STATUS" ] && read -r STATUS < "$WINEPREFIX/STATUS"
-
-if [ "$STATUS" == "2" ]; then
-    INFO "Set wine version to Win7 for installing"
-    winetricks win7
-
-    wine "C:/$INSTALLER_FILE_NAME" || ERRO "Install fails!"
-
-    INFO "Set wineversion to WinXP as install completed"
-    winetricks winxp
-
-    INFO "LoL Installed"
-    echo 3 > "$WINEPREFIX/STATUS"
-fi
-
-################################################################################
-# Check if LoL installed
-export LOL_LAUNCHER_PATH
-
-if [ ! -f "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" ]; then
-    TMP="$(mktemp)"
-
+echo ---
+INFO "Check if launcher installed"
+if [ ! -d "$LOL_INSTALL_PATH" ]; then
+    INFO "League of Legends not found at: $LOL_INSTALL_PATH"
+    INFO "Try found any launcher"
     find -H "$WINEPREFIX/drive_c/" -name "$LOL_LAUNCHER_NAME" > "$TMP"
     read -r LOL_LAUNCHER_PATH < "$TMP"
+    rm_w "$TMP"
 
-    [ ! -f "$LOL_LAUNCHER_PATH" ] && ERRO "Can't find LoL Launcher!"
-    rm "$TMP"
+    if [ -f "$LOL_LAUNCHER_PATH" ]; then
+        INFO "Find another League of Legends launcher, move it to $LOL_INSTALL_PATH"
+        dirname "$LOL_LAUNCHER_PATH" > "$TMP"
+        read -r LOL_DIR < "$TMP"
+        rm_w "$TMP"
+        mv -v "$LOL_DIR/" "$LOL_INSTALL_PATH/"
+    else
+        INFO "League of Legends not found at $WINEPREFIX/drive_c/"
+        INFO "So reinstall it"
+        # Install Tiny Launcher
+        for file in /var/lib/leagueoflegends/*.exe; do
+            install -Dm644 "$file" "$LOL_INSTALL_PATH/$(basename "$file")" || ERRO "Something went wrong!"
+        done
+        for file in /var/lib/leagueoflegends/RADS/system/*; do
+            install -Dm644 "$file" "$LOL_INSTALL_PATH/RADS/system/$(basename "$file")" || ERRO "Something went wrong!"
+        done
+    fi
+else
+    INFO "League of Legends found at: $LOL_INSTALL_PATH"
 fi
 
-if [ ! -d "$LOL_INSTALL_PATH" ]; then
-    WARN "Move LoL dir for remove spaces in path"
-    TMP="$(mktemp)"
-    dirname "$LOL_LAUNCHER_PATH" > "$TMP"
-    read -r LOL_DIR < "$TMP"
-    rm "$TMP"
-
-    mv -v "$LOL_DIR/" "$LOL_INSTALL_PATH/"
-
-    echo 4 > "$WINEPREFIX/STATUS"
-fi
+echo ---
+INFO "Initialization Finished"
 
 dos2unix(){ sed $'s/\r$//'; }
 unix2dos(){ sed $'s/$/\r/'; }
 
 LOL_game_cfg=$LOL_INSTALL_PATH/Config/game.cfg
 if [ ! -f "$LOL_game_cfg" ]; then
+    INFO "Can't find: $LOL_game_cfg"
     INFO "Ignore OpenGL setting"
     LOL_OpenGL=2
 fi
 
 case "$LOL_OpenGL" in
+    0|1) dos2unix > "$TMP" < "$LOL_game_cfg" ;;
+esac
+
+case "$LOL_OpenGL" in
     0)
         if grep -q x3d_platform=1 "$LOL_game_cfg"; then
-            TMP="$(mktemp)"
-            dos2unix > "$TMP" < "$LOL_game_cfg"
             sed -i 's/x3d_platform=1//g' "$TMP"
             unix2dos > "$LOL_game_cfg" < "$TMP"
-            rm "$TMP"
             INFO "Disable OpenGL in game.cfg"
         fi
     ;;
     1)
         if ! grep -q x3d_platform=1 "$LOL_game_cfg"; then
-            TMP="$(mktemp)"
-            dos2unix > "$TMP" < "$LOL_game_cfg"
             sed -i 's/\[General\]/\[General\]\n x3d_platform=1/g' "$TMP"
             unix2dos > "$LOL_game_cfg" < "$TMP"
-            rm "$TMP"
             INFO "Enable OpenGL in game.cfg"
         fi
     ;;
 esac
 
+rm_w "$TMP"
+
 echo ---
-TMP="$(mktemp)"
-winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP"
+winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null
 read -r WIN_PATH < "$TMP"
-rm "$TMP"
+rm_w "$TMP"
 
 INFO "LoL Launcher path: $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME"
-INFO "All okay, let's enjoy!"
-INFO "Try to run: $LOL_LAUNCHER_NAME"
-
-$PREFIXCOMMAND wine "$WIN_PATH"
+INFO "Run: $LOL_LAUNCHER_NAME" | tee -a "$WINEPREFIX/run.log"
+INFO "Wine run log: $WINEPREFIX/run.log"
+$PREFIXCOMMAND wine "$WIN_PATH" &>> "$WINEPREFIX/run.log"

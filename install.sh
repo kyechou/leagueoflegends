@@ -13,7 +13,7 @@ esac
 cd "$(dirname "$0")" || exit 1
 if [ "$PREFIX" == "/" ]; then
     if [ "$UID" != "0" ]; then
-        command -v sudo &> /dev/null && ERRO "Run by root or install sudo!"
+        command -v sudo &> /dev/null || ERRO "Run by root or install sudo!"
         SUDO=sudo
     else
         unset SUDO
@@ -24,3 +24,11 @@ $SUDO install -Dm644 ./leagueoflegends.conf     "$PREFIX/etc/leagueoflegends.con
 $SUDO install -Dm755 ./leagueoflegends          "$PREFIX/usr/bin/leagueoflegends"
 $SUDO install -Dm644 ./leagueoflegends.png      "$PREFIX/usr/share/icons/hicolor/48x48/apps/leagueoflegends.png"
 $SUDO install -Dm644 ./leagueoflegends.desktop  "$PREFIX/usr/share/applications/leagueoflegends.desktop"
+
+# Install Tiny Launcher
+for file in ./Launcher/*.exe; do
+    $SUDO install -Dm644 "$file" "$PREFIX/var/lib/leagueoflegends/$(basename $file)"
+done
+for file in ./Launcher/RADS/system/*; do
+    $SUDO install -Dm644 "$file" "$PREFIX/var/lib/leagueoflegends/RADS/system/$(basename $file)"
+done

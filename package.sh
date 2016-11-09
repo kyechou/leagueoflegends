@@ -31,7 +31,10 @@ debian_package(){
 }
 
 archlinux_package(){
-    INFO "Use yaourt -S leagueoflegends-git"
+    git clone https://aur.archlinux.org/leagueoflegends-git.git /tmp/leagueoflegends-git/
+    cd /tmp/leagueoflegends-git/
+    makepkg -i
+    rm -rf /tmp/leagueoflegends-git/
 }
 
 case $1 in

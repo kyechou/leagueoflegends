@@ -11,7 +11,7 @@ $ git clone https://github.com/Nefelim4ag/League-Of-Legends.git /tmp/LoL
 # /tmp/LoL/install.sh
 ```
 * ![logo](http://www.monitorix.org/imgs/archlinux.png "arch logo") Arch: [AUR/leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git).
-* Debian/Ubuntu: use [package.sh](https://raw.githubusercontent.com/Nefelim4ag/Ananicy/master/package.sh) in repo
+* Debian/Ubuntu: use [package.sh](https://raw.githubusercontent.com/Nefelim4ag/League-Of-Legends/master/package.sh) in repo
 
 ```
 $ git clone https://github.com/Nefelim4ag/League-Of-Legends.git /tmp/LoL

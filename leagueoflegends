@@ -129,6 +129,13 @@ esac
 
 rm_w "$TMP"
 
+case "$1" in
+    winecfg) winecfg ;;
+    wineserver) shift; wineserver "$@" ;;
+esac
+
+[ ! -z "$1" ] && exit 0
+
 echo ---
 winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null
 read -r WIN_PATH < "$TMP"

@@ -29,6 +29,14 @@ export LOL_OpenGL
 export LOL_LAUNCHER_NAME LOL_INSTALL_PATH LOL_LAUNCHER_PATH
 export LOL_RUN_LOG
 
+WINEARCH=win32
+WINEPREFIX="$HOME/.local/share/leagueoflegends"
+PREFIXCOMMAND=""
+LOL_OpenGL=2
+LOL_RUN_LOG="$WINEPREFIX/wine_lol.log"
+LOL_LAUNCHER_NAME="lol.launcher.exe"
+LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
+
 TMP="$(mktemp -u)"
 ################################################################################
 # Initialization

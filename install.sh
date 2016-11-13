@@ -22,7 +22,7 @@ fi
 
 $SUDO install -Dm644 ./leagueoflegends.conf     "$PREFIX/etc/leagueoflegends.conf"
 $SUDO install -Dm755 ./leagueoflegends          "$PREFIX/usr/bin/leagueoflegends"
-$SUDO install -Dm644 ./leagueoflegends.png      "$PREFIX/usr/share/icons/hicolor/48x48/apps/leagueoflegends.png"
+$SUDO install -Dm644 ./leagueoflegends.png      "$PREFIX/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
 $SUDO install -Dm644 ./leagueoflegends.desktop  "$PREFIX/usr/share/applications/leagueoflegends.desktop"
 
 # Install Tiny Launcher

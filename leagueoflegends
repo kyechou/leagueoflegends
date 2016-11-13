@@ -72,6 +72,14 @@ done
 rm_w(){ [ -f "$1" ] && rm "$1"; }
 
 echo ---
+reinstall_bin(){
+    for file in /var/lib/leagueoflegends/*.exe; do
+        install -Dm644 "$file" "$LOL_INSTALL_PATH/$(basename "$file")" || ERRO "Something went wrong!"
+    done
+    for file in /var/lib/leagueoflegends/RADS/system/*; do
+        install -Dm644 "$file" "$LOL_INSTALL_PATH/RADS/system/$(basename "$file")" || ERRO "Something went wrong!"
+    done
+}
 INFO "Check if launcher installed"
 if [ ! -d "$LOL_INSTALL_PATH" ]; then
     INFO "League of Legends not found at: $LOL_INSTALL_PATH"
@@ -90,12 +98,7 @@ if [ ! -d "$LOL_INSTALL_PATH" ]; then
         INFO "League of Legends not found at $WINEPREFIX/drive_c/"
         INFO "So reinstall it"
         # Install Tiny Launcher
-        for file in /var/lib/leagueoflegends/*.exe; do
-            install -Dm644 "$file" "$LOL_INSTALL_PATH/$(basename "$file")" || ERRO "Something went wrong!"
-        done
-        for file in /var/lib/leagueoflegends/RADS/system/*; do
-            install -Dm644 "$file" "$LOL_INSTALL_PATH/RADS/system/$(basename "$file")" || ERRO "Something went wrong!"
-        done
+        reinstall_bin
     fi
 else
     INFO "League of Legends found at: $LOL_INSTALL_PATH"
@@ -140,6 +143,7 @@ rm_w "$TMP"
 case "$1" in
     winecfg) winecfg ;;
     wineserver) shift; wineserver "$@" ;;
+    reinstall_bin) reinstall_bin ;;
 esac
 
 [ ! -z "$1" ] && exit 0

@@ -147,9 +147,9 @@ if [ ! -z "$1" ]; then
         echo "$0 reinstall_bin - reinstall lol leauncher bins"
     }
     case "$1" in
-        winecfg) winecfg ;;
-        wineserver) shift; wineserver "$@" ;;
-        reinstall_bin) reinstall_bin ;;
+        winecfg) winecfg;                   echo "winecfg"         &>> "$LOL_RUN_LOG" ;;
+        wineserver) shift; wineserver "$@"; echo "wineserver" "$@" &>> "$LOL_RUN_LOG" ;;
+        reinstall_bin) reinstall_bin;       echo "reinstall_bin"   &>> "$LOL_RUN_LOG" ;;
         *) help ;;
     esac
     exit 0

@@ -140,13 +140,20 @@ esac
 
 rm_w "$TMP"
 
-case "$1" in
-    winecfg) winecfg ;;
-    wineserver) shift; wineserver "$@" ;;
-    reinstall_bin) reinstall_bin ;;
-esac
-
-[ ! -z "$1" ] && exit 0
+if [ ! -z "$1" ]; then
+    help(){
+        echo "$0 winecfg"
+        echo "$0 wineserver <args>"
+        echo "$0 reinstall_bin - reinstall lol leauncher bins"
+    }
+    case "$1" in
+        winecfg) winecfg ;;
+        wineserver) shift; wineserver "$@" ;;
+        reinstall_bin) reinstall_bin ;;
+        *) help ;;
+    esac
+    exit 0
+fi
 
 echo ---
 winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null

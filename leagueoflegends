@@ -19,7 +19,7 @@ bin_exist wine
 bin_exist winetricks
 
 ################################################################################
-INFO "Last tested version: wine-1.9.21 (Staging) enabled CSMT"
+INFO "Last tested version: wine-1.9.23"
 
 ################################################################################
 # Some vars

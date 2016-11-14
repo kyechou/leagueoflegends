@@ -73,10 +73,10 @@ rm_w(){ [ -f "$1" ] && rm "$1"; }
 
 echo ---
 reinstall_bin(){
-    for file in /var/lib/leagueoflegends/*.exe; do
+    for file in /opt/leagueoflegends/*.exe; do
         install -Dm644 "$file" "$LOL_INSTALL_PATH/$(basename "$file")" || ERRO "Something went wrong!"
     done
-    for file in /var/lib/leagueoflegends/RADS/system/*; do
+    for file in /opt/leagueoflegends/RADS/system/*; do
         install -Dm644 "$file" "$LOL_INSTALL_PATH/RADS/system/$(basename "$file")" || ERRO "Something went wrong!"
     done
 }

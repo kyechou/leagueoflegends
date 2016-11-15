@@ -2,7 +2,7 @@
 Name=League Of Legends
 Comment=League Of Legends Game
 Type=Application
-Exec=leagueoflegends
+Exec=leagueoflegends launcher
 Icon=leagueoflegends
 Terminal=false
 Categories=Wine;Game;
@@ -10,7 +10,7 @@ Actions=Launcher;LauncherBeta;killall;winecfg;
 
 [Desktop Action Launcher]
 Name=Launcher
-Exec=leagueoflegends
+Exec=leagueoflegends launcher
 
 [Desktop Action LauncherBeta]
 Name=Launcher Beta

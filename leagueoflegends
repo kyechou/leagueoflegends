@@ -72,7 +72,7 @@ done
 rm_w(){ [ -f "$1" ] && rm "$1"; }
 
 echo ---
-reinstall_bin(){
+reinstall(){
     for file in /opt/leagueoflegends/*.exe; do
         install -Dm644 "$file" "$LOL_INSTALL_PATH/$(basename "$file")" || ERRO "Something went wrong!"
     done
@@ -98,7 +98,7 @@ if [ ! -d "$LOL_INSTALL_PATH" ]; then
         INFO "League of Legends not found at $WINEPREFIX/drive_c/"
         INFO "So reinstall it"
         # Install Tiny Launcher
-        reinstall_bin
+        reinstall
     fi
 else
     INFO "League of Legends found at: $LOL_INSTALL_PATH"
@@ -140,27 +140,43 @@ esac
 
 rm_w "$TMP"
 
-if [ ! -z "$1" ]; then
+LOL_RUN(){
+    echo ---
+    winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null
+    read -r WIN_PATH < "$TMP"
+    rm_w "$TMP"
+
+    INFO "LoL Launcher path: $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME"
+    INFO "Run: $LOL_LAUNCHER_NAME" | tee -a "$LOL_RUN_LOG"
+    INFO "Wine run log: $LOL_RUN_LOG"
+    $PREFIXCOMMAND wine "$WIN_PATH" $LOL_LAUNCHER_ARGS &>> "$LOL_RUN_LOG"
+}
+
+if [ -z "$1" ]; then
+    LOL_RUN
+else
     help(){
-        echo "$0 winecfg"
-        echo "$0 wineserver <args>"
-        echo "$0 reinstall_bin - reinstall lol leauncher bins"
+        echo "$0 <no args>  - launch lol"
+        echo "$0 winecfg    - run winecfg in lol prefix"
+        echo "$0 wineserver <args> - -k for killing all processes"
+        echo "$0 reinstall  - reinstall lol launcher bins"
+        echo "$0 beta       - launch lol beta client"
     }
     case "$1" in
-        winecfg) winecfg;                   echo "winecfg"         &>> "$LOL_RUN_LOG" ;;
-        wineserver) shift; wineserver "$@"; echo "wineserver" "$@" &>> "$LOL_RUN_LOG" ;;
-        reinstall_bin) reinstall_bin;       echo "reinstall_bin"   &>> "$LOL_RUN_LOG" ;;
+        winecfg)
+            winecfg
+            { echo ---; echo "winecfg" ; echo ---; } &>> "$LOL_RUN_LOG" ;;
+        wineserver)
+            shift; wineserver "$@"
+            { echo ---; echo "wineserver" "$@"; echo ---; } &>> "$LOL_RUN_LOG"
+        ;;
+        reinstall)
+            reinstall
+            { echo ---; echo "reinstall"; echo ---; } &>> "$LOL_RUN_LOG" ;;
+        beta)
+            LOL_LAUNCHER_NAME="LeagueClient.exe" LOL_LAUNCHER_ARGS="--no-sandbox"
+            LOL_RUN
+        ;;
         *) help ;;
     esac
-    exit 0
 fi
-
-echo ---
-winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null
-read -r WIN_PATH < "$TMP"
-rm_w "$TMP"
-
-INFO "LoL Launcher path: $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME"
-INFO "Run: $LOL_LAUNCHER_NAME" | tee -a "$LOL_RUN_LOG"
-INFO "Wine run log: $LOL_RUN_LOG"
-$PREFIXCOMMAND wine "$WIN_PATH" $LOL_LAUNCHER_ARGS &>> "$LOL_RUN_LOG"

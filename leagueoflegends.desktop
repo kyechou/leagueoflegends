@@ -4,4 +4,14 @@ Comment=League Of Legends Game
 Type=Application
 Exec=leagueoflegends
 Icon=leagueoflegends
+Terminal=false
 Categories=Wine;Game;
+Actions=Launcher;LauncherBeta;
+
+[Desktop Action Launcher]
+Name=Launcher
+Exec=leagueoflegends
+
+[Desktop Action LauncherBeta]
+Name=Launcher Beta
+Exec=leagueoflegends beta

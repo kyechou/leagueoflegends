@@ -6,7 +6,7 @@ Exec=leagueoflegends
 Icon=leagueoflegends
 Terminal=false
 Categories=Wine;Game;
-Actions=Launcher;LauncherBeta;
+Actions=Launcher;LauncherBeta;killall;winecfg;
 
 [Desktop Action Launcher]
 Name=Launcher
@@ -15,3 +15,11 @@ Exec=leagueoflegends
 [Desktop Action LauncherBeta]
 Name=Launcher Beta
 Exec=leagueoflegends beta
+
+[Desktop Action killall]
+Name=killall LoL Processes
+Exec=leagueoflegends wineserver -k
+
+[Desktop Action winecfg]
+Name=run winecfg in LoL Prefix
+Exec=leagueoflegends winecfg

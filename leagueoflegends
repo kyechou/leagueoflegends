@@ -164,9 +164,9 @@ esac
 
             INFO "LoL Launcher UNIX path: $LOL_INSTALL_PATH/$LOL_LAUNCHER_BETA_NAME"
             INFO "LoL Launcher WINE path: $WIN_PATH"
-            INFO "Run: $LOL_LAUNCHER_BETA_NAME"
+            INFO "Run: $LOL_LAUNCHER_BETA_NAME" "$LOL_LAUNCHER_BETA_ARGS"
             INFO "Wine run log: $LOL_RUN_LOG"
-            $PREFIXCOMMAND wine "$WIN_PATH" $LOL_LAUNCHER_BETA_ARGS &>> "$LOL_RUN_LOG"
+            $PREFIXCOMMAND wine "$WIN_PATH" "$LOL_LAUNCHER_BETA_ARGS" &>> "$LOL_RUN_LOG"
         ;;
         launcher)
             winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null
@@ -174,9 +174,9 @@ esac
 
             INFO "LoL Launcher UNIX path: $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME"
             INFO "LoL Launcher WINE path: $WIN_PATH"
-            INFO "Run: $LOL_LAUNCHER_NAME"
+            INFO "Run: $LOL_LAUNCHER_NAME" "$LOL_LAUNCHER_ARGS"
             INFO "Wine run log: $LOL_RUN_LOG"
-            $PREFIXCOMMAND wine "$WIN_PATH" $LOL_LAUNCHER_ARGS &>> "$LOL_RUN_LOG"
+            $PREFIXCOMMAND wine "$WIN_PATH" "$LOL_LAUNCHER_ARGS" &>> "$LOL_RUN_LOG"
         ;;
         *)
             echo "$0 <no args>  - Initialization of wine prefix with game, also show help"

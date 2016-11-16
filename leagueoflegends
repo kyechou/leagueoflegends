@@ -9,7 +9,7 @@ ERRO(){ echo -n "ERRO: "; echo -n "$@" ; echo " Abort!"; exit 1;}
 # Check some deps
 bin_exist(){
     if command -v "$1" &> /dev/null; then
-        INFO "INFO: $1 checked"
+        INFO "$1 checked"
     else
         ERRO "Missing ${1}!"
     fi
@@ -17,9 +17,6 @@ bin_exist(){
 
 bin_exist wine
 bin_exist winetricks
-
-################################################################################
-INFO "Last tested version: wine-1.9.23"
 
 ################################################################################
 # Some vars
@@ -64,6 +61,10 @@ if [ ! -d "$WINEPREFIX" ]; then
 
     INFO "Created: $WINEPREFIX"
 fi
+
+echo ---
+INFO "Last tested version: wine-1.9.23"
+INFO "Your version: $(wine --version)"
 
 echo ---
 INFO "Check: if configured"

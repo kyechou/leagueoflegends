@@ -30,6 +30,7 @@ export LOL_LAUNCHER_NAME LOL_LAUNCHER_ARGS
 export LOL_INSTALL_PATH  LOL_LAUNCHER_PATH
 export LOL_LAUNCHER_BETA_NAME LOL_LAUNCHER_BETA_ARGS
 export LOL_RUN_LOG
+export WINE_REQ_MOD
 
 WINEARCH=win32
 WINEPREFIX="$HOME/.local/share/leagueoflegends"
@@ -66,8 +67,8 @@ fi
 
 echo ---
 INFO "Check: if configured"
-REQ_MOD=( corefonts vcrun2005 vcrun2008 vcrun2015 d3dx9 )
-for mod in "${REQ_MOD[@]}"; do
+[ -z "${WINE_REQ_MOD[@]}" ] && WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 vcrun2015 d3dx9 )
+for mod in "${WINE_REQ_MOD[@]}"; do
     if ! grep -q "$mod" "$WINEPREFIX/winetricks.log"; then
         winetricks -q "$mod" || ERRO "Something went wrong!"
     fi

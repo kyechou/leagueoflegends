@@ -193,6 +193,7 @@ configure_OpenGL(){
             $PREFIXCOMMAND wine "$WIN_PATH" "$LOL_LAUNCHER_ARGS" &>> "$LOL_RUN_LOG"
         ;;
         silent) : ;;
+        tail) : ;;
         *)
             echo "$0 <no args>  - Initialization of wine prefix with game, also show help"
             echo "$0 silent     - same as <no args> but no help output"
@@ -202,9 +203,15 @@ configure_OpenGL(){
             echo "$0 wineserver <args> - -k for killing all processes"
             echo "$0 reinstall  - reinstall lol launcher bins"
             echo "$0 regen_wine_prefix - backup LoL dir, recreate wineprefix, move LoL back, use carefully"
+            echo "$0 tail       - tail -f to log file"
         ;;
     esac
     echo ---
 } | tee -a "$LOL_RUN_LOG"
+
+# It's prevent problem with recursion in log: tail -f file &>> file
+case "$1" in
+    tail) tail -f "$LOL_RUN_LOG" ;;
+esac
 
 rm_w "$TMP"

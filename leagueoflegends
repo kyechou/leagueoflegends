@@ -37,11 +37,35 @@ LOL_LAUNCHER_BETA_NAME="LeagueClient.exe"
 LOL_LAUNCHER_BETA_ARGS="--no-sandbox"
 LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
 WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
-
+CONF=/etc/leagueoflegends.conf
 TMP="$(mktemp -u)"
+
+################################################################################
+# Check args
+case "$1" in
+    winecfg|wineserver) : ;;
+    reinstall|regen_wine_prefix) : ;;
+    launcher|beta) : ;;
+    tail) : ;;
+    *)
+        echo "League of Legends Launcher wrapper/installer"
+        echo "See $CONF"
+        echo "Usage: $0 <args>"
+        echo "  launcher           - launch lol client"
+        echo "  beta               - launch lol beta client"
+        echo "  winecfg            - run winecfg in lol prefix"
+        echo "  wineserver <args>  - -k for killing all processes"
+        echo "  reinstall          - reinstall lol launcher bins"
+        echo "  tail               - tail -f to log file"
+        echo "  only_make_wineprefix    - only make wineprefix"
+        echo "  regen_wine_prefix  - backup LoL dir, recreate wineprefix"
+        echo "                       move LoL back, use carefully"
+        exit 1
+    ;;
+esac
+
 ################################################################################
 # Initialization
-CONF=/etc/leagueoflegends.conf
 # shellcheck source=leagueoflegends.conf
 source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}"
 
@@ -66,6 +90,20 @@ source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}"
         fi
     done
 }
+
+touch "$LOL_RUN_LOG"
+
+case "$1" in
+    make_wineprefix) exit 0;;
+    winecfg) winecfg; exit 0;;
+    wineserver)
+        shift;
+        echo "wineserver" "$@" &>> "$LOL_RUN_LOG"
+        wineserver "$@"
+        exit 0
+    ;;
+    tail) tail -f "$LOL_RUN_LOG"; exit 0;;
+esac
 
 {
     reinstall(){
@@ -98,8 +136,29 @@ source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}"
     else
         INFO "League of Legends found at: $LOL_INSTALL_PATH"
     fi
+    rm_w "$TMP"
 }
 
+case "$1" in
+    reinstall) reinstall; exit 0;;
+    regen_wine_prefix)
+        [ -d "${WINEPREFIX}.backup" ] && ERRO "Backup of ${WINEPREFIX} already exist"
+        INFO "Backup prefix: ${WINEPREFIX}.backup"
+        cp -al "${WINEPREFIX}" "${WINEPREFIX}.backup"
+
+        INFO "Dir for backup: $LOL_INSTALL_PATH"
+        mv -v "$LOL_INSTALL_PATH" "$WINEPREFIX/../LoL/" || ERRO "Can't backup LoL dir"
+
+        mv -v "$WINEPREFIX" "${WINEPREFIX}.old"
+        INFO "Remove old prefix"
+        rm -rf "${WINEPREFIX}.old" &
+
+        INFO "Self rerun to recreate wineprefix"
+        "$0" make_wineprefix
+        mv -v "$WINEPREFIX/../LoL/" "$LOL_INSTALL_PATH"
+        exit 0
+    ;;
+esac
 
 {
     INFO "Search DLLs in LoL"
@@ -119,102 +178,59 @@ WINEDLLOVERRIDES=${WINEDLLOVERRIDES// /;}
 INFO "Initialization Finished"
 
 configure_OpenGL(){
-    LOL_game_cfg=$LOL_INSTALL_PATH/Config/game.cfg
-    if [ ! -f "$LOL_game_cfg" ]; then
-        INFO "Can't find: $LOL_game_cfg"
+    [[ "$LOL_OpenGL" =~ '0|1' ]] || return
+
+    Gcfg=$LOL_INSTALL_PATH/Config/game.cfg
+
+    if [ ! -f "$Gcfg" ]; then
+        INFO "Can't find: $Gcfg"
         INFO "Ignore OpenGL setting"
-        LOL_OpenGL=2
+        return
     fi
 
-    case "$LOL_OpenGL" in
-        0|1) dos2unix > "$TMP" < "$LOL_game_cfg" ;;
-    esac
+    dos2unix > "$TMP" < "$Gcfg"
 
-    case "$LOL_OpenGL" in
-        0)
-            if grep -q x3d_platform=1 "$LOL_game_cfg"; then
-                sed -i 's/x3d_platform=1//g' "$TMP"
-                unix2dos > "$LOL_game_cfg" < "$TMP"
-                INFO "Disable OpenGL in game.cfg"
-            fi
-        ;;
-        1)
-            if ! grep -q x3d_platform=1 "$LOL_game_cfg"; then
-                sed -i 's/\[General\]/\[General\]\nx3d_platform=1/g' "$TMP"
-                unix2dos > "$LOL_game_cfg" < "$TMP"
-                INFO "Enable OpenGL in game.cfg"
-            fi
-        ;;
-    esac
+    if [[ "$LOL_OpenGL" == 0 ]] && grep -q x3d_platform=1 "$Gcfg"; then
+        sed -i 's/x3d_platform=1//g' "$TMP"
+        unix2dos > "$LOL_game_cfg" < "$TMP"
+        INFO "Disable OpenGL in game.cfg"
+    fi
+    if [[ "$LOL_OpenGL" == 1 ]] && ! grep -q x3d_platform=1 "$Gcfg"; then
+        sed -i 's/\[General\]/\[General\]\nx3d_platform=1/g' "$TMP"
+        unix2dos > "$Gcfg" < "$TMP"
+        INFO "Enable OpenGL in game.cfg"
+    fi
+
+    rm_w "$TMP"
 }
+
+configure_OpenGL
+case "$1" in
+    launcher)
+        winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null ;;
+    beta)
+        winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_BETA_NAME" > "$TMP" 2> /dev/null ;;
+esac
+
+read -r WINE_PATH < "$TMP"
+winepath -u "$WINE_PATH" > "$TMP" 2> /dev/null
+read -r UNIX_PATH < "$TMP"
+rm_w "$TMP"
+
+INFO "LoL Launcher UNIX path: $UNIX_PATH"
+INFO "LoL Launcher WINE path: $WINE_PATH"
+
+case "$1" in
+    beta)
+        LOL_LAUNCHER_NAME="$LOL_LAUNCHER_BETA_NAME"
+        LOL_LAUNCHER_ARGS="$LOL_LAUNCHER_BETA_ARGS"
+    ;;
+esac
 
 {
     echo ---
-    case "$1" in
-        winecfg)
-            winecfg
-            echo "winecfg"
-        ;;
-        wineserver)
-            shift;
-            wineserver "$@"
-            echo "wineserver" "$@"
-        ;;
-        reinstall)
-            reinstall
-            echo "reinstall"
-        ;;
-        regen_wine_prefix)
-            INFO "Dir for backup: $LOL_INSTALL_PATH"
-            mv -v "$LOL_INSTALL_PATH" "$WINEPREFIX/../LoL/" || ERRO "Can't backup LoL dir"
-            rm -rf "$WINEPREFIX"
-            INFO "Self rerun to recreate wineprefix"
-            "$0" silent
-            [ -d "$LOL_INSTALL_PATH" ] && rm -rf "$LOL_INSTALL_PATH"
-            mv -v "$WINEPREFIX/../LoL/" "$LOL_INSTALL_PATH"
-        ;;
-        beta)
-            configure_OpenGL
-            winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_BETA_NAME" > "$TMP" 2> /dev/null
-            read -r WIN_PATH < "$TMP"
-
-            INFO "LoL Launcher UNIX path: $LOL_INSTALL_PATH/$LOL_LAUNCHER_BETA_NAME"
-            INFO "LoL Launcher WINE path: $WIN_PATH"
-            INFO "Run: $LOL_LAUNCHER_BETA_NAME" "$LOL_LAUNCHER_BETA_ARGS"
-            INFO "Wine run log: $LOL_RUN_LOG"
-            $PREFIXCOMMAND wine "$WIN_PATH" "$LOL_LAUNCHER_BETA_ARGS" &>> "$LOL_RUN_LOG"
-        ;;
-        launcher)
-            configure_OpenGL
-            winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null
-            read -r WIN_PATH < "$TMP"
-
-            INFO "LoL Launcher UNIX path: $LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME"
-            INFO "LoL Launcher WINE path: $WIN_PATH"
-            INFO "Run: $LOL_LAUNCHER_NAME" "$LOL_LAUNCHER_ARGS"
-            INFO "Wine run log: $LOL_RUN_LOG"
-            $PREFIXCOMMAND wine "$WIN_PATH" "$LOL_LAUNCHER_ARGS" &>> "$LOL_RUN_LOG"
-        ;;
-        silent) : ;;
-        tail) : ;;
-        *)
-            echo "$0 <no args>  - Initialization of wine prefix with game, also show help"
-            echo "$0 silent     - same as <no args> but no help output"
-            echo "$0 launcher   - launch lol client"
-            echo "$0 beta       - launch lol beta client"
-            echo "$0 winecfg    - run winecfg in lol prefix"
-            echo "$0 wineserver <args> - -k for killing all processes"
-            echo "$0 reinstall  - reinstall lol launcher bins"
-            echo "$0 regen_wine_prefix - backup LoL dir, recreate wineprefix, move LoL back, use carefully"
-            echo "$0 tail       - tail -f to log file"
-        ;;
-    esac
+    INFO "Run: $LOL_LAUNCHER_NAME" "$LOL_LAUNCHER_ARGS"
+    INFO "Wine run log: $LOL_RUN_LOG"
+    $PREFIXCOMMAND wine "$WINE_PATH" "$LOL_LAUNCHER_ARGS" &>> "$LOL_RUN_LOG"
     echo ---
 } | tee -a "$LOL_RUN_LOG"
-
-# It's prevent problem with recursion in log: tail -f file &>> file
-case "$1" in
-    tail) tail -f "$LOL_RUN_LOG" ;;
-esac
-
-rm_w "$TMP"

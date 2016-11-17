@@ -37,6 +37,7 @@ LOL_LAUNCHER_BETA_NAME="LeagueClient.exe"
 LOL_LAUNCHER_BETA_ARGS="--no-sandbox"
 LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
 WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
+LOL_LAUNCHER_RUN="old"
 CONF=/etc/leagueoflegends.conf
 TMP="$(mktemp -u)"
 
@@ -44,7 +45,7 @@ TMP="$(mktemp -u)"
 # Check args
 case "$1" in
     winecfg|wineserver) : ;;
-    reinstall|regen_wine_prefix) : ;;
+    reinstall|regen_wine_prefix|make_wineprefix) : ;;
     launcher|beta) : ;;
     tail) : ;;
     *)
@@ -57,7 +58,7 @@ case "$1" in
         echo "  wineserver <args>  - -k for killing all processes"
         echo "  reinstall          - reinstall lol launcher bins"
         echo "  tail               - tail -f to log file"
-        echo "  only_make_wineprefix    - only make wineprefix"
+        echo "  make_wineprefix    - only make wineprefix"
         echo "  regen_wine_prefix  - backup LoL dir, recreate wineprefix"
         echo "                       move LoL back, use carefully"
         exit 1
@@ -178,7 +179,7 @@ WINEDLLOVERRIDES=${WINEDLLOVERRIDES// /;}
 INFO "Initialization Finished"
 
 # Configure OpenGL
-{
+configure_OpenGL(){
     [[ "$LOL_OpenGL" =~ '0|1' ]] || return
 
     Gcfg=$LOL_INSTALL_PATH/Config/game.cfg
@@ -204,6 +205,7 @@ INFO "Initialization Finished"
 
     rm_w "$TMP"
 }
+configure_OpenGL
 
 # Configure client to run by launcher
 {

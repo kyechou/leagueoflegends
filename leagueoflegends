@@ -7,16 +7,15 @@ ERRO(){ echo -n "ERRO: "; echo -n "$@" ; echo " Abort!"; exit 1;}
 
 ################################################################################
 # Check some deps
-bin_exist(){
-    if command -v "$1" &> /dev/null; then
-        INFO "$1 checked"
-    else
-        ERRO "Missing ${1}!"
-    fi
-}
-
+bin_exist(){ command -v "$1" &> /dev/null || ERRO "Missing ${1}!"; }
 bin_exist wine
 bin_exist winetricks
+
+################################################################################
+# Define useful functions
+rm_w(){ [ -f "$1" ] && rm "$1"; }
+dos2unix(){ sed $'s/\r$//'; }
+unix2dos(){ sed $'s/$/\r/'; }
 
 ################################################################################
 # Some vars
@@ -31,7 +30,6 @@ export WINE_REQ_MOD
 
 WINEARCH=win32
 WINEPREFIX="$HOME/.local/share/leagueoflegends"
-PREFIXCOMMAND=""
 LOL_OpenGL=2
 LOL_RUN_LOG="$WINEPREFIX/wine_lol.log"
 LOL_LAUNCHER_NAME="lol.launcher.exe"
@@ -44,93 +42,83 @@ TMP="$(mktemp -u)"
 ################################################################################
 # Initialization
 CONF=/etc/leagueoflegends.conf
-[ ! -f "$CONF" ] && ERRO "Missing: ${CONF}"
-INFO "Reading Config"
 # shellcheck source=leagueoflegends.conf
-source "$CONF"
+source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}"
 
-echo ---
-INFO "Check: $WINEPREFIX"
-if [ ! -d "$WINEPREFIX" ]; then
-    INFO "Wine prefix not exist"
-    INFO "So try recreate it"
-
-    wineboot &> /dev/null
-
-    INFO "Make user dirs isolated"
-    find -H "$WINEPREFIX/drive_c/users/" -type l -delete
-
-    INFO "Created: $WINEPREFIX"
-fi
-
-echo ---
-INFO "Last tested version: wine-1.9.23"
-INFO "Your version: $(wine --version)"
-
-echo ---
-INFO "Check: if configured"
-for mod in "${WINE_REQ_MOD[@]}"; do
-    [ -z "$mod" ] && continue
-    if ! grep -q "$mod" "$WINEPREFIX/winetricks.log"; then
-        winetricks -q "$mod" || ERRO "Something went wrong!"
+{
+    INFO "Check: wineprefix exist $WINEPREFIX"
+    if [ ! -d "$WINEPREFIX" ]; then
+        INFO "Wine prefix not exist"
+        INFO "So try recreate it"
+        wineboot &> /dev/null
+        INFO "Created: $WINEPREFIX"
     fi
-done
+    INFO "Last tested version: wine-1.9.23"
+    INFO "Your version: $(wine --version)"
+}
 
-rm_w(){ [ -f "$1" ] && rm "$1"; }
-
-echo ---
-reinstall(){
-    INFO "Install OLD tiny launcher"
-    for file in /opt/leagueoflegends/*.exe; do
-        install -Dm644 "$file" "$LOL_INSTALL_PATH/$(basename "$file")" || ERRO "Something went wrong!"
-    done
-    for file in /opt/leagueoflegends/RADS/system/*; do
-        install -Dm644 "$file" "$LOL_INSTALL_PATH/RADS/system/$(basename "$file")" || ERRO "Something went wrong!"
+{
+    INFO "Check: wineprefix configured"
+    for mod in "${WINE_REQ_MOD[@]}"; do
+        [ -z "$mod" ] && continue
+        if ! grep -q "$mod" "$WINEPREFIX/winetricks.log"; then
+            winetricks -q "$mod" || ERRO "Something went wrong!"
+        fi
     done
 }
 
-INFO "Check if OLD launcher installed"
-if [ ! -d "$LOL_INSTALL_PATH" ]; then
-    INFO "League of Legends not found at: $LOL_INSTALL_PATH"
-    INFO "Try found any launcher"
-    find -H "$WINEPREFIX/drive_c/" -name "$LOL_LAUNCHER_NAME" > "$TMP"
-    read -r LOL_LAUNCHER_PATH < "$TMP"
-
-    if [ -f "$LOL_LAUNCHER_PATH" ]; then
-        INFO "Find another League of Legends launcher, move it to $LOL_INSTALL_PATH"
-        dirname "$LOL_LAUNCHER_PATH" > "$TMP"
-        read -r LOL_DIR < "$TMP"
-        mv -v "$LOL_DIR/" "$LOL_INSTALL_PATH/"
-    else
-        INFO "League of Legends not found at $WINEPREFIX/drive_c/"
-        INFO "So reinstall it"
-        # Install Tiny Launcher
-        reinstall
-    fi
-else
-    INFO "League of Legends found at: $LOL_INSTALL_PATH"
-fi
-
-echo ---
-INFO "Try use dlls from LoL installation"
 {
-    for file in $(find $LOL_INSTALL_PATH -type f -name "*.dll"); do
-        basename $file
-    done
-} | grep .dll | grep -v rcp-be | sort -u > $TMP
+    reinstall(){
+        INFO "Install launcher"
+        for file in /opt/leagueoflegends/*.exe; do
+            install -Dm644 "$file" "$LOL_INSTALL_PATH/$(basename "$file")" || ERRO "Something went wrong!"
+        done
+        for file in /opt/leagueoflegends/RADS/system/*; do
+            install -Dm644 "$file" "$LOL_INSTALL_PATH/RADS/system/$(basename "$file")" || ERRO "Something went wrong!"
+        done
+    }
 
-for dll in $(cat $TMP); do
+    INFO "Check: launcher installed"
+    if [ ! -d "$LOL_INSTALL_PATH" ]; then
+        INFO "League of Legends not found at: $LOL_INSTALL_PATH"
+        INFO "Search for existing launcher"
+        find -H "$WINEPREFIX/drive_c/" -name "$LOL_LAUNCHER_NAME" > "$TMP"
+        read -r LOL_LAUNCHER_PATH < "$TMP"
+
+        if [ -f "$LOL_LAUNCHER_PATH" ]; then
+            INFO "Find another League of Legends launcher, move it to $LOL_INSTALL_PATH"
+            dirname "$LOL_LAUNCHER_PATH" > "$TMP"
+            read -r LOL_DIR < "$TMP"
+            mv -v "$LOL_DIR/" "$LOL_INSTALL_PATH/"
+        else
+            INFO "League of Legends not found at $WINEPREFIX/drive_c/"
+            INFO "Reinstall it"
+            reinstall
+        fi
+    else
+        INFO "League of Legends found at: $LOL_INSTALL_PATH"
+    fi
+}
+
+
+{
+    INFO "Search DLLs in LoL"
+    find "$LOL_INSTALL_PATH" -type f -name "*.dll" -exec basename {} \; | \
+        grep .dll | \
+        grep -v rcp-be | \
+        sort -u > "$TMP"
+}
+
+INFO "Found: $(wc -l < $TMP) DLLs"
+INFO "Make DLLs override"
+while read -r dll; do
     WINEDLLOVERRIDES="$dll=n,b $WINEDLLOVERRIDES"
-done
+done < "$TMP"
 WINEDLLOVERRIDES=${WINEDLLOVERRIDES// /;}
 
-echo ---
 INFO "Initialization Finished"
 
 configure_OpenGL(){
-    dos2unix(){ sed $'s/\r$//'; }
-    unix2dos(){ sed $'s/$/\r/'; }
-
     LOL_game_cfg=$LOL_INSTALL_PATH/Config/game.cfg
     if [ ! -f "$LOL_game_cfg" ]; then
         INFO "Can't find: $LOL_game_cfg"

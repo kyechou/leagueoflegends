@@ -177,7 +177,8 @@ WINEDLLOVERRIDES=${WINEDLLOVERRIDES// /;}
 
 INFO "Initialization Finished"
 
-configure_OpenGL(){
+# Configure OpenGL
+{
     [[ "$LOL_OpenGL" =~ '0|1' ]] || return
 
     Gcfg=$LOL_INSTALL_PATH/Config/game.cfg
@@ -204,7 +205,16 @@ configure_OpenGL(){
     rm_w "$TMP"
 }
 
-configure_OpenGL
+# Configure client to run by launcher
+{
+    Ucfg="$LOL_INSTALL_PATH"/RADS/system/user.cfg
+    case "$LOL_LAUNCHER_RUN" in
+        old)  echo leagueClientOptIn = no  > "$Ucfg" ;;
+        beta) echo leagueClientOptIn = yes > "$Ucfg" ;;
+        *) ERRO "Unsupported: LOL_LAUNCHER_RUN=$LOL_LAUNCHER_RUN" ;;
+    esac
+}
+
 case "$1" in
     launcher)
         winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null ;;

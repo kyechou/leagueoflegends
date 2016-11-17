@@ -25,17 +25,17 @@ $ /tmp/LoL/package.sh debian
 - Run "leagueoflegends" in console or run desktop application "League of Legends"
 
 ### Move LoL from another wine
-- Do steps above for "Fresh LoL install"
-- Close running launcher
-- Copy/Move your LoL client dir to WINEPREFIX (see conf)
+- Install scripts by install.sh/package.sh
+- Change config if you need /etc/leagueoflegends.conf
+- Then:
+
+In default configuration:
 ```
-# If  WINEPREFIX="$HOME/.local/share/leagueoflegends"
-# And LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
-# Then do:
-$ rm -rf $HOME/.local/share/leagueoflegends/drive_c/LoL/
-$ mv dir_with_LoL_client/ $HOME/.local/share/leagueoflegends/drive_c/$RANDOM/
-$ leagueoflegends
+$ leagueoflegends make_wineprefix
+$ mv dir_with_lol.launcher.exe/ $HOME/.local/share/leagueoflegends/drive_c/LoL/
+$ leagueoflegends launcher
 ```
+- Run "leagueoflegends" in console or run desktop application "League of Legends"
 
 # Know problems
 
@@ -45,6 +45,10 @@ $ leagueoflegends
 
 ### Network lags:
 - Connections issue - try set sysctl net.ipv4.tcp_timestamps=0
+
+### Beta Client Don't work!
+Works, but:
+https://github.com/Nefelim4ag/League-Of-Legends/issues/8
 
 # P.S.
 Under "Launcher" dir, git store binary blobs ~1.5Mb from [LoL SingleFileInstall](http://l3cdn.riotgames.com/Installer/SingleFileInstall/LeagueOfLegendsBaseEUW.exe)

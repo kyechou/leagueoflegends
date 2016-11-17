@@ -38,7 +38,7 @@ LOL_LAUNCHER_NAME="lol.launcher.exe"
 LOL_LAUNCHER_BETA_NAME="LeagueClient.exe"
 LOL_LAUNCHER_BETA_ARGS="--no-sandbox"
 LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
-WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 vcrun2015 d3dx9 )
+WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
 
 TMP="$(mktemp -u)"
 ################################################################################
@@ -80,6 +80,7 @@ rm_w(){ [ -f "$1" ] && rm "$1"; }
 
 echo ---
 reinstall(){
+    INFO "Install OLD tiny launcher"
     for file in /opt/leagueoflegends/*.exe; do
         install -Dm644 "$file" "$LOL_INSTALL_PATH/$(basename "$file")" || ERRO "Something went wrong!"
     done
@@ -88,7 +89,7 @@ reinstall(){
     done
 }
 
-INFO "Check if launcher installed"
+INFO "Check if OLD launcher installed"
 if [ ! -d "$LOL_INSTALL_PATH" ]; then
     INFO "League of Legends not found at: $LOL_INSTALL_PATH"
     INFO "Try found any launcher"
@@ -109,6 +110,19 @@ if [ ! -d "$LOL_INSTALL_PATH" ]; then
 else
     INFO "League of Legends found at: $LOL_INSTALL_PATH"
 fi
+
+echo ---
+INFO "Try use dlls from LoL installation"
+{
+    for file in $(find $LOL_INSTALL_PATH -type f -name "*.dll"); do
+        basename $file
+    done
+} | grep .dll | grep -v rcp-be | sort -u > $TMP
+
+for dll in $(cat $TMP); do
+    WINEDLLOVERRIDES="$dll=n,b $WINEDLLOVERRIDES"
+done
+WINEDLLOVERRIDES=${WINEDLLOVERRIDES// /;}
 
 echo ---
 INFO "Initialization Finished"

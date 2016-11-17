@@ -20,7 +20,7 @@ bin_exist winetricks
 
 ################################################################################
 # Some vars
-export WINEPREFIX WINEARCH
+export WINEPREFIX WINEARCH WINEDLLOVERRIDES
 export PREFIXCOMMAND TMP
 export LOL_OpenGL
 export LOL_LAUNCHER_NAME LOL_LAUNCHER_ARGS
@@ -38,6 +38,7 @@ LOL_LAUNCHER_NAME="lol.launcher.exe"
 LOL_LAUNCHER_BETA_NAME="LeagueClient.exe"
 LOL_LAUNCHER_BETA_ARGS="--no-sandbox"
 LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
+WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 vcrun2015 d3dx9 )
 
 TMP="$(mktemp -u)"
 ################################################################################
@@ -68,8 +69,8 @@ INFO "Your version: $(wine --version)"
 
 echo ---
 INFO "Check: if configured"
-[ -z "${WINE_REQ_MOD[@]}" ] && WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 vcrun2015 d3dx9 )
 for mod in "${WINE_REQ_MOD[@]}"; do
+    [ -z "$mod" ] && continue
     if ! grep -q "$mod" "$WINEPREFIX/winetricks.log"; then
         winetricks -q "$mod" || ERRO "Something went wrong!"
     fi

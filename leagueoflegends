@@ -19,25 +19,26 @@ unix2dos(){ sed $'s/$/\r/'; }
 
 ################################################################################
 # Some vars
-export WINEPREFIX WINEARCH WINEDLLOVERRIDES
+export WINEPREFIX WINEARCH WINEDLLOVERRIDES WINE_REQ_MOD
 export PREFIXCOMMAND TMP
 export LOL_OpenGL
 export LOL_LAUNCHER_NAME LOL_LAUNCHER_ARGS
 export LOL_INSTALL_PATH  LOL_LAUNCHER_PATH
 export LOL_LAUNCHER_BETA_NAME LOL_LAUNCHER_BETA_ARGS
 export LOL_RUN_LOG
-export WINE_REQ_MOD
 
 WINEARCH=win32
 WINEPREFIX="$HOME/.local/share/leagueoflegends"
+WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
+
 LOL_OpenGL=2
 LOL_RUN_LOG="$WINEPREFIX/wine_lol.log"
 LOL_LAUNCHER_NAME="lol.launcher.exe"
 LOL_LAUNCHER_BETA_NAME="LeagueClient.exe"
 LOL_LAUNCHER_BETA_ARGS="--no-sandbox"
 LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
-WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
 LOL_LAUNCHER_RUN="old"
+
 CONF=/etc/leagueoflegends.conf
 TMP="$(mktemp -u)"
 
@@ -81,6 +82,8 @@ source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}"
     INFO "Last tested version: wine-1.9.23"
     INFO "Your version: $(wine --version)"
 }
+
+touch "$WINEPREFIX/winetricks.log"
 
 {
     INFO "Check: wineprefix configured"

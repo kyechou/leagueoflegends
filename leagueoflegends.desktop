@@ -1,20 +1,16 @@
 [Desktop Entry]
 Name=League Of Legends
-Comment=League Of Legends Game
+Comment=League Of Legends Launcher
 Type=Application
 Exec=leagueoflegends launcher
 Icon=leagueoflegends
 Terminal=false
 Categories=Wine;Game;
-Actions=Launcher;LauncherBeta;killall;winecfg;
+Actions=Client;killall;winecfg;
 
-[Desktop Action Launcher]
-Name=Launcher
-Exec=leagueoflegends launcher
-
-[Desktop Action LauncherBeta]
-Name=Launcher Beta
-Exec=leagueoflegends beta
+[Desktop Action Client]
+Name=Client Beta
+Exec=leagueoflegends client
 
 [Desktop Action killall]
 Name=killall LoL Processes

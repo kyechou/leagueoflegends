@@ -41,7 +41,7 @@ $ leagueoflegends launcher
 
 ### Black Login Screen:
 - Workaround - Not found
-- Try change random winecfg settings until it's fixed (example try run with virtualdesktop), after return settings to default, all must works good , if someone know simple solution let me know.
+- Try to change random winecfg settings until it's fixed (example try to run with virtualdesktop), then return settings to default, it should work, if someone knows simple solution just let me know.
 
 ### Network lags:
 - Connections issue - try set sysctl net.ipv4.tcp_timestamps=0

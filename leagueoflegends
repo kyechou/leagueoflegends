@@ -182,7 +182,7 @@ INFO "Initialization Finished"
 
 # Configure OpenGL
 configure_OpenGL(){
-    [[ "$LOL_OpenGL" =~ '0|1' ]] || return
+    [[ "$LOL_OpenGL" =~ 0|1 ]] || return
 
     Gcfg=$LOL_INSTALL_PATH/Config/game.cfg
 

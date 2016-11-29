@@ -92,6 +92,19 @@ touch "$WINEPREFIX/winetricks.log"
     done
 }
 
+{
+    INFO "Check: wine user dirs are private"
+    find "$WINEPREFIX/drive_c/users/" -type l -exec rm -v {} \; -exec mkdir -pv {} \;
+}
+
+{
+    INFO "Check: wine can access only to wine drive (C:/)"
+    for link in "$WINEPREFIX/dosdevices"/*; do
+        [[ "$link" =~ c: ]] && continue
+        rm -v "$link"
+    done
+}
+
 touch "$LOL_LAUNCHER_RUN_LOG" "$LOL_CLIENT_RUN_LOG"
 
 case "$1" in
@@ -164,7 +177,7 @@ case "$1" in
 esac
 
 {
-    INFO "Check md5sum"
+    INFO "Check: md5sum"
     cd "$LOL_INSTALL_PATH" || exit 1
     {
         echo 6d0ceaf819e45420f0987b63a051e558  lol.launcher.exe

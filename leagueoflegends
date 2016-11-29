@@ -8,8 +8,9 @@ ERRO(){ echo -n "ERRO: "; echo -n "$@" ; echo " Abort!"; exit 1;}
 ################################################################################
 # Check some deps
 bin_exist(){ command -v "$1" &> /dev/null || ERRO "Missing ${1}!"; }
-bin_exist wine
-bin_exist winetricks
+for bin in wine winetricks wineserver winepath; do
+    bin_exist $bin
+done
 
 ################################################################################
 # Define useful functions

@@ -46,6 +46,7 @@ case "$1" in
     launcher|client) : ;;
     winecfg|wineserver) : ;;
     reinstall|tail|make_wineprefix|regen_wine_prefix) : ;;
+    cleanup_logs) : ;;
     *)
         echo "League of Legends Launcher wrapper/installer"
         echo "See $CONF"
@@ -58,6 +59,7 @@ case "$1" in
         echo "  reinstall          - reinstall lol launcher bins"
         echo "  tail               - tail -f to log file"
         echo "  make_wineprefix    - only make wineprefix"
+        echo "  cleanup_logs       - remove log files in wine prefix"
         echo "  regen_wine_prefix  - backup LoL dir, recreate wineprefix"
         echo "                       move LoL back, use carefully"
         exit 1
@@ -115,6 +117,14 @@ case "$1" in
         shift;
         wineserver "$@"
         exit 0
+    ;;
+    cleanup_logs)
+        find -H "$WINEPREFIX/drive_c/" -name "*.log" -delete -print
+        if [ -d "$LOL_INSTALL_PATH/Logs/" ]; then
+            find -H "$LOL_INSTALL_PATH/Logs/" -type f -delete -print
+            find -H "$LOL_INSTALL_PATH/Logs/" -empty -delete -print
+        fi
+        truncate -s 0 "$LOL_LAUNCHER_RUN_LOG" "$LOL_CLIENT_RUN_LOG"
     ;;
     tail)
         tail -f "$LOL_LAUNCHER_RUN_LOG" "$LOL_CLIENT_RUN_LOG"

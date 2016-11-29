@@ -8,7 +8,7 @@ ERRO(){ echo -n "ERRO: "; echo -n "$@" ; echo " Abort!"; exit 1;}
 ################################################################################
 # Check some deps
 bin_exist(){ command -v "$1" &> /dev/null || ERRO "Missing ${1}!"; }
-for bin in wine winetricks wineserver winepath; do
+for bin in wine winetricks wineserver winepath wineboot; do
     bin_exist $bin
 done
 

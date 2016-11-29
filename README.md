@@ -1,7 +1,7 @@
 # League-Of-Legends
 Linux: League Of Legends www.leagueoflegends.com install/run wrapper
 
-Tested: Archlinux 14.11.2016 wine 1.9.23
+Tested: Archlinux 30.11.2016 wine 1.9.24
 
 # Instructions
 ### Script install
@@ -57,5 +57,6 @@ leagueoflegends regen_wine_prefix
 ```
 
 # P.S.
-Under "Launcher" dir, git store binary blobs ~1.5Mb from [LoL SingleFileInstall](http://l3cdn.riotgames.com/Installer/SingleFileInstall/LeagueOfLegendsBaseEUW.exe)
-It's needed for fast/easy setup fresh LoL client.
+- Catalog "Launcher"  contains binary and configuration files ~1368Kb from [LoL SingleFileInstall](http://l3cdn.riotgames.com/Installer/SingleFileInstall/LeagueOfLegendsBaseEUW.exe)
+- It's needed for fast/easy setup LoL client.
+- It's a client for [RADS](http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe) - Riot Application Distribution System

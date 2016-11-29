@@ -79,7 +79,7 @@ source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
         wineboot &> /dev/null
         INFO "Created: $WINEPREFIX"
     fi
-    INFO "Last tested version: wine-1.9.23"
+    INFO "Last tested version: wine-1.9.24"
     INFO "Your version: $(wine --version)"
 }
 

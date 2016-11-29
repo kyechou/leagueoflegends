@@ -26,9 +26,7 @@ $SUDO install -Dm644 ./leagueoflegends.png      "$PREFIX/usr/share/icons/hicolor
 $SUDO install -Dm644 ./leagueoflegends.desktop  "$PREFIX/usr/share/applications/leagueoflegends.desktop"
 
 # Install Tiny Launcher
-for file in ./Launcher/*.exe; do
-    $SUDO install -Dm644 "$file" "$PREFIX/opt/leagueoflegends/$(basename "$file")"
-done
+$SUDO install -Dm644 ./Launcher/lol.launcher.exe "$PREFIX/opt/leagueoflegends/lol.launcher.exe"
 for file in ./Launcher/RADS/system/*; do
     $SUDO install -Dm644 "$file" "$PREFIX/opt/leagueoflegends/RADS/system/$(basename "$file")"
 done

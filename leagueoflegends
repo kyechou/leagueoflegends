@@ -125,9 +125,7 @@ esac
 {
     reinstall(){
         INFO "Install launcher"
-        for file in /opt/leagueoflegends/*.exe; do
-            install -Dm644 "$file" "$LOL_INSTALL_PATH/$(basename "$file")" || ERRO "Something went wrong!"
-        done
+        $SUDO install -Dm644 /opt/leagueoflegends/lol.launcher.exe "$LOL_INSTALL_PATH/lol.launcher.exe" || ERRO "Something went wrong!"
         for file in /opt/leagueoflegends/RADS/system/*; do
             install -Dm644 "$file" "$LOL_INSTALL_PATH/RADS/system/$(basename "$file")" || ERRO "Something went wrong!"
         done

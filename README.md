@@ -50,6 +50,12 @@ $ leagueoflegends launcher
 Works, but:
 https://github.com/Nefelim4ag/League-Of-Legends/issues/8
 
+### Bug splat during patching phase
+https://github.com/Nefelim4ag/League-Of-Legends/issues/9 try:
+```
+leagueoflegends regen_wine_prefix
+```
+
 # P.S.
 Under "Launcher" dir, git store binary blobs ~1.5Mb from [LoL SingleFileInstall](http://l3cdn.riotgames.com/Installer/SingleFileInstall/LeagueOfLegendsBaseEUW.exe)
 It's needed for fast/easy setup fresh LoL client.

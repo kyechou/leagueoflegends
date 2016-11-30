@@ -126,6 +126,7 @@ case "$1" in
             find -H "$LOL_INSTALL_PATH/Logs/" -empty -delete -print
         fi
         truncate -s 0 "$LOL_LAUNCHER_RUN_LOG" "$LOL_CLIENT_RUN_LOG"
+        exit 0
     ;;
     tail)
         tail -f "$LOL_LAUNCHER_RUN_LOG" "$LOL_CLIENT_RUN_LOG"

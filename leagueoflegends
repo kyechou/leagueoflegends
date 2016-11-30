@@ -120,6 +120,7 @@ case "$1" in
     ;;
     cleanup_logs)
         find -H "$WINEPREFIX/drive_c/" -name "*.log" -delete -print
+        find -H "$LOL_INSTALL_PATH/" -name "*.log?" -delete -print
         if [ -d "$LOL_INSTALL_PATH/Logs/" ]; then
             find -H "$LOL_INSTALL_PATH/Logs/" -type f -delete -print
             find -H "$LOL_INSTALL_PATH/Logs/" -empty -delete -print

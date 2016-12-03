@@ -32,7 +32,7 @@ $ /tmp/LoL/package.sh debian
 In default configuration:
 ```
 $ leagueoflegends make_wineprefix
-$ mv dir_with_lol.launcher.exe/ $HOME/.local/share/leagueoflegends/drive_c/LoL/
+$ mv dir_with_lol.launcher.exe/ $HOME/.local/share/leagueoflegends/LoL/
 $ leagueoflegends launcher
 ```
 - Run "leagueoflegends" in console or run desktop application "League of Legends"

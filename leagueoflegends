@@ -22,15 +22,16 @@ unix2dos(){ sed $'s/$/\r/'; }
 # Some vars
 export PREFIXCOMMAND
 export TMP
-export LOL_OpenGL
+export BASE_DIR="$HOME/.local/share/leagueoflegends"
+export LOL_OpenGL=2
 
 export WINEARCH=win32
-export WINEPREFIX="$HOME/.local/share/leagueoflegends"
+export WINEPREFIX="$BASE_DIR/WINE.$WINEARCH"
 export WINEDLLOVERRIDES
 export WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
 
 export LOL_LAUNCHER_NAME="lol.launcher.exe"
-export LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
+export LOL_INSTALL_PATH="$BASE_DIR/LOL/"
 export LOL_LAUNCHER_RUN_LOG="$WINEPREFIX/lol_launcher.log"
 export LOL_CLIENT_RUN_LOG="$WINEPREFIX/lol_client.log"
 
@@ -69,6 +70,11 @@ esac
 source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
 
 {
+    INFO "Check: Base dir $BASE_DIR"
+    mkdir -p "$BASE_DIR"
+}
+
+{
     INFO "Check: wineprefix exist $WINEPREFIX"
     if [ ! -d "$WINEPREFIX" ]; then
         INFO "Wine prefix not exist"
@@ -100,7 +106,8 @@ touch "$WINEPREFIX/winetricks.log"
 {
     INFO "Check: wine can access only to wine drive (C:/)"
     for link in "$WINEPREFIX/dosdevices"/*; do
-        [[ "$link" =~ c: ]] && continue
+        [[ "$link" =~ c: ]] && continue # For default link to ../drive_c
+        [[ "$link" =~ x: ]] && continue # For link to LoL path
         rm -v "$link"
     done
 }
@@ -170,7 +177,7 @@ reinstall(){
     if [ ! -d "$LOL_INSTALL_PATH" ]; then
         INFO "League of Legends not found at: $LOL_INSTALL_PATH"
         INFO "Search for existing launcher"
-        find -H "$WINEPREFIX/drive_c/" -name "$LOL_LAUNCHER_NAME" > "$TMP"
+        find -H "$BASE_DIR" -name "$LOL_LAUNCHER_NAME" > "$TMP"
         read -r LOL_LAUNCHER_PATH < "$TMP"
 
         if [ -f "$LOL_LAUNCHER_PATH" ]; then
@@ -179,7 +186,7 @@ reinstall(){
             read -r LOL_DIR < "$TMP"
             mv -v "$LOL_DIR/" "$LOL_INSTALL_PATH/"
         else
-            INFO "League of Legends not found at $WINEPREFIX/drive_c/"
+            INFO "League of Legends not found at $BASE_DIR"
             INFO "Reinstall it"
             reinstall
         fi
@@ -189,23 +196,19 @@ reinstall(){
     fi
 }
 
+{
+    INFO "Check: Link X: -> $LOL_INSTALL_PATH"
+    ln -sf "$LOL_INSTALL_PATH" "$WINEPREFIX/dosdevices/x:"
+}
+
 case "$1" in
     reinstall) reinstall; exit 0;;
     regen_wine_prefix)
         [ -d "${WINEPREFIX}.backup" ] && ERRO "Backup of ${WINEPREFIX} already exist"
         INFO "Backup prefix: ${WINEPREFIX}.backup"
-        cp -al "${WINEPREFIX}" "${WINEPREFIX}.backup"
-
-        INFO "Dir for backup: $LOL_INSTALL_PATH"
-        mv -v "$LOL_INSTALL_PATH" "$WINEPREFIX/../LoL/" || ERRO "Can't backup LoL dir"
-
-        mv -v "$WINEPREFIX" "${WINEPREFIX}.old"
-        INFO "Remove old prefix"
-        rm -rf "${WINEPREFIX}.old" &
-
+        mv "${WINEPREFIX}" "${WINEPREFIX}.backup"
         INFO "Self rerun to recreate wineprefix"
         "$0" make_wineprefix
-        mv -v "$WINEPREFIX/../LoL/" "$LOL_INSTALL_PATH"
         exit 0
     ;;
 esac
@@ -216,14 +219,14 @@ esac
         grep .dll | \
         grep -v rcp-be | \
         sort -u > "$TMP"
-}
 
-INFO "Found: $(wc -l < "$TMP") DLLs"
-INFO "Make DLLs override"
-while read -r dll; do
-    WINEDLLOVERRIDES="$dll=n,b $WINEDLLOVERRIDES"
-done < "$TMP"
-WINEDLLOVERRIDES=${WINEDLLOVERRIDES// /;}
+    INFO "Found: $(wc -l < "$TMP") DLLs"
+    INFO "Make DLLs override"
+    while read -r dll; do
+        WINEDLLOVERRIDES="$dll=n,b $WINEDLLOVERRIDES"
+    done < "$TMP"
+    WINEDLLOVERRIDES=${WINEDLLOVERRIDES// /;}
+}
 
 INFO "Initialization Finished"
 

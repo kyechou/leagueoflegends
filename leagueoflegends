@@ -191,7 +191,7 @@ esac
     INFO "Check: md5sum"
     cd "$LOL_INSTALL_PATH" || exit 1
     {
-        echo 6d0ceaf819e45420f0987b63a051e558  lol.launcher.exe
+        echo 2275b15d6cbb2085dd4b5fe43010bd16  lol.launcher.exe
         # http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe.version
         # 1.0.0.228 - RADS/system/rads_user_kernel.exe
         echo 5f27f62eabcd11518112ea99de02bef7  RADS/system/rads_user_kernel.exe

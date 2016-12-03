@@ -57,6 +57,22 @@ leagueoflegends regen_wine_prefix
 ```
 
 # P.S.
-- Catalog "Launcher"  contains binary and configuration files ~1368Kb from [LoL SingleFileInstall](http://l3cdn.riotgames.com/Installer/SingleFileInstall/LeagueOfLegendsBaseEUW.exe)
-- It's needed for fast/easy setup LoL client.
-- It's a client for [RADS](http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe) - Riot Application Distribution System
+I don't use original install.exe, because it sucks. I did own way for fast and easy setup of LoL client.
+
+Tiny installation stuff:
+```
+lol.launcher.exe - packed by UPX original lol.launcher.exe
+RADS/system/locale.cfg     - Launcher localisation
+RADS/system/system.cfg   - Path and region for download full launcher
+RADS/system/launcher.cfg - Internal launcher configuration
+RADS/system/rads_user_kernel.exe - Riot Application Distribution System
+```
+**All configs hardcoded for Western Europe.**
+
+You don't need change anything,
+because launcher will always download
+**ALL STUFF FOR ALL REGIONS (~150Mb)**,
+so just wait for launcher UI and then change region and language.
+
+- Tiny install regenerated from configs in script code + client for RADS
+- [RADS](http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe)

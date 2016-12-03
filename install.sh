@@ -20,13 +20,42 @@ if [ "$PREFIX" == "/" ]; then
     fi
 fi
 
+unix2dos(){ sed $'s/$/\r/'; }
+
+gen_locale_cfg(){
+    {
+        echo locale = en_gb
+    } | unix2dos
+}
+
+gen_system_cfg(){
+    {
+        echo DownloadPath = /releases/live
+        echo DownloadURL = l3cdn.riotgames.com
+        echo Region = EUW
+    } | unix2dos
+}
+
+gen_launcher_cfg(){
+    {
+        echo airConfigProject = lol_air_client_config_euw
+        echo airProject = lol_air_client
+        echo gameProject = lol_game_client_sln
+    } | unix2dos
+}
+
 $SUDO install -Dm644 ./leagueoflegends.conf     "$PREFIX/etc/leagueoflegends.conf"
 $SUDO install -Dm755 ./leagueoflegends          "$PREFIX/usr/bin/leagueoflegends"
 $SUDO install -Dm644 ./leagueoflegends.png      "$PREFIX/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
 $SUDO install -Dm644 ./leagueoflegends.desktop  "$PREFIX/usr/share/applications/leagueoflegends.desktop"
 
 # Install Tiny Launcher
-$SUDO install -Dm644 ./Launcher/lol.launcher.exe "$PREFIX/opt/leagueoflegends/lol.launcher.exe"
-for file in ./Launcher/RADS/system/*; do
-    $SUDO install -Dm644 "$file" "$PREFIX/opt/leagueoflegends/RADS/system/$(basename "$file")"
-done
+URL_LAUNCHER="https://github.com/Nefelim4ag/League-Of-Legends/raw/master/Launcher/lol.launcher.exe"
+URL_RADS="http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe"
+
+$SUDO mkdir -p "$PREFIX/opt/leagueoflegends/RADS/system/"
+$SUDO wget -nv "$URL_LAUNCHER" -O "$PREFIX/opt/leagueoflegends/lol.launcher.exe"
+$SUDO wget -nv "$URL_RADS" -O "$PREFIX/opt/leagueoflegends/RADS/system/rads_user_kernel.exe"
+gen_locale_cfg   | $SUDO tee "$PREFIX/opt/leagueoflegends/RADS/system/locale.cfg"   > /dev/null
+gen_system_cfg   | $SUDO tee "$PREFIX/opt/leagueoflegends/RADS/system/system.cfg"   > /dev/null
+gen_launcher_cfg | $SUDO tee "$PREFIX/opt/leagueoflegends/RADS/system/launcher.cfg" > /dev/null

@@ -20,20 +20,17 @@ unix2dos(){ sed $'s/$/\r/'; }
 
 ################################################################################
 # Some vars
-export PREFIXCOMMAND
-export TMP
-export BASE_DIR="$HOME/.local/share/leagueoflegends"
+export PREFIXCOMMAND TMP BASE_DIR
 export LOL_OpenGL=2
 
-export WINEPREFIX
-export WINEARCH=win32
-export WINEDLLOVERRIDES
+export WINEPREFIX WINEARCH WINEDLLOVERRIDES
 export WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
 
 export LOL_LAUNCHER_NAME="lol.launcher.exe"
 export LOL_INSTALL_PATH
-export LOL_LAUNCHER_RUN_LOG
-export LOL_CLIENT_RUN_LOG
+export LOL_LAUNCHER_LOG
+export LOL_CLIENT_LOG
+
 CONF=/etc/leagueoflegends.conf
 TMP="$(mktemp -u)"
 
@@ -68,10 +65,12 @@ esac
 # shellcheck source=leagueoflegends.conf
 source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
 
-WINEPREFIX="${WINEPREFIX:-$BASE_DIR/WINE.$WINEARCH}"
-LOL_INSTALL_PATH="${LOL_INSTALL_PATH:-$BASE_DIR/LOL/}"
-LOL_LAUNCHER_RUN_LOG="${LOL_LAUNCHER_RUN_LOG:-$WINEPREFIX/lol_launcher.log}"
-LOL_CLIENT_RUN_LOG="${LOL_CLIENT_RUN_LOG:-$WINEPREFIX/lol_client.log}"
+[ -z "$WINEARCH" ]         && WINEARCH=win32
+[ -z "$BASE_DIR" ]         && BASE_DIR="$HOME/.local/share/leagueoflegends"
+[ -z "$WINEPREFIX" ]       && WINEPREFIX="$BASE_DIR/WINE.$WINEARCH/"
+[ -z "$LOL_INSTALL_PATH" ] && LOL_INSTALL_PATH="$BASE_DIR/LOL/"
+[ -z "$LOL_LAUNCHER_LOG" ] && LOL_LAUNCHER_LOG="$BASE_DIR/lol_launcher.log"
+[ -z "$LOL_CLIENT_LOG" ]   && LOL_CLIENT_LOG="$BASE_DIR/lol_client.log"
 
 {
     INFO "Check: Base dir $BASE_DIR"
@@ -116,7 +115,7 @@ touch "$WINEPREFIX/winetricks.log"
     done
 }
 
-touch "$LOL_LAUNCHER_RUN_LOG" "$LOL_CLIENT_RUN_LOG"
+touch "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
 
 case "$1" in
     make_wineprefix) exit 0;;
@@ -127,17 +126,17 @@ case "$1" in
         exit 0
     ;;
     cleanup_logs)
-        find -H "$WINEPREFIX/drive_c/" -name "*.log" -delete -print
+        find -H "$BASE_DIR" -name "*.log" -delete -print
         find -H "$LOL_INSTALL_PATH/" -name "*.log?" -delete -print
         if [ -d "$LOL_INSTALL_PATH/Logs/" ]; then
             find -H "$LOL_INSTALL_PATH/Logs/" -type f -delete -print
             find -H "$LOL_INSTALL_PATH/Logs/" -empty -delete -print
         fi
-        truncate -s 0 "$LOL_LAUNCHER_RUN_LOG" "$LOL_CLIENT_RUN_LOG"
+        truncate -s 0 "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
         exit 0
     ;;
     tail)
-        tail -f "$LOL_LAUNCHER_RUN_LOG" "$LOL_CLIENT_RUN_LOG"
+        tail -f "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
         exit 0
     ;;
 esac
@@ -283,8 +282,8 @@ case "$1" in
 
 
         INFO "Run: $LOL_LAUNCHER_NAME"
-        INFO "Wine run log: $LOL_LAUNCHER_RUN_LOG"
-        $PREFIXCOMMAND wine "$WINE_PATH" "$LOL_LAUNCHER_ARGS" &>> "$LOL_LAUNCHER_RUN_LOG"
+        INFO "Wine run log: $LOL_LAUNCHER_LOG"
+        $PREFIXCOMMAND wine "$WINE_PATH" "$LOL_LAUNCHER_ARGS" &>> "$LOL_LAUNCHER_LOG"
     ;;
     client)
         LOL_CLIENT_NAME="LeagueClient.exe"
@@ -302,7 +301,7 @@ case "$1" in
         INFO "LoL Client WINE path: $WINE_PATH"
 
         INFO "Run: $LOL_CLIENT_NAME $LOL_CLIENT_ARGS"
-        INFO "Wine run log: $LOL_CLIENT_RUN_LOG"
-        $PREFIXCOMMAND wine "$WINE_PATH" "$LOL_CLIENT_ARGS" &>> "$LOL_CLIENT_RUN_LOG"
+        INFO "Wine run log: $LOL_CLIENT_LOG"
+        $PREFIXCOMMAND wine "$WINE_PATH" "$LOL_CLIENT_ARGS" &>> "$LOL_CLIENT_LOG"
     ;;
 esac

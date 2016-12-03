@@ -38,7 +38,7 @@ TMP="$(mktemp -u)"
 # Check args
 case "$1" in
     launcher|client) : ;;
-    winecfg|wineserver) : ;;
+    winecfg|wineserver|winetricks) : ;;
     reinstall|tail|make_wineprefix|regen_wine_prefix) : ;;
     cleanup_logs) : ;;
     *)
@@ -50,6 +50,7 @@ case "$1" in
         echo "  client             - launch lol beta client"
         echo "  winecfg            - run winecfg in lol prefix"
         echo "  wineserver <args>  - -k for killing all processes"
+        echo "  winetricks <args>  - run winetricks in lol prefix"
         echo "  reinstall          - reinstall lol launcher bins"
         echo "  tail               - tail -f to log file"
         echo "  make_wineprefix    - only make wineprefix"
@@ -121,8 +122,13 @@ case "$1" in
     make_wineprefix) exit 0;;
     winecfg) winecfg; exit 0;;
     wineserver)
-        shift;
+        shift
         wineserver "$@"
+        exit 0
+    ;;
+    winetricks)
+        shift
+        winetricks "$@"
         exit 0
     ;;
     cleanup_logs)

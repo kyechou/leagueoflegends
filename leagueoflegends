@@ -31,7 +31,6 @@ WINEARCH=win32
 WINEPREFIX="$HOME/.local/share/leagueoflegends"
 WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
 
-LOL_OpenGL=2
 LOL_LAUNCHER_NAME="lol.launcher.exe"
 LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
 LOL_LAUNCHER_RUN_LOG="$WINEPREFIX/lol_launcher.log"

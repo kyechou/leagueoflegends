@@ -25,16 +25,15 @@ export TMP
 export BASE_DIR="$HOME/.local/share/leagueoflegends"
 export LOL_OpenGL=2
 
+export WINEPREFIX
 export WINEARCH=win32
-export WINEPREFIX="$BASE_DIR/WINE.$WINEARCH"
 export WINEDLLOVERRIDES
 export WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
 
 export LOL_LAUNCHER_NAME="lol.launcher.exe"
-export LOL_INSTALL_PATH="$BASE_DIR/LOL/"
-export LOL_LAUNCHER_RUN_LOG="$WINEPREFIX/lol_launcher.log"
-export LOL_CLIENT_RUN_LOG="$WINEPREFIX/lol_client.log"
-
+export LOL_INSTALL_PATH
+export LOL_LAUNCHER_RUN_LOG
+export LOL_CLIENT_RUN_LOG
 CONF=/etc/leagueoflegends.conf
 TMP="$(mktemp -u)"
 
@@ -68,6 +67,11 @@ esac
 # Initialization
 # shellcheck source=leagueoflegends.conf
 source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
+
+WINEPREFIX="${WINEPREFIX:-$BASE_DIR/WINE.$WINEARCH}"
+LOL_INSTALL_PATH="${LOL_INSTALL_PATH:-$BASE_DIR/LOL/}"
+LOL_LAUNCHER_RUN_LOG="${LOL_LAUNCHER_RUN_LOG:-$WINEPREFIX/lol_launcher.log}"
+LOL_CLIENT_RUN_LOG="${LOL_CLIENT_RUN_LOG:-$WINEPREFIX/lol_client.log}"
 
 {
     INFO "Check: Base dir $BASE_DIR"

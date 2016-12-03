@@ -192,9 +192,12 @@ esac
     cd "$LOL_INSTALL_PATH" || exit 1
     {
         echo 6d0ceaf819e45420f0987b63a051e558  lol.launcher.exe
+        # http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe.version
+        # 1.0.0.228 - RADS/system/rads_user_kernel.exe
         echo 5f27f62eabcd11518112ea99de02bef7  RADS/system/rads_user_kernel.exe
     } | md5sum --quiet -c || {
-        WARN "You have a broken install, or files has been updated, please send this data to upstream"
+        WARN "You have a broken files, or files has been updated"
+        INFO "Please send this data to upstream"
     }
 }
 

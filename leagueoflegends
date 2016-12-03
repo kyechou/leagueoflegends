@@ -20,21 +20,19 @@ unix2dos(){ sed $'s/$/\r/'; }
 
 ################################################################################
 # Some vars
-export WINEPREFIX WINEARCH WINEDLLOVERRIDES WINE_REQ_MOD
-export PREFIXCOMMAND TMP
+export PREFIXCOMMAND
+export TMP
 export LOL_OpenGL
-export LOL_LAUNCHER_NAME
-export LOL_INSTALL_PATH
-export LOL_RUN_LOG
 
-WINEARCH=win32
-WINEPREFIX="$HOME/.local/share/leagueoflegends"
-WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
+export WINEARCH=win32
+export WINEPREFIX="$HOME/.local/share/leagueoflegends"
+export WINEDLLOVERRIDES
+export WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
 
-LOL_LAUNCHER_NAME="lol.launcher.exe"
-LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
-LOL_LAUNCHER_RUN_LOG="$WINEPREFIX/lol_launcher.log"
-LOL_CLIENT_RUN_LOG="$WINEPREFIX/lol_client.log"
+export LOL_LAUNCHER_NAME="lol.launcher.exe"
+export LOL_INSTALL_PATH="$WINEPREFIX/drive_c/LoL/"
+export LOL_LAUNCHER_RUN_LOG="$WINEPREFIX/lol_launcher.log"
+export LOL_CLIENT_RUN_LOG="$WINEPREFIX/lol_client.log"
 
 CONF=/etc/leagueoflegends.conf
 TMP="$(mktemp -u)"
@@ -133,35 +131,41 @@ case "$1" in
     ;;
 esac
 
-{
-    reinstall(){
-        INFO "Install launcher"
 
-        gen_locale_cfg(){ echo locale = en_gb; }
+reinstall(){
+    INFO "Install launcher"
+    gen_locale_cfg(){ echo locale = en_gb; }
 
-        gen_system_cfg(){
-            echo DownloadPath = /releases/live
-            echo DownloadURL = l3cdn.riotgames.com
-            echo Region = EUW
-        }
-
-        gen_launcher_cfg(){
-            echo airConfigProject = lol_air_client_config_euw
-            echo airProject = lol_air_client
-            echo gameProject = lol_game_client_sln
-        }
-
-        URL_LAUNCHER="https://github.com/Nefelim4ag/League-Of-Legends/raw/master/lol.launcher.exe"
-        URL_RADS="http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe"
-
-        mkdir -p "$LOL_INSTALL_PATH/RADS/system/"
-        wget -nv "$URL_LAUNCHER" -O "$LOL_INSTALL_PATH/lol.launcher.exe"                 || ERRO "Something went wrong!"
-        wget -nv "$URL_RADS"     -O "$LOL_INSTALL_PATH/RADS/system/rads_user_kernel.exe" || ERRO "Something went wrong!"
-        gen_locale_cfg   | unix2dos > "$LOL_INSTALL_PATH/RADS/system/locale.cfg"         || ERRO "Something went wrong!"
-        gen_system_cfg   | unix2dos > "$LOL_INSTALL_PATH/RADS/system/system.cfg"         || ERRO "Something went wrong!"
-        gen_launcher_cfg | unix2dos > "$LOL_INSTALL_PATH/RADS/system/launcher.cfg"       || ERRO "Something went wrong!"
+    gen_system_cfg(){
+        echo DownloadPath = /releases/live
+        echo DownloadURL = l3cdn.riotgames.com
+        echo Region = EUW
     }
 
+    gen_launcher_cfg(){
+        echo airConfigProject = lol_air_client_config_euw
+        echo airProject = lol_air_client
+        echo gameProject = lol_game_client_sln
+    }
+
+    URL_LAUNCHER="https://github.com/Nefelim4ag/League-Of-Legends/raw/master/lol.launcher.exe"
+    URL_RADS="http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe"
+
+    mkdir -p "$LOL_INSTALL_PATH/RADS/system/" || ERRO "Something went wrong!"
+    {
+        cd "$LOL_INSTALL_PATH" || exit 1
+        wget -nv "$URL_LAUNCHER" -O "lol.launcher.exe"         || ERRO "Something went wrong!"
+        {
+            cd "RADS/system" || exit 1
+            wget -nv "$URL_RADS"     -O "rads_user_kernel.exe" || ERRO "Something went wrong!"
+            gen_locale_cfg   | unix2dos > "locale.cfg"         || ERRO "Something went wrong!"
+            gen_system_cfg   | unix2dos > "system.cfg"         || ERRO "Something went wrong!"
+            gen_launcher_cfg | unix2dos > "launcher.cfg"       || ERRO "Something went wrong!"
+        }
+    }
+}
+
+{
     INFO "Check: launcher installed"
     if [ ! -d "$LOL_INSTALL_PATH" ]; then
         INFO "League of Legends not found at: $LOL_INSTALL_PATH"
@@ -179,10 +183,10 @@ esac
             INFO "Reinstall it"
             reinstall
         fi
+        rm_w "$TMP"
     else
         INFO "League of Legends found at: $LOL_INSTALL_PATH"
     fi
-    rm_w "$TMP"
 }
 
 case "$1" in

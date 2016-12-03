@@ -137,10 +137,30 @@ esac
 {
     reinstall(){
         INFO "Install launcher"
-        $SUDO install -Dm644 /opt/leagueoflegends/lol.launcher.exe "$LOL_INSTALL_PATH/lol.launcher.exe" || ERRO "Something went wrong!"
-        for file in /opt/leagueoflegends/RADS/system/*; do
-            install -Dm644 "$file" "$LOL_INSTALL_PATH/RADS/system/$(basename "$file")" || ERRO "Something went wrong!"
-        done
+
+        gen_locale_cfg(){ echo locale = en_gb; }
+
+        gen_system_cfg(){
+            echo DownloadPath = /releases/live
+            echo DownloadURL = l3cdn.riotgames.com
+            echo Region = EUW
+        }
+
+        gen_launcher_cfg(){
+            echo airConfigProject = lol_air_client_config_euw
+            echo airProject = lol_air_client
+            echo gameProject = lol_game_client_sln
+        }
+
+        URL_LAUNCHER="https://github.com/Nefelim4ag/League-Of-Legends/raw/master/lol.launcher.exe"
+        URL_RADS="http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe"
+
+        mkdir -p "$LOL_INSTALL_PATH/RADS/system/"
+        wget -nv "$URL_LAUNCHER" -O "$LOL_INSTALL_PATH/lol.launcher.exe"                 || ERRO "Something went wrong!"
+        wget -nv "$URL_RADS"     -O "$LOL_INSTALL_PATH/RADS/system/rads_user_kernel.exe" || ERRO "Something went wrong!"
+        gen_locale_cfg   | unix2dos > "$LOL_INSTALL_PATH/RADS/system/locale.cfg"         || ERRO "Something went wrong!"
+        gen_system_cfg   | unix2dos > "$LOL_INSTALL_PATH/RADS/system/system.cfg"         || ERRO "Something went wrong!"
+        gen_launcher_cfg | unix2dos > "$LOL_INSTALL_PATH/RADS/system/launcher.cfg"       || ERRO "Something went wrong!"
     }
 
     INFO "Check: launcher installed"

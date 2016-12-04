@@ -48,6 +48,7 @@ case "$1" in
         echo "  launcher           - launch lol launcher"
         echo "                       launcher can run old client"
         echo "  client             - launch lol beta client"
+        echo "                       must be installed by launcher first"
         echo "  winecfg            - run winecfg in lol prefix"
         echo "  wineserver <args>  - -k for killing all processes"
         echo "  winetricks <args>  - run winetricks in lol prefix"

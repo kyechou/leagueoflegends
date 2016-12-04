@@ -284,6 +284,8 @@ case "$1" in
         rm_w "$TMP"
 
         INFO "LoL Launcher UNIX path: $UNIX_PATH"
+        [ ! -f "$UNIX_PATH" ] && \
+            ERRO "Dir $LOL_INSTALL_PATH exists, but lol.launcher.exe not found"
         INFO "LoL Launcher WINE path: $WINE_PATH"
 
 
@@ -304,6 +306,8 @@ case "$1" in
         rm_w "$TMP"
 
         INFO "LoL Client UNIX path: $UNIX_PATH"
+        [ ! -f "$UNIX_PATH" ] && \
+            ERRO "Can't wind beta client, you must install it first by launcher"
         INFO "LoL Client WINE path: $WINE_PATH"
 
         INFO "Run: $LOL_CLIENT_NAME $LOL_CLIENT_ARGS"

@@ -198,7 +198,7 @@ reinstall(){
 
 {
     INFO "Check: Link X: -> $LOL_INSTALL_PATH"
-    ln -sf "$LOL_INSTALL_PATH" "$WINEPREFIX/dosdevices/x:"
+    ln -Tfs "$LOL_INSTALL_PATH" "$WINEPREFIX/dosdevices/x:"
 }
 
 case "$1" in

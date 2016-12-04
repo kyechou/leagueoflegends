@@ -24,7 +24,7 @@ export PREFIXCOMMAND TMP BASE_DIR
 export LOL_OpenGL=2
 
 export WINEPREFIX WINEARCH WINEDLLOVERRIDES
-export WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 )
+export WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 sandbox )
 
 export LOL_LAUNCHER_NAME="lol.launcher.exe"
 export LOL_INSTALL_PATH
@@ -90,21 +90,12 @@ source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
     INFO "Your version: $(wine --version)"
 }
 
-touch "$WINEPREFIX/winetricks.log"
-
 {
     INFO "Check: wineprefix configured"
-    for mod in "${WINE_REQ_MOD[@]}"; do
-        [ -z "$mod" ] && continue
-        if ! grep -q "$mod" "$WINEPREFIX/winetricks.log"; then
-            winetricks -q "$mod" || ERRO "Something went wrong!"
-        fi
-    done
-}
-
-{
-    INFO "Check: wine user dirs are private"
-    find "$WINEPREFIX/drive_c/users/" -type l -exec rm -v {} \; -exec mkdir -pv {} \;
+    cd "$WINEPREFIX" || exit 1
+    if [ ! -f "winetricks.log" ]; then
+        winetricks -q --optout "${WINE_REQ_MOD[@]}" || ERRO "Something went wrong!"
+    fi
 }
 
 {

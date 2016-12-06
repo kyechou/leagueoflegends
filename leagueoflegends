@@ -26,7 +26,7 @@ export LOL_OpenGL=2
 export WINEPREFIX WINEARCH WINEDLLOVERRIDES
 export WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 sandbox )
 
-export LOL_LAUNCHER_NAME="lol.launcher.exe"
+export LOL_RADS="rads_user_kernel.exe"
 export LOL_INSTALL_PATH
 export LOL_LAUNCHER_LOG
 export LOL_CLIENT_LOG
@@ -156,34 +156,30 @@ reinstall(){
         echo gameProject = lol_game_client_sln
     }
 
-    URL_LAUNCHER="https://github.com/Nefelim4ag/League-Of-Legends/raw/master/lol.launcher.exe"
     URL_RADS="http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe"
-
     mkdir -p "$LOL_INSTALL_PATH/RADS/system/" || ERRO "Something went wrong!"
     {
-        cd "$LOL_INSTALL_PATH" || exit 1
-        wget -nv "$URL_LAUNCHER" -O "lol.launcher.exe"         || ERRO "Something went wrong!"
-        {
-            cd "RADS/system" || exit 1
-            wget -nv "$URL_RADS"     -O "rads_user_kernel.exe" || ERRO "Something went wrong!"
-            gen_locale_cfg   | unix2dos > "locale.cfg"         || ERRO "Something went wrong!"
-            gen_system_cfg   | unix2dos > "system.cfg"         || ERRO "Something went wrong!"
-            gen_launcher_cfg | unix2dos > "launcher.cfg"       || ERRO "Something went wrong!"
-        }
+        cd "$LOL_INSTALL_PATH/RADS/system" || exit 1
+        wget -nv "$URL_RADS"     -O "rads_user_kernel.exe" || ERRO "Something went wrong!"
+        gen_locale_cfg   | unix2dos > "locale.cfg"         || ERRO "Something went wrong!"
+        gen_system_cfg   | unix2dos > "system.cfg"         || ERRO "Something went wrong!"
+        gen_launcher_cfg | unix2dos > "launcher.cfg"       || ERRO "Something went wrong!"
     }
 }
+
+
 
 {
     INFO "Check: launcher installed"
     if [ ! -d "$LOL_INSTALL_PATH" ]; then
         INFO "League of Legends not found at: $LOL_INSTALL_PATH"
         INFO "Search for existing launcher"
-        find -H "$BASE_DIR" -name "$LOL_LAUNCHER_NAME" > "$TMP"
-        read -r LOL_LAUNCHER_PATH < "$TMP"
+        find -H "$BASE_DIR" -name "$LOL_RADS" > "$TMP"
+        read -r LOL_RADS_PATH < "$TMP"
 
-        if [ -f "$LOL_LAUNCHER_PATH" ]; then
-            INFO "Find another League of Legends launcher, move it to $LOL_INSTALL_PATH"
-            dirname "$LOL_LAUNCHER_PATH" > "$TMP"
+        if [ -f "$LOL_RADS_PATH" ]; then
+            INFO "Find another League of Legends directory, move it to $LOL_INSTALL_PATH"
+            dirname $(dirname $(dirname "$LOL_RADS_PATH")) > "$TMP"
             read -r LOL_DIR < "$TMP"
             mv -v "$LOL_DIR/" "$LOL_INSTALL_PATH/"
         else
@@ -266,24 +262,37 @@ configure_OpenGL
     echo leagueClientOptIn = no  > "$Ucfg"
 }
 
+## RADS ARGS
+# rads_user_kernel stopkernel
+# rads_user_kernel enumavailproj
+# rads_user_kernel enuminstproj
+# rads_user_kernel enumavailrel
+# rads_user_kernel enuminstrel
+# rads_user_kernel installproj <project>
+# rads_user_kernel uninstallproj <project>
+# rads_user_kernel installrel <project> <release>
+# rads_user_kernel uninstallrel <project> <release>
+# rads_user_kernel run <project> <release> <executable>
+# rads_user_kernel updateandrun <project> <executable>
+# rads_user_kernel checksum Options: -noupdate -tsr
+
 case "$1" in
     launcher)
-        winepath -w "$LOL_INSTALL_PATH/$LOL_LAUNCHER_NAME" > "$TMP" 2> /dev/null
+        cd "$LOL_INSTALL_PATH/RADS/" || exit 1
 
+        winepath -w system/rads_user_kernel.exe > "$TMP" 2> /dev/null
         read -r WINE_PATH < "$TMP"
         winepath -u "$WINE_PATH" > "$TMP" 2> /dev/null
         read -r UNIX_PATH < "$TMP"
         rm_w "$TMP"
-
-        INFO "LoL Launcher UNIX path: $UNIX_PATH"
+        INFO "RADS UNIX path: $UNIX_PATH"
         [ ! -f "$UNIX_PATH" ] && \
-            ERRO "Dir $LOL_INSTALL_PATH exists, but lol.launcher.exe not found"
-        INFO "LoL Launcher WINE path: $WINE_PATH"
-
-
-        INFO "Run: $LOL_LAUNCHER_NAME"
+            ERRO "Dir $LOL_INSTALL_PATH exists, but rads_user_kernel.exe not found"
+        INFO "RADS WINE path: $WINE_PATH"
+        ARGS="updateandrun lol_launcher LoLLauncher.exe"
+        INFO "Run: rads_user_kernel.exe $ARGS"
         INFO "Wine run log: $LOL_LAUNCHER_LOG"
-        $PREFIXCOMMAND wine "$WINE_PATH" "$LOL_LAUNCHER_ARGS" &>> "$LOL_LAUNCHER_LOG"
+        $PREFIXCOMMAND wine "$WINE_PATH" $ARGS &>> "$LOL_LAUNCHER_LOG"
     ;;
     client)
         LOL_CLIENT_NAME="LeagueClient.exe"

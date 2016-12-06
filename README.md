@@ -61,7 +61,6 @@ I don't use original install.exe, because it sucks. I did own way for fast and e
 
 Tiny installation stuff:
 ```
-lol.launcher.exe - packed by UPX original lol.launcher.exe
 RADS/system/locale.cfg     - Launcher localisation
 RADS/system/system.cfg   - Path and region for download full launcher
 RADS/system/launcher.cfg - Internal launcher configuration

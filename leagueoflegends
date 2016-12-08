@@ -297,7 +297,7 @@ case "$1" in
     client)
         LOL_CLIENT_NAME="LeagueClient.exe"
         LOL_CLIENT_ARGS="--no-sandbox"
-        find -H "$LOL_INSTALL_PATH" -name "$LOL_CLIENT_NAME" > "$TMP"
+        find -H "$LOL_INSTALL_PATH" -name "$LOL_CLIENT_NAME" | tail -n1 > "$TMP"
         read -r LOL_CLIENT_PATH < "$TMP"
         winepath -w "$LOL_CLIENT_PATH" > "$TMP" 2> /dev/null
 

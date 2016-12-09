@@ -1,25 +1,21 @@
 #!/bin/bash
-################################################################################
-# Logging functions
+## Logging functions
 INFO(){ echo -n "INFO: "; echo "$@" ;}
 WARN(){ echo -n "WARN: "; echo "$@" ;}
-ERRO(){ echo -n "ERRO: "; echo -n "$@" ; echo " Abort!"; exit 1;}
+ERRO(){ echo -n "ERRO: "; echo "$@" ; exit 1;}
 
-################################################################################
-# Check some deps
+## Check some deps
 bin_exist(){ command -v "$1" &> /dev/null || ERRO "Missing ${1}!"; }
 for bin in wine winetricks wineserver winepath wineboot; do
     bin_exist $bin
 done
 
-################################################################################
-# Define useful functions
+## Define useful functions
 rm_w(){ [ -f "$1" ] && rm "$1"; }
 dos2unix(){ sed $'s/\r$//'; }
 unix2dos(){ sed $'s/$/\r/'; }
 
-################################################################################
-# Some vars
+## Some vars
 export PREFIXCOMMAND TMP BASE_DIR
 export LOL_OpenGL=2
 
@@ -34,8 +30,7 @@ export LOL_CLIENT_LOG
 CONF=/etc/leagueoflegends.conf
 TMP="$(mktemp -u)"
 
-################################################################################
-# Check args
+## Check args
 case "$1" in
     launcher|client) : ;;
     winecfg|wineserver|winetricks) : ;;
@@ -62,8 +57,7 @@ case "$1" in
     ;;
 esac
 
-################################################################################
-# Initialization
+## Initialization
 # shellcheck source=leagueoflegends.conf
 source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
 
@@ -100,7 +94,7 @@ source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
 }
 
 {
-    INFO "Check: wine can access only to wine drive (C:/)"
+    INFO "Check: wine can access only to wine drive C:/ + X:/ (LoL)"
     for link in "$WINEPREFIX/dosdevices"/*; do
         [[ "$link" =~ c: ]] && continue # For default link to ../drive_c
         [[ "$link" =~ x: ]] && continue # For link to LoL path
@@ -108,20 +102,10 @@ source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
     done
 }
 
-touch "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
-
 case "$1" in
     make_wineprefix) exit 0;;
-    winecfg) winecfg; exit 0;;
-    wineserver)
-        shift
-        wineserver "$@"
-        exit 0
-    ;;
-    winetricks)
-        shift
-        winetricks "$@"
-        exit 0
+    wineserver|winetricks|winecfg)
+        ARG="$1"; shift; exec "$ARG" "$@"
     ;;
     cleanup_logs)
         find -H "$BASE_DIR" -name "*.log" -delete -print
@@ -130,12 +114,11 @@ case "$1" in
             find -H "$LOL_INSTALL_PATH/Logs/" -type f -delete -print
             find -H "$LOL_INSTALL_PATH/Logs/" -empty -delete -print
         fi
-        truncate -s 0 "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
-        exit 0
+        exec truncate -s 0 "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
     ;;
     tail)
-        tail -f "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
-        exit 0
+        touch "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
+        exec tail -f "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
     ;;
 esac
 
@@ -205,8 +188,7 @@ case "$1" in
         INFO "Backup prefix: ${WINEPREFIX}.backup"
         mv "${WINEPREFIX}" "${WINEPREFIX}.backup"
         INFO "Self rerun to recreate wineprefix"
-        "$0" make_wineprefix
-        exit 0
+        exec "$0" make_wineprefix
     ;;
 esac
 
@@ -256,70 +238,77 @@ configure_OpenGL(){
 }
 configure_OpenGL
 
-# Configure client to run by launcher
+# LoL Launcher on linux can only run old air clint
+# Force using of old client
 {
     Ucfg="$LOL_INSTALL_PATH"/RADS/system/user.cfg
     echo leagueClientOptIn = no  > "$Ucfg"
 }
 
 ## RADS ARGS
-# rads_user_kernel stopkernel
-# rads_user_kernel enumavailproj
-# rads_user_kernel enuminstproj
-# rads_user_kernel enumavailrel
-# rads_user_kernel enuminstrel
-# rads_user_kernel installproj <project>
-# rads_user_kernel uninstallproj <project>
-# rads_user_kernel installrel <project> <release>
-# rads_user_kernel uninstallrel <project> <release>
-# rads_user_kernel run <project> <release> <executable>
-# rads_user_kernel updateandrun <project> <executable>
-# rads_user_kernel checksum Options: -noupdate -tsr
+# rads_user_kernel <args>
+#   stopkernel
+#   enumavailproj
+#   enuminstproj
+#   enumavailrel
+#   enuminstrel
+#   installproj <project>
+#   uninstallproj <project>
+#   installrel <project> <release>
+#   uninstallrel <project> <release>
+#   run <project> <release> <executable>
+#   updateandrun <project> <executable>
+#   checksum Options: -noupdate -tsr
+
+wine_w(){ $PREFIXCOMMAND wine "$@"; }
+
+cd "$LOL_INSTALL_PATH" || exit 1
 
 case "$1" in
     launcher)
-        cd "$LOL_INSTALL_PATH/RADS/" || exit 1
+        cd "RADS/" || exit 1
 
         winepath -w system/rads_user_kernel.exe > "$TMP" 2> /dev/null
         read -r WINE_PATH < "$TMP"
         winepath -u "$WINE_PATH" > "$TMP" 2> /dev/null
         read -r UNIX_PATH < "$TMP"
         rm_w "$TMP"
+
+        [ ! -f "$UNIX_PATH" ] && ERRO "rads_user_kernel.exe not found"
+
         INFO "RADS UNIX path: $UNIX_PATH"
-        [ ! -f "$UNIX_PATH" ] && \
-            ERRO "Dir $LOL_INSTALL_PATH exists, but rads_user_kernel.exe not found"
         INFO "RADS WINE path: $WINE_PATH"
         ARGS="updateandrun lol_launcher LoLLauncher.exe"
         INFO "Run: rads_user_kernel.exe $ARGS"
         INFO "Wine run log: $LOL_LAUNCHER_LOG"
-        $PREFIXCOMMAND wine "$WINE_PATH" $ARGS &>> "$LOL_LAUNCHER_LOG"
+        wine_w "$WINE_PATH" $ARGS &>> "$LOL_LAUNCHER_LOG"
     ;;
     client)
         LOL_CLIENT_NAME="LeagueClient.exe"
-        LOL_CLIENT_ARGS="--no-sandbox"
         echo "$LOL_INSTALL_PATH/$LOL_CLIENT_NAME" > "$TMP"
         if [ ! -f "$LOL_INSTALL_PATH/$LOL_CLIENT_NAME" ]; then
             {
-                for path in "$LOL_INSTALL_PATH"/RADS/projects/league_client/releases/*.*.*.*/; do
-                    find -H $path -name "$LOL_CLIENT_NAME"
+                for path in RADS/projects/league_client/releases/*.*.*.*/; do
+                    find -H "$path" -name "$LOL_CLIENT_NAME"
                 done
             } | sort | tail -n1 > "$TMP"
         fi
         read -r LOL_CLIENT_PATH < "$TMP"
-        winepath -w "$LOL_CLIENT_PATH" > "$TMP" 2> /dev/null
 
+        winepath -w "$LOL_CLIENT_PATH" > "$TMP" 2> /dev/null
         read -r WINE_PATH < "$TMP"
         winepath -u "$WINE_PATH" > "$TMP" 2> /dev/null
         read -r UNIX_PATH < "$TMP"
         rm_w "$TMP"
 
-        INFO "LoL Client UNIX path: $UNIX_PATH"
         [ ! -f "$UNIX_PATH" ] && \
             ERRO "Can't wind beta client, you must install it first by launcher"
-        INFO "LoL Client WINE path: $WINE_PATH"
 
+        LOL_CLIENT_ARGS="--no-sandbox"
+        INFO "LoL Client UNIX path: $UNIX_PATH"
+        INFO "LoL Client WINE path: $WINE_PATH"
         INFO "Run: $LOL_CLIENT_NAME $LOL_CLIENT_ARGS"
         INFO "Wine run log: $LOL_CLIENT_LOG"
-        $PREFIXCOMMAND wine "$WINE_PATH" "$LOL_CLIENT_ARGS" &>> "$LOL_CLIENT_LOG"
+        wine_w "$WINE_PATH" "$LOL_CLIENT_ARGS" &>> "$LOL_CLIENT_LOG"
     ;;
 esac

@@ -297,7 +297,14 @@ case "$1" in
     client)
         LOL_CLIENT_NAME="LeagueClient.exe"
         LOL_CLIENT_ARGS="--no-sandbox"
-        find -H "$LOL_INSTALL_PATH" -name "$LOL_CLIENT_NAME" | tail -n1 > "$TMP"
+        echo "$LOL_INSTALL_PATH/$LOL_CLIENT_NAME" > "$TMP"
+        if [ ! -f "$LOL_INSTALL_PATH/$LOL_CLIENT_NAME" ]; then
+            {
+                for path in "$LOL_INSTALL_PATH"/RADS/projects/league_client/releases/*.*.*.*/; do
+                    find -H $path -name "$LOL_CLIENT_NAME"
+                done
+            } | sort | tail -n1 > "$TMP"
+        fi
         read -r LOL_CLIENT_PATH < "$TMP"
         winepath -w "$LOL_CLIENT_PATH" > "$TMP" 2> /dev/null
 

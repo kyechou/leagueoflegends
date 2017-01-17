@@ -27,6 +27,8 @@ export LOL_INSTALL_PATH
 export LOL_LAUNCHER_LOG
 export LOL_CLIENT_LOG
 
+export GC_DONT_GC
+
 CONF=/etc/leagueoflegends.conf
 TMP="$(mktemp -u)"
 

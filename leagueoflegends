@@ -22,8 +22,8 @@ export LOL_OpenGL=2
 export WINEPREFIX WINEARCH WINEDLLOVERRIDES
 export WINE_REQ_MOD=( corefonts vcrun2005 vcrun2008 d3dx9 sandbox )
 
+export INSTALL_PATH
 export LOL_RADS="rads_user_kernel.exe"
-export LOL_INSTALL_PATH
 export LOL_LAUNCHER_LOG
 export LOL_CLIENT_LOG
 
@@ -66,7 +66,7 @@ source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
 [ -z "$WINEARCH" ]         && WINEARCH=win32
 [ -z "$BASE_DIR" ]         && BASE_DIR="$HOME/.local/share/leagueoflegends"
 [ -z "$WINEPREFIX" ]       && WINEPREFIX="$BASE_DIR/WINE.$WINEARCH/"
-[ -z "$LOL_INSTALL_PATH" ] && LOL_INSTALL_PATH="$BASE_DIR/LOL/"
+[ -z "$INSTALL_PATH" ] && INSTALL_PATH="$BASE_DIR/LOL/"
 [ -z "$LOL_LAUNCHER_LOG" ] && LOL_LAUNCHER_LOG="$BASE_DIR/lol_launcher.log"
 [ -z "$LOL_CLIENT_LOG" ]   && LOL_CLIENT_LOG="$BASE_DIR/lol_client.log"
 
@@ -111,10 +111,10 @@ case "$1" in
     ;;
     cleanup_logs)
         find -H "$BASE_DIR" -name "*.log" -delete -print
-        find -H "$LOL_INSTALL_PATH/" -name "*.log?" -delete -print
-        if [ -d "$LOL_INSTALL_PATH/Logs/" ]; then
-            find -H "$LOL_INSTALL_PATH/Logs/" -type f -delete -print
-            find -H "$LOL_INSTALL_PATH/Logs/" -empty -delete -print
+        find -H "$INSTALL_PATH/" -name "*.log?" -delete -print
+        if [ -d "$INSTALL_PATH/Logs/" ]; then
+            find -H "$INSTALL_PATH/Logs/" -type f -delete -print
+            find -H "$INSTALL_PATH/Logs/" -empty -delete -print
         fi
         exec truncate -s 0 "$LOL_LAUNCHER_LOG" "$LOL_CLIENT_LOG"
     ;;
@@ -142,9 +142,9 @@ reinstall(){
     }
 
     URL_RADS="http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe"
-    mkdir -p "$LOL_INSTALL_PATH/RADS/system/" || ERRO "Something went wrong!"
+    mkdir -p "$INSTALL_PATH/RADS/system/" || ERRO "Something went wrong!"
     {
-        cd "$LOL_INSTALL_PATH/RADS/system" || exit 1
+        cd "$INSTALL_PATH/RADS/system" || exit 1
         wget -nv "$URL_RADS"     -O "rads_user_kernel.exe" || ERRO "Something went wrong!"
         gen_locale_cfg   | unix2dos > "locale.cfg"         || ERRO "Something went wrong!"
         gen_system_cfg   | unix2dos > "system.cfg"         || ERRO "Something went wrong!"
@@ -156,17 +156,17 @@ reinstall(){
 
 {
     INFO "Check: launcher installed"
-    if [ ! -d "$LOL_INSTALL_PATH" ]; then
-        INFO "League of Legends not found at: $LOL_INSTALL_PATH"
+    if [ ! -d "$INSTALL_PATH" ]; then
+        INFO "League of Legends not found at: $INSTALL_PATH"
         INFO "Search for existing launcher"
         find -H "$BASE_DIR" -name "$LOL_RADS" > "$TMP"
         read -r LOL_RADS_PATH < "$TMP"
 
         if [ -f "$LOL_RADS_PATH" ]; then
-            INFO "Find another League of Legends directory, move it to $LOL_INSTALL_PATH"
+            INFO "Find another League of Legends directory, move it to $INSTALL_PATH"
             dirname $(dirname $(dirname "$LOL_RADS_PATH")) > "$TMP"
             read -r LOL_DIR < "$TMP"
-            mv -v "$LOL_DIR/" "$LOL_INSTALL_PATH/"
+            mv -v "$LOL_DIR/" "$INSTALL_PATH/"
         else
             INFO "League of Legends not found at $BASE_DIR"
             INFO "Reinstall it"
@@ -174,13 +174,13 @@ reinstall(){
         fi
         rm_w "$TMP"
     else
-        INFO "League of Legends found at: $LOL_INSTALL_PATH"
+        INFO "League of Legends found at: $INSTALL_PATH"
     fi
 }
 
 {
-    INFO "Check: Link X: -> $LOL_INSTALL_PATH"
-    ln -Tfs "$LOL_INSTALL_PATH" "$WINEPREFIX/dosdevices/x:"
+    INFO "Check: Link X: -> $INSTALL_PATH"
+    ln -Tfs "$INSTALL_PATH" "$WINEPREFIX/dosdevices/x:"
 }
 
 case "$1" in
@@ -196,7 +196,7 @@ esac
 
 {
     INFO "Search DLLs in LoL"
-    find "$LOL_INSTALL_PATH" -type f -name "*.dll" -exec basename {} \; | \
+    find "$INSTALL_PATH" -type f -name "*.dll" -exec basename {} \; | \
         grep .dll | \
         grep -v rcp-be | \
         sort -u > "$TMP"
@@ -215,7 +215,7 @@ INFO "Initialization Finished"
 configure_OpenGL(){
     [[ "$LOL_OpenGL" =~ 0|1 ]] || return
 
-    Gcfg=$LOL_INSTALL_PATH/Config/game.cfg
+    Gcfg=$INSTALL_PATH/Config/game.cfg
 
     if [ ! -f "$Gcfg" ]; then
         INFO "Can't find: $Gcfg"
@@ -243,7 +243,7 @@ configure_OpenGL
 # LoL Launcher on linux can only run old air clint
 # Force using of old client
 {
-    Ucfg="$LOL_INSTALL_PATH"/RADS/system/user.cfg
+    Ucfg="$INSTALL_PATH"/RADS/system/user.cfg
     echo leagueClientOptIn = no  > "$Ucfg"
 }
 
@@ -264,7 +264,7 @@ configure_OpenGL
 
 wine_w(){ $PREFIXCOMMAND wine "$@"; }
 
-cd "$LOL_INSTALL_PATH" || exit 1
+cd "$INSTALL_PATH" || exit 1
 
 case "$1" in
     launcher)
@@ -287,8 +287,8 @@ case "$1" in
     ;;
     client)
         LOL_CLIENT_NAME="LeagueClient.exe"
-        echo "$LOL_INSTALL_PATH/$LOL_CLIENT_NAME" > "$TMP"
-        if [ ! -f "$LOL_INSTALL_PATH/$LOL_CLIENT_NAME" ]; then
+        echo "$INSTALL_PATH/$LOL_CLIENT_NAME" > "$TMP"
+        if [ ! -f "$INSTALL_PATH/$LOL_CLIENT_NAME" ]; then
             {
                 for path in RADS/projects/league_client/releases/*.*.*.*/; do
                     find -H "$path" -name "$LOL_CLIENT_NAME"

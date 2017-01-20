@@ -53,8 +53,7 @@ case "$1" in
         echo "  tail               - tail -f to log file"
         echo "  make_wineprefix    - only make wineprefix"
         echo "  cleanup_logs       - remove log files in wine prefix"
-        echo "  regen_wine_prefix  - backup LoL dir, recreate wineprefix"
-        echo "                       move LoL back, use carefully"
+        echo "  regen_wine_prefix  - backup wine wineprefix, recreate wineprefix"
         exit 1
     ;;
 esac

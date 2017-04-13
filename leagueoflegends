@@ -290,6 +290,7 @@ case "$1" in
         if [ ! -f "$INSTALL_PATH/$LOL_CLIENT_NAME" ]; then
             {
                 for path in RADS/projects/league_client/releases/*.*.*.*/; do
+                    [ -d "$path" ] || continue
                     find -H "$path" -name "$LOL_CLIENT_NAME"
                 done
             } | sort | tail -n1 > "$TMP"

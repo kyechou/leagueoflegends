@@ -1,7 +1,7 @@
 # League-Of-Legends
 Linux: League Of Legends www.leagueoflegends.com install/run wrapper
 
-Tested: Archlinux 13.05.2017 wine 2.5
+Tested: Archlinux 13.04.2017 wine 2.5
 
 # Instructions
 ### Script install

@@ -1,7 +1,9 @@
 # League-Of-Legends
 Linux: League Of Legends www.leagueoflegends.com install/run wrapper
 
-Tested: Archlinux 13.04.2017 wine 2.5
+Tested: Archlinux 08.03.2018 wine 3.3
+
+Base on [guide](https://www.reddit.com/r/leagueoflinux/comments/5ukgur/a_revised_guide_for_installing_league_of_legends)
 
 # Instructions
 ### Script install
@@ -32,7 +34,7 @@ $ /tmp/LoL/package.sh debian
 In default configuration:
 ```
 $ leagueoflegends make_wineprefix
-$ mv dir_with_lol.launcher.exe/ $HOME/.local/share/leagueoflegends/LoL/
+$ mv <Directory with LeagueClient.exe>/ $HOME/.local/share/leagueoflegends/LOL/CLIENT/
 $ leagueoflegends launcher
 ```
 - Run "leagueoflegends" in console or run desktop application "League of Legends"

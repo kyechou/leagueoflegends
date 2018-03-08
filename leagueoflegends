@@ -1,8 +1,8 @@
 #!/bin/bash
 ## Logging functions
-INFO(){ echo -n "INFO: "; echo "$@" ;}
-WARN(){ echo -n "WARN: "; echo "$@" ;}
-ERRO(){ echo -n "ERRO: "; echo "$@" ; exit 1;}
+INFO(){ echo "INFO: $*";}
+WARN(){ echo "WARN: $*";}
+ERRO(){ echo "ERRO: $*"; exit 1;}
 
 ## Check some deps
 bin_exist(){ command -v "$1" &> /dev/null || ERRO "Missing ${1}!"; }
@@ -11,32 +11,30 @@ for bin in wine winetricks wineserver winepath wineboot; do
 done
 
 ## Define useful functions
-rm_w(){ [ -f "$1" ] && rm "$1"; }
-dos2unix(){ sed $'s/\r$//'; }
-unix2dos(){ sed $'s/$/\r/'; }
+rm_w(){ rm -f "$1"; }
 
 ## Some vars
-export PREFIXCOMMAND TMP BASE_DIR
-export LOL_OpenGL=2
+export CACHE="$HOME/.cache/leagueoflegends/"
+export DOWNLOADED_INSTALLER="$CACHE/LoL_installer_NA.exe"
 
-export WINEPREFIX WINEARCH WINEDLLOVERRIDES
-export WINE_REQ_MOD=( corefonts sandbox )
+export PREFIXCOMMAND TMP BASE_DIR
+
+export WINEPREFIX WINEARCH
+export WINEDLLOVERRIDES="msvcp140=b,n"
+export WINE_REQ_MOD=(d3dx9 corefonts)
 
 export INSTALL_PATH
-export LOL_RADS="rads_user_kernel.exe"
+export LOL_CLIENT_BIN="LeagueClient.exe"
 export LOL_LAUNCHER_LOG
 export LOL_CLIENT_LOG
 
-export GC_DONT_GC
-
-CONF=/etc/leagueoflegends.conf
-TMP="$(mktemp -u)"
+export CONF=/etc/leagueoflegends.conf
 
 ## Check args
 case "$1" in
-    launcher|client) : ;;
+    launcher) : ;;
     winecfg|wineserver|winetricks) : ;;
-    reinstall|tail|make_wineprefix|regen_wine_prefix) : ;;
+    tail|make_wineprefix|regen_wine_prefix) : ;;
     cleanup_logs) : ;;
     *)
         echo "League of Legends Launcher wrapper/installer"
@@ -44,12 +42,9 @@ case "$1" in
         echo "Usage: $0 <args>"
         echo "  launcher           - launch lol launcher"
         echo "                       launcher can run old client"
-        echo "  client             - launch lol beta client"
-        echo "                       must be installed by launcher first"
         echo "  winecfg            - run winecfg in lol prefix"
         echo "  wineserver <args>  - -k for killing all processes"
         echo "  winetricks <args>  - run winetricks in lol prefix"
-        echo "  reinstall          - reinstall lol launcher bins"
         echo "  tail               - tail -f to log file"
         echo "  make_wineprefix    - only make wineprefix"
         echo "  cleanup_logs       - remove log files in wine prefix"
@@ -60,24 +55,30 @@ esac
 
 ## Initialization
 INFO "Load: $CONF"
+
 # shellcheck source=leagueoflegends.conf
 source "$CONF" &> /dev/null || ERRO "Missing: ${CONF}!"
+
 if [ ! -f "$HOME/.config/leagueoflegends.conf" ]; then
     cp "$CONF" "$HOME/.config/leagueoflegends.conf"
 fi
+
 INFO "Load: $HOME/.config/leagueoflegends.conf"
+# shellcheck source=leagueoflegends.conf
 source "$HOME/.config/leagueoflegends.conf"
 
-[ -z "$WINEARCH" ]         && WINEARCH=win32
-[ -z "$BASE_DIR" ]         && BASE_DIR="$HOME/.local/share/leagueoflegends"
+[ -z "$WINEARCH" ]         && WINEARCH=win64
+[ -z "$BASE_DIR" ]         && BASE_DIR="$HOME/.local/share/leagueoflegends/"
 [ -z "$WINEPREFIX" ]       && WINEPREFIX="$BASE_DIR/WINE.$WINEARCH/"
-[ -z "$INSTALL_PATH" ] && INSTALL_PATH="$BASE_DIR/LOL/"
-[ -z "$LOL_LAUNCHER_LOG" ] && LOL_LAUNCHER_LOG="$BASE_DIR/lol_launcher.log"
-[ -z "$LOL_CLIENT_LOG" ]   && LOL_CLIENT_LOG="$BASE_DIR/lol_client.log"
+[ -z "$INSTALL_PATH" ]     && INSTALL_PATH="$BASE_DIR/LOL/"
 
 {
     INFO "Check: Base dir $BASE_DIR"
     mkdir -p "$BASE_DIR"
+    INFO "Check: Cache dir $CACHE"
+    mkdir -p "$CACHE"
+    INFO "Check: Install path: $INSTALL_PATH"
+    mkdir -p "$INSTALL_PATH"
 }
 
 {
@@ -85,28 +86,31 @@ source "$HOME/.config/leagueoflegends.conf"
     if [ ! -d "$WINEPREFIX" ]; then
         INFO "Wine prefix not exist"
         INFO "So try recreate it"
-        wineboot &> /dev/null
+        env WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -i &> /dev/null
         INFO "Created: $WINEPREFIX"
     fi
-    INFO "Last tested version: wine-1.9.24"
+    INFO "Last tested version: wine-3.3"
     INFO "Your version: $(wine --version)"
 }
 
 {
-    INFO "Check: wineprefix configured"
-    cd "$WINEPREFIX" || exit 1
-    if [ ! -f "winetricks.log" ]; then
-        winetricks -q --optout "${WINE_REQ_MOD[@]}" || ERRO "Something went wrong!"
-    fi
+        INFO "Check: wineprefix configured"
+        if [ ! -f "$WINEPREFIX/winetricks.log" ]; then
+                winetricks -q --optout "${WINE_REQ_MOD[@]}" || ERRO "Something went wrong!"
+        fi
 }
 
 {
-    INFO "Check: wine can access only to wine drive C:/ + X:/ (LoL)"
-    for link in "$WINEPREFIX/dosdevices"/*; do
-        [[ "$link" =~ c: ]] && continue # For default link to ../drive_c
-        [[ "$link" =~ x: ]] && continue # For link to LoL path
-        rm -v "$link"
-    done
+     INFO "Check: wine sandbox - can access only to wine drive C:/ + X:/ (LoL)"
+     for link in "$WINEPREFIX/dosdevices"/*; do
+         [[ "$link" =~ c: ]] && continue # For default link to ../drive_c
+         [[ "$link" =~ x: ]] && continue # For link to LoL path
+         [[ "$link" =~ z: ]] && continue
+         rm -v "$link"
+     done
+
+    INFO "Check: Link X: -> $INSTALL_PATH"
+    ln -Tfsr "$INSTALL_PATH" "$WINEPREFIX/dosdevices/x:"
 }
 
 case "$1" in
@@ -129,67 +133,28 @@ case "$1" in
     ;;
 esac
 
-
-reinstall(){
-    INFO "Install launcher"
-    gen_locale_cfg(){ echo locale = en_gb; }
-
-    gen_system_cfg(){
-        echo DownloadPath = /releases/live
-        echo DownloadURL = l3cdn.riotgames.com
-        echo Region = EUW
-    }
-
-    gen_launcher_cfg(){
-        echo airConfigProject = lol_air_client_config_euw
-        echo airProject = lol_air_client
-        echo gameProject = lol_game_client_sln
-    }
-
-    URL_RADS="http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe"
-    mkdir -p "$INSTALL_PATH/RADS/system/" || ERRO "Something went wrong!"
-    {
-        cd "$INSTALL_PATH/RADS/system" || exit 1
-        wget -nv "$URL_RADS"     -O "rads_user_kernel.exe" || ERRO "Something went wrong!"
-        gen_locale_cfg   | unix2dos > "locale.cfg"         || ERRO "Something went wrong!"
-        gen_system_cfg   | unix2dos > "system.cfg"         || ERRO "Something went wrong!"
-        gen_launcher_cfg | unix2dos > "launcher.cfg"       || ERRO "Something went wrong!"
-    }
+{
+    INFO "Download installer"
+    mkdir -p "$CACHE"
+    URL="https://riotgamespatcher-a.akamaihd.net/releases/live/installer/deploy/League%20of%20Legends%20installer%20NA.exe"
+    wget -q -c "$URL" -O "$DOWNLOADED_INSTALLER"
 }
 
-
-
 {
-    INFO "Check: launcher installed"
-    if [ ! -d "$INSTALL_PATH" ]; then
-        INFO "League of Legends not found at: $INSTALL_PATH"
-        INFO "Search for existing launcher"
-        find -H "$BASE_DIR" -name "$LOL_RADS" > "$TMP"
-        read -r LOL_RADS_PATH < "$TMP"
-
-        if [ -f "$LOL_RADS_PATH" ]; then
-            INFO "Find another League of Legends directory, move it to $INSTALL_PATH"
-            dirname $(dirname $(dirname "$LOL_RADS_PATH")) > "$TMP"
-            read -r LOL_DIR < "$TMP"
-            mv -v "$LOL_DIR/" "$INSTALL_PATH/"
+        INFO "Check client installed"
+        if find "$INSTALL_PATH" -name "$LOL_CLIENT_BIN" | grep -q "$LOL_CLIENT_BIN"; then
+                :
         else
-            INFO "League of Legends not found at $BASE_DIR"
-            INFO "Reinstall it"
-            reinstall
-        fi
-        rm_w "$TMP"
-    else
-        INFO "League of Legends found at: $INSTALL_PATH"
-    fi
-}
+                INFO "Can't find: $LOL_CLIENT_BIN"
 
-{
-    INFO "Check: Link X: -> $INSTALL_PATH"
-    ln -Tfs "$INSTALL_PATH" "$WINEPREFIX/dosdevices/x:"
+                TGT_WINE_PATH="$(winepath -w "$INSTALL_PATH\CLIENT")"
+
+                INFO "Run installer:" "$DOWNLOADED_INSTALLER" --license_agreement 1 --mode unattended --installdir $TGT_WINE_PATH
+                wine "$DOWNLOADED_INSTALLER" --license_agreement 1 --mode unattended  --installdir "$TGT_WINE_PATH"
+        fi
 }
 
 case "$1" in
-    reinstall) reinstall; exit 0;;
     regen_wine_prefix)
         [ -d "${WINEPREFIX}.backup" ] && ERRO "Backup of ${WINEPREFIX} already exist"
         INFO "Backup prefix: ${WINEPREFIX}.backup"
@@ -199,124 +164,17 @@ case "$1" in
     ;;
 esac
 
-{
-    INFO "Search DLLs in LoL"
-    find "$INSTALL_PATH" -type f -name "*.dll" -exec basename {} \; | \
-        grep .dll | \
-        grep -v rcp-be | \
-        sort -u > "$TMP"
-
-    INFO "Found: $(wc -l < "$TMP") DLLs"
-    INFO "Make DLLs override"
-    while read -r dll; do
-        WINEDLLOVERRIDES="$dll=n,b $WINEDLLOVERRIDES"
-    done < "$TMP"
-    WINEDLLOVERRIDES=${WINEDLLOVERRIDES// /;}
-}
-
 INFO "Initialization Finished"
 
-# Configure OpenGL
-configure_OpenGL(){
-    [[ "$LOL_OpenGL" =~ 0|1 ]] || return
-
-    Gcfg=$INSTALL_PATH/Config/game.cfg
-
-    if [ ! -f "$Gcfg" ]; then
-        INFO "Can't find: $Gcfg"
-        INFO "Ignore OpenGL setting"
-        return
-    fi
-
-    dos2unix > "$TMP" < "$Gcfg"
-
-    if [[ "$LOL_OpenGL" == 0 ]] && grep -q x3d_platform=1 "$Gcfg"; then
-        sed -i 's/x3d_platform=1//g' "$TMP"
-        unix2dos > "$Gcfg" < "$TMP"
-        INFO "Disable OpenGL in game.cfg"
-    fi
-    if [[ "$LOL_OpenGL" == 1 ]] && ! grep -q x3d_platform=1 "$Gcfg"; then
-        sed -i 's/\[General\]/\[General\]\nx3d_platform=1/g' "$TMP"
-        unix2dos > "$Gcfg" < "$TMP"
-        INFO "Enable OpenGL in game.cfg"
-    fi
-
-    rm_w "$TMP"
-}
-configure_OpenGL
-
-# LoL Launcher on linux can only run old air clint
-# Force using of old client
-{
-    Ucfg="$INSTALL_PATH"/RADS/system/user.cfg
-    echo leagueClientOptIn = no  > "$Ucfg"
-}
-
-## RADS ARGS
-# rads_user_kernel <args>
-#   stopkernel
-#   enumavailproj
-#   enuminstproj
-#   enumavailrel
-#   enuminstrel
-#   installproj <project>
-#   uninstallproj <project>
-#   installrel <project> <release>
-#   uninstallrel <project> <release>
-#   run <project> <release> <executable>
-#   updateandrun <project> <executable>
-#   checksum Options: -noupdate -tsr
-
-wine_w(){ $PREFIXCOMMAND wine "$@"; }
-
-cd "$INSTALL_PATH" || exit 1
-
 case "$1" in
-    launcher)
-        cd "RADS/" || exit 1
-
-        winepath -w system/rads_user_kernel.exe > "$TMP" 2> /dev/null
-        read -r WINE_PATH < "$TMP"
-        winepath -u "$WINE_PATH" > "$TMP" 2> /dev/null
-        read -r UNIX_PATH < "$TMP"
-        rm_w "$TMP"
-
-        [ ! -f "$UNIX_PATH" ] && ERRO "rads_user_kernel.exe not found"
-
-        INFO "RADS UNIX path: $UNIX_PATH"
-        INFO "RADS WINE path: $WINE_PATH"
-        ARGS="updateandrun lol_launcher LoLLauncher.exe"
-        INFO "Run: rads_user_kernel.exe $ARGS"
-        INFO "Wine run log: $LOL_LAUNCHER_LOG"
-        wine_w "$WINE_PATH" $ARGS &>> "$LOL_LAUNCHER_LOG"
-    ;;
-    client)
-        LOL_CLIENT_NAME="LeagueClient.exe"
-        echo "$INSTALL_PATH/$LOL_CLIENT_NAME" > "$TMP"
-        if [ ! -f "$INSTALL_PATH/$LOL_CLIENT_NAME" ]; then
-            {
-                for path in RADS/projects/league_client/releases/*.*.*.*/; do
-                    [ -d "$path" ] || continue
-                    find -H "$path" -name "$LOL_CLIENT_NAME"
-                done
-            } | sort | tail -n1 > "$TMP"
-        fi
-        read -r LOL_CLIENT_PATH < "$TMP"
-
-        winepath -w "$LOL_CLIENT_PATH" > "$TMP" 2> /dev/null
-        read -r WINE_PATH < "$TMP"
-        winepath -u "$WINE_PATH" > "$TMP" 2> /dev/null
-        read -r UNIX_PATH < "$TMP"
-        rm_w "$TMP"
-
-        [ ! -f "$UNIX_PATH" ] && \
-            ERRO "Can't wind beta client, you must install it first by launcher"
-
-        LOL_CLIENT_ARGS="--no-sandbox"
-        INFO "LoL Client UNIX path: $UNIX_PATH"
-        INFO "LoL Client WINE path: $WINE_PATH"
-        INFO "Run: $LOL_CLIENT_NAME $LOL_CLIENT_ARGS"
-        INFO "Wine run log: $LOL_CLIENT_LOG"
-        wine_w "$WINE_PATH" "$LOL_CLIENT_ARGS" &>> "$LOL_CLIENT_LOG"
-    ;;
+        launcher)
+                INFO "Run launcher"
+                LAUNCHER_BIN="$(find "$INSTALL_PATH" -name "LeagueClient.exe" | sort | head -n 1)"
+                LAUNCHER_BIN="$(winepath -w "$LAUNCHER_BIN")"
+                if [ -z "$PREFIXCOMMAND" ]; then
+                        wine "$LAUNCHER_BIN"
+                else
+                        $PREFIXCOMMAND wine "$LAUNCHER_BIN"
+                fi
+        ;;
 esac

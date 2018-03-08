@@ -1,9 +1,9 @@
 #!/bin/bash -e
 ################################################################################
 # echo wrappers
-INFO(){ echo -n "INFO: "; echo "$@" ;}
-WARN(){ echo -n "WARN: "; echo "$@" ;}
-ERRO(){ echo -n "ERRO: "; echo -n "$@" ; echo " Abort!"; exit 1;}
+INFO(){ echo "INFO: $*";}
+WARN(){ echo "WARN: $*";}
+ERRO(){ echo "ERRO: $*"; exit 1;}
 
 debian_package(){
     cd "$(dirname "$0")"

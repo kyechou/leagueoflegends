@@ -13,7 +13,7 @@ debian_package(){
     DEB_NAME="leagueoflegends-${VERSION}_any"
     mkdir -p "$DEB_NAME"
 
-    ./install.sh PREFIX="$DEB_NAME/"
+    make install PREFIX="$DEB_NAME/"
 
     mkdir -p "$DEB_NAME/DEBIAN/"
     {

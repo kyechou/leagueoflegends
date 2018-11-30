@@ -1,0 +1,4 @@
+REGEDIT4
+
+[\HKEY_CURRENT_USER\Software\Wine\DirectInput]
+"MouseWarpOverride"="enable"

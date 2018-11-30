@@ -90,7 +90,7 @@ case "$1" in
         echo "    cleanup_logs      - Remove log files"
         echo "    winecfg           - Run winecfg with WINEPREFIX"
         echo "    wineserver [...]  - Run wineserver with WINEPREFIX"
-        echo "    winetricks [...]  - Run winetricks with wineprefix"
+        echo "    winetricks [...]  - Run winetricks with WINEPREFIX"
         echo "    make_wineprefix   - Create WINEPREFIX only"
         echo "    regen_wineprefix  - Backup and recreate WINEPREFIX"
         exit 1

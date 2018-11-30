@@ -2,7 +2,7 @@
 Name=League of Legends
 Comment=League of Legends Launcher
 Type=Application
-Exec=leagueoflegends launcher
+Exec=leagueoflegends launch
 Icon=leagueoflegends
 Terminal=false
 Categories=Wine;Game;

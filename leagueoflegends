@@ -28,7 +28,6 @@ export INSTALLER="$CACHE_DIR/LoL_installer_NA.exe"
 export INSTALLER_URL="https://riotgamespatcher-a.akamaihd.net/releases/live/installer/deploy/League%20of%20Legends%20installer%20NA.exe"
 export LOL_CLIENT_BIN="LeagueClient.exe"
 export WINEARCH=win64
-export WINEDEBUG=-all
 export WINEDLLOVERRIDES="msvcp140=n,b"
 export WINE_REQ_MOD=("d3dx9" "corefonts" "vcrun2017")
 export BASE_DIR="$HOME/.local/share/leagueoflegends"
@@ -149,7 +148,7 @@ wine regedit "$REGFILE"
 ## Install League of Legends
 ############################################################
 INFO "Downloading installer"
-wget -qcO "$INSTALLER" "$INSTALLER_URL"
+wget -cO "$INSTALLER" "$INSTALLER_URL"
 [ -z "$CLIENT_PATH" ] && {
     INFO "Installing League of Legends"
     wine "$INSTALLER" \

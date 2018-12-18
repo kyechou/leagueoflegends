@@ -33,7 +33,7 @@ debian_package(){
 archlinux_package(){
     git clone https://aur.archlinux.org/leagueoflegends-git.git /tmp/leagueoflegends-git/
     cd /tmp/leagueoflegends-git/
-    makepkg -i
+    makepkg -srci
     rm -rf /tmp/leagueoflegends-git/
 }
 

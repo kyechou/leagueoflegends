@@ -1,81 +1,88 @@
-# Currently only installer works, welcome to any PR
+# League of Legends
 
-# League-Of-Legends
-Linux: League Of Legends www.leagueoflegends.com install/run wrapper
+League of Legends (www.leagueoflegends.com) helper script for installing and
+running the game on Linux.
 
-Tested: Archlinux 08.03.2018 wine 3.3
+This tool is based on both [this
+guide](https://www.reddit.com/r/leagueoflinux/comments/5ukgur/a_revised_guide_for_installing_league_of_legends)
+and the [Lutris script](https://lutris.net/games/install/3552/view), and tested
+with wine-3.21 and wine-3.21-staging.
 
-Based on [guide](https://www.reddit.com/r/leagueoflinux/comments/5ukgur/a_revised_guide_for_installing_league_of_legends)
+## Installation
 
-# Instructions
-### Script install
-You can install stuff manualy by:
-```
-$ git clone https://github.com/Nefelim4ag/League-Of-Legends.git /tmp/LoL
-# /tmp/LoL/install.sh
-```
-*   ![logo](http://www.monitorix.org/imgs/archlinux.png "arch logo") Arch: [AUR/leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git).
-*   Debian/Ubuntu: use [package.sh](https://raw.githubusercontent.com/Nefelim4ag/League-Of-Legends/master/package.sh) in repo
+You can install the helper script manually by:
 
 ```
-$ git clone https://github.com/Nefelim4ag/League-Of-Legends.git /tmp/LoL
-$ /tmp/LoL/package.sh debian
-# dpkg -i /tmp/LoL/leagueoflegends-*.deb
+$ git clone https://github.com/Nefelim4ag/League-Of-Legends.git
+$ cd League-Of-Legends
+# make install
+```
+
+Otherwise, you can install the script as a package. Pull requests for other
+distributions are welcome.
+
+- ![arch logo](http://www.monitorix.org/imgs/archlinux.png) Arch Linux:
+  [AUR/leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git).
+- Debian/Ubuntu: use `make deb` to create the package.
+
+## Configuration
+
+The configuration file is located at `/etc/leagueoflegends.conf`. You can copy
+the file to `~/.config/`, which will take precedence over the system-wide
+configuration file.
+
+All the commented lines in the file are the default configuration. You can
+uncomment and change the values as you desire.
+
+## Usage
+
+```
+League of Legends - helper program
+Usage: leagueoflegends <command>
+Commands:
+    launch            - Launch LoL
+    install           - Install LoL
+    uninstall         - Uninstall LoL
+    cleanup_logs      - Remove log files
+    winecfg           - Run winecfg with WINEPREFIX
+    wineserver [...]  - Run wineserver with WINEPREFIX
+    winetricks [...]  - Run winetricks with WINEPREFIX
+    make_wineprefix   - Create WINEPREFIX only
+    regen_wineprefix  - Backup and recreate WINEPREFIX
 ```
 
 ### Fresh LoL install
--   Install scripts by make or package.sh
--   Change config if you need /etc/leagueoflegends.conf or/and ~/.config/leagueoflegends.conf
--   Run "leagueoflegends" in console or run desktop application "League of Legends"
 
-### Move LoL from another wine
--   Install scripts by make or package.sh
--   Change config if you need /etc/leagueoflegends.conf
--   Then:
+```
+$ leagueoflegends install
+```
 
-In default configuration:
+### Uninstall LoL
+
+Note that this will remove the game files completely.
+
+```
+$ leagueoflegends uninstall
+```
+
+### Launch LoL
+
+```
+$ leagueoflegends launch
+```
+
+or you can launch the game from your application menu.
+
+### Relocate old LoL wine instance
+
 ```
 $ leagueoflegends make_wineprefix
-$ mv <Directory with LeagueClient.exe>/ $HOME/.local/share/leagueoflegends/LOL/CLIENT/
-$ leagueoflegends launcher
-```
--   Run "leagueoflegends" in console or run desktop application "League of Legends"
-
-# Know problems
-
-### Black Login Screen:
--   Workaround - Not found
--   Try to change random winecfg settings until it's fixed (example try to run with virtualdesktop), then return settings to default, it should work, if someone knows simple solution just let me know.
-
-### Network lags:
--   Connections issue - try set sysctl net.ipv4.tcp_timestamps=0
-
-### Beta Client Don't work!
-Works, but:
-https://github.com/Nefelim4ag/League-Of-Legends/issues/8
-
-### Bug splat during patching phase
-https://github.com/Nefelim4ag/League-Of-Legends/issues/9 try:
-```
-leagueoflegends regen_wine_prefix
+$ mv <Directory with LeagueClient.exe> ~/.local/share/leagueoflegends/LOL/
 ```
 
-# P.S.
-I don't use original install.exe, because it sucks. I did own way for fast and easy setup of LoL client.
+### Advanced wine configurations
 
-Tiny installation stuff:
-```
-RADS/system/locale.cfg     - Launcher localisation
-RADS/system/system.cfg   - Path and region for download full launcher
-RADS/system/launcher.cfg - Internal launcher configuration
-RADS/system/rads_user_kernel.exe - Riot Application Distribution System
-```
-**All configs hardcoded for Western Europe.**
+If you need to run winecfg, wineserver, or winetricks toward the wine prefix,
+you can prefix the command with this script, which will prepare and export the
+environment variables needed.
 
-You don't need change anything,
-because launcher will always download
-**ALL STUFF FOR ALL REGIONS (~150Mb)**,
-so just wait for launcher UI and then change region and language.
-
--   Tiny install regenerated from configs in script code + client for RADS
--   [RADS](http://l3cdn.riotgames.com/releases/live/system/rads_user_kernel.exe)

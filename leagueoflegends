@@ -41,8 +41,6 @@ export CONF="/etc/leagueoflegends.conf"
 export USER_CONF="$HOME/.config/leagueoflegends.conf"
 export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
 export CACHE_DIR="$HOME/.cache/leagueoflegends"
-export INSTALLER="$CACHE_DIR/LoL_installer_NA.exe"
-export INSTALLER_URL="https://riotgamespatcher-a.akamaihd.net/releases/live/installer/deploy/League%20of%20Legends%20installer%20NA.exe"
 export LOL_CLIENT_BIN="LeagueClient.exe"
 export WINEARCH=win64
 export WINEDLLOVERRIDES="msvcp140=n,b"

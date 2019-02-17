@@ -162,6 +162,43 @@ wine regedit "$REGFILE"
 ############################################################
 ## Install League of Legends
 ############################################################
+askQ "Select your region" "North America" "EU West" "EU Nordic & East" "Brazil" "Turkey" "Russia" "Japan"
+read -p "    #: " answer
+
+case "${answer}" in
+    1)
+        # North America
+        export LANG_CODE="NA"
+        ;;
+    2)
+        # EU West
+        export LANG_CODE="EUW"
+        ;;
+    3)
+        # EU Nordic & East
+        export LANG_CODE="EUNE"
+        ;;
+    4)
+        # Brazil
+        export LANG_CODE="BR"
+        ;;
+    5)
+        # Turkey
+        export LANG_CODE="TR"
+        ;;
+    6)
+        # Russia
+        export LANG_CODE="RU"
+        ;;
+    7)
+        # Japan
+        export LANG_CODE="JP"
+        ;;
+esac
+
+export INSTALLER="$CACHE_DIR/LoL_installer_$LANG_CODE.exe"
+export INSTALLER_URL="https://riotgamespatcher-a.akamaihd.net/releases/live/installer/deploy/League%20of%20Legends%20installer%20$LANG_CODE.exe"
+
 INFO "Downloading installer"
 wget -cO "$INSTALLER" "$INSTALLER_URL"
 [ -z "$CLIENT_PATH" ] && {

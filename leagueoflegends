@@ -9,6 +9,23 @@ WARN() { echo "WARN: $*"; }
 ERRO() { echo "ERRO: $*"; exit 1; }
 
 ############################################################
+## Ask question to user
+############################################################
+function askQ () {
+  count=1
+  first_arg="$2"
+  echo
+  echo "    $1"
+  for var in "${@:2}"
+  do
+    echo "    #$count - $2"
+    ((count++))
+    shift
+  done
+  echo
+}
+
+############################################################
 ## Check dependencies
 ############################################################
 deps=("wine" "wineboot" "winetricks" "winepath" "winecfg" "wineserver" "wget")

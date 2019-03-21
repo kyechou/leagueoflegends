@@ -162,7 +162,7 @@ wine regedit "$REGFILE"
 ############################################################
 ## Install League of Legends
 ############################################################
-askQ "Select your region" "North America" "EU West" "EU Nordic & East" "Brazil" "Turkey" "Russia" "Japan"
+askQ "Select your region" "North America" "EU West" "EU Nordic & East" "Latin America North" "Latin America South" "Brazil" "Turkey" "Russia" "Japan" "Oceania"
 read -p "    #: " answer
 
 case "${answer}" in
@@ -179,20 +179,32 @@ case "${answer}" in
         export LANG_CODE="EUNE"
         ;;
     4)
+        # Latin America North
+        export LANG_CODE="LA1"
+        ;;
+    5)
+        # Latin America South
+        export LANG_CODE="LA2"
+        ;;
+    6)
         # Brazil
         export LANG_CODE="BR"
         ;;
-    5)
+    7)
         # Turkey
         export LANG_CODE="TR"
         ;;
-    6)
+    8)
         # Russia
         export LANG_CODE="RU"
         ;;
-    7)
+    9)
         # Japan
         export LANG_CODE="JP"
+        ;;
+    10)
+        # Oceania
+        export LANG_CODE="OC1"
         ;;
 esac
 

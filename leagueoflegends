@@ -162,7 +162,7 @@ wine regedit "$REGFILE"
 ############################################################
 ## Install League of Legends
 ############################################################
-askQ "Select your region" "North America" "EU West" "EU Nordic & East" "Latin America North" "Latin America South" "Brazil" "Turkey" "Russia" "Japan" "Oceania"
+askQ "Select your region" "North America" "EU West" "EU Nordic & East" "Latin America North" "Latin America South" "Brazil" "Turkey" "Russia" "Japan" "Oceania" "Republic of Korea"
 read -p "    #: " answer
 
 case "${answer}" in
@@ -206,10 +206,19 @@ case "${answer}" in
         # Oceania
         export LANG_CODE="OC1"
         ;;
+    11)
+        # Republic of Korea
+        export LANG_CODE="KR"
+        ;;
 esac
 
 export INSTALLER="$CACHE_DIR/LoL_installer_$LANG_CODE.exe"
-export INSTALLER_URL="https://riotgamespatcher-a.akamaihd.net/releases/live/installer/deploy/League%20of%20Legends%20installer%20$LANG_CODE.exe"
+
+if [ "$LANG_CODE" = "KR" ]; then
+    export INSTALLER_URL="https://riotgamespatcher-a.akamaihd.net/KR_CBT/installer/deploy/League of Legends installer KR.exe"
+else
+    export INSTALLER_URL="https://riotgamespatcher-a.akamaihd.net/releases/live/installer/deploy/League%20of%20Legends%20installer%20$LANG_CODE.exe"
+fi
 
 INFO "Downloading installer"
 wget -cO "$INSTALLER" "$INSTALLER_URL"

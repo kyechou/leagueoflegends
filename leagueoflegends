@@ -44,7 +44,7 @@ export CACHE_DIR="$HOME/.cache/leagueoflegends"
 export LOL_CLIENT_BIN="LeagueClient.exe"
 export WINEARCH=win64
 export WINEDLLOVERRIDES="msvcp140=n,b"
-export WINE_REQ_MOD=("d3dx9" "corefonts" "vcrun2017")
+export WINE_REQ_MOD=("d3dx9" "corefonts" "vcrun2017" "win7")
 export BASE_DIR="$HOME/.local/share/leagueoflegends"
 export WINEPREFIX="$BASE_DIR/wine.$WINEARCH"
 export INSTALL_PATH="$BASE_DIR/LOL"
@@ -247,5 +247,14 @@ echo
     INFO "Recreating wineprefix"
     exec "$0" make_wineprefix
 }
+
+############################################################
+## Cleanup the wine-generated user menus
+############################################################
+rm -rf \
+    ~/.config/menus/applications-merged/wine-Programs-League\ of\ Legends-* \
+    ~/.local/share/applications/wine/Programs/League\ of\ Legends \
+    ~/.local/share/applications/wine-extension-*.desktop \
+    ~/.local/share/applications/mimeinfo.cache
 
 # vim: set ts=4 sw=4 et:

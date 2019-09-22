@@ -5,7 +5,7 @@ running on Linux.
 
 ## Dependencies
 
-- wine
+- wine (please see **Note**)
 - winetricks
 - bash
 - lib32-gnutls
@@ -17,8 +17,8 @@ running on Linux.
 **Note**
 
 The current version of WINE does not support the game. Game crashes while
-entering the main game after champion selection.
-([bug 47198](https://bugs.winehq.org/show_bug.cgi?id=47198))
+entering the main game after champion selection
+([bug 47198](https://bugs.winehq.org/show_bug.cgi?id=47198)).
 Until that is resolved, please use
 [wine-lol](https://aur.archlinux.org/packages/wine-lol/) instead of wine or
 wine-staging.

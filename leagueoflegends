@@ -43,7 +43,7 @@ export USER_CONF="$HOME/.config/leagueoflegends.conf"
 export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
 export CACHE_DIR="$HOME/.cache/leagueoflegends"
 export LOL_CLIENT_BIN="LeagueClient.exe"
-export WINEARCH=win64
+export WINEARCH=win32
 export WINEDLLOVERRIDES="msvcp140=n,b"
 export WINE_REQ_MOD=("d3dx9" "corefonts" "vcrun2017" "win7")
 export BASE_DIR="$HOME/.local/share/leagueoflegends"

@@ -1,24 +1,39 @@
 # League of Legends
 
 League of Legends (www.leagueoflegends.com) helper script for installing and
-running the game on Linux.
+running on Linux.
 
-This tool is based on both [this
-guide](https://www.reddit.com/r/leagueoflinux/comments/5ukgur/a_revised_guide_for_installing_league_of_legends)
-and the [Lutris script](https://lutris.net/games/install/3552/view), and tested
-with wine-3.21 and wine-3.21-staging.
+## Dependencies
+
+- wine
+- winetricks
+- bash
+- lib32-gnutls
+- lib32-libldap
+- lib32-openal
+- lib32-libpulse
+- wget
+
+**Note**
+
+The current version of WINE does not support the game. Game crashes while
+entering the main game after champion selection.
+([bug 47198](https://bugs.winehq.org/show_bug.cgi?id=47198))
+Until that is resolved, please use
+[wine-lol](https://aur.archlinux.org/packages/wine-lol/) instead of wine or
+wine-staging.
 
 ## Installation
 
 You can install the helper script manually by:
 
 ```
-$ git clone https://github.com/Nefelim4ag/League-Of-Legends.git
-$ cd League-Of-Legends
+$ git clone https://github.com/kyechou/leagueoflegends.git
+$ cd leagueoflegends
 # make install
 ```
 
-Otherwise, you can install the script as a package. Pull requests for other
+Alternatively, you can install the script as a package. Pull requests for other
 distributions are welcome.
 
 - ![arch logo](http://www.monitorix.org/imgs/archlinux.png) Arch Linux:

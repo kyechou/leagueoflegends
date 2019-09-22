@@ -37,6 +37,7 @@ done
 ############################################################
 ## Preset default variable values
 ############################################################
+export PATH="/opt/wine-lol/bin:$PATH"
 export CONF="/etc/leagueoflegends.conf"
 export USER_CONF="$HOME/.config/leagueoflegends.conf"
 export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"

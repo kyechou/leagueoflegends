@@ -71,7 +71,9 @@ case "$1" in
         $PREFIXCOMMAND wine "$CLIENT_PATH"
         exit 0
         ;;
-    install) : ;;
+    install)
+        [ -n "$CLIENT_PATH" ] && ERRO "Game has been installed"
+        ;;
     uninstall)
         rm -rf "$USER_CONF" "$CACHE_DIR" "$BASE_DIR" "$WINEPREFIX" \
             "$INSTALL_PATH"
@@ -144,13 +146,12 @@ if [ ! -f "$WINEPREFIX/winetricks.log" ]; then
 fi
 for link in "$WINEPREFIX/dosdevices"/*; do
     [[ "$link" =~ 'c:' ]] && continue # For default link to ../drive_c
-    [[ "$link" =~ 'x:' ]] && continue # For link to LoL path
     [[ "$link" =~ 'z:' ]] && continue # For default link to /
     INFO "Removing unnecessary device $link"
-    rm -v "$link"
+    rm -vf "$link"
 done
-INFO "Linking device x: to $INSTALL_PATH"
-ln -Tfsr "$INSTALL_PATH" "$WINEPREFIX/dosdevices/x:"
+INFO "Linking install path to $INSTALL_PATH"
+ln -Tfsr "$INSTALL_PATH" "$WINEPREFIX/dosdevices/c:/Program Files/League of Legends"
 INFO "Modifying WINE registry"
 wine regedit "$REGFILE"
 

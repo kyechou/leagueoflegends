@@ -1,4 +1,8 @@
 REGEDIT4
 
-[\HKEY_CURRENT_USER\Software\Wine\DirectInput]
+[HKEY_CURRENT_USER\Software\Wine\DirectInput]
 "MouseWarpOverride"="enable"
+
+[HKEY_CURRENT_USER\Software\Wine\Explorer]
+"Desktop"="league of wine"
+"Desktops"="1920x1080"

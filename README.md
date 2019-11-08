@@ -101,3 +101,7 @@ If you need to run winecfg, wineserver, or winetricks toward the wine prefix,
 you can prefix the command with this script, which will prepare and export the
 environment variables needed.
 
+## Troubleshooting
+
+- [Cannot move camera after changing window's focus](https://www.reddit.com/r/leagueoflinux/comments/cb5gdc/locked_camera_after_window_focuss_change/)
+

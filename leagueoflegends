@@ -135,7 +135,7 @@ esac
     INFO "Creating and initializing $WINEPREFIX"
     env WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -i >/dev/null 2>&1
 }
-INFO "Latest tested version: wine-3.21"
+INFO "Latest tested version: wine-5.6 (Staging)"
 INFO "Your version: $(wine --version)"
 
 ############################################################

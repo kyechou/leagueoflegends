@@ -67,7 +67,8 @@ source "$CONF" >/dev/null 2>&1 || ERRO "Missing $CONF"
 case "$1" in
     launch)
         [ -z "$CLIENT_PATH" ] && ERRO "Game is not properly installed"
-        CLIENT_PATH="$(winepath -w "$CLIENT_PATH")"
+        CLIENT_PATH="$(winepath -w "$CLIENT_PATH" \
+            | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
         INFO "Starting game"
         $PREFIXCOMMAND wine "$CLIENT_PATH"
         exit 0

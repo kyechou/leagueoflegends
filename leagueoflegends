@@ -43,11 +43,11 @@ export_default_variables() {
     export WINEARCH=win32
     #export WINEDLLOVERRIDES="msvcp140=n,b"
     export WINEDLLOVERRIDES="mscoree,mshtml="   # mute gecko, mono questions
-    export WINE_REQ_MOD=(d3dcompiler_43 d3dx9 corefonts vcrun2017 win7) # d9vk dxvk
+    export WINE_REQ_MOD=(d3dx9 corefonts vcrun2017 win7) # d9vk dxvk
     export WINEPREFIX="$HOME/.local/share/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     #export CLIENT_EXE="$INSTALL_DIR/League of Legends/LeagueClient.exe"
-    export CLIENT_EXE="$INSTALL_DIR/Riot Games/Riot Client/RiotClientServices.exe"
+    export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
 
     export MESA_GLTHREAD=true
     export DXVK_LOG_LEVEL=none
@@ -246,6 +246,7 @@ Commands:
     uninstall           - Uninstall LoL
     reinstall           - Reinstall LoL
     cleanup_logs        - Remove log files
+    kill                - Kill the wine processes
     run <shell comamnd> - Run shell command with environment variables
                           (useful for Wine utilities)
 EOF
@@ -275,6 +276,9 @@ main() {
             ;;
         cleanup_logs)
             cleanup_logs
+            ;;
+        kill)
+            wineserver --kill
             ;;
         run)
             $@

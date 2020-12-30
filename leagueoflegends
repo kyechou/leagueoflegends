@@ -33,20 +33,16 @@ check_depends() {
     done
 }
 
-export_default_variables() {
+export_env_variables() {
     export PATH="/opt/wine-lol/bin:$PATH"
     export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
-    export ETC_CONF="/etc/leagueoflegends.conf"
-    export USER_CONF="$HOME/.config/leagueoflegends.conf"
     export CACHE_DIR="$HOME/.cache/leagueoflegends"
 
     export WINEARCH=win32
-    #export WINEDLLOVERRIDES="msvcp140=n,b"
     export WINEDLLOVERRIDES="mscoree,mshtml="   # mute gecko, mono questions
-    export WINE_REQ_MOD=(d3dx9 corefonts vcrun2017 win7) # d9vk dxvk
+    export WINE_REQ_MOD=(d3dx9 corefonts vcrun2017) # d9vk win7
     export WINEPREFIX="$HOME/.local/share/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
-    #export CLIENT_EXE="$INSTALL_DIR/League of Legends/LeagueClient.exe"
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
 
     export MESA_GLTHREAD=true
@@ -57,16 +53,6 @@ export_default_variables() {
     export __GL_SHADER_DISK_CACHE=1
     export __GL_SHADER_DISK_CACHE_PATH="$WINEPREFIX"
     export __GL_THREADED_OPTIMIZATIONS=0
-}
-
-load_configs() {
-    if [ ! -f "$ETC_CONF" ]; then
-        die "$ETC_CONF not found"
-    fi
-    source "$ETC_CONF"
-    if [ -f "$USER_CONF" ]; then
-        source "$USER_CONF"
-    fi
 }
 
 create_wineprefix() {
@@ -190,14 +176,12 @@ port_waiting_daemon() {
     fi
 
     # Get the app-port parameter
-    #msg "LeagueClientUx.exe pid: ${uxpid}"
     port=$(xargs -0 </proc/${uxpid}/cmdline | sed -n 's/.*--app-port=\([[:digit:]]*\).*/\1/p')
     if [ -z "$port" ]; then
         die "Could not find --app-port of LeagueClientUx.exe"
     fi
 
     # Suspend the league client until app-port gets available
-    #msg "Waiting for port ${port}"
     kill -STOP ${uxpid}
     timeout 5m bash -c "
     until openssl s_client -connect :${port} <<< Q >/dev/null 2>&1; do
@@ -254,8 +238,7 @@ EOF
 
 main() {
     check_depends
-    export_default_variables
-    load_configs
+    export_env_variables
 
     cmd="$1"
     shift

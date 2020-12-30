@@ -12,7 +12,7 @@ running on Linux.
 - lib32-libldap
 - lib32-openal
 - lib32-libpulse
-- wget
+- curl
 
 **Note**
 
@@ -41,6 +41,8 @@ distributions are welcome.
 - Debian/Ubuntu: use `make deb` to create the package.
 
 ## Configuration
+
+(TODO)
 
 The configuration file is located at `/etc/leagueoflegends.conf`. You can copy
 the file to `~/.config/`, which will take precedence over the system-wide

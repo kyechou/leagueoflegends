@@ -1,14 +1,20 @@
-#!/bin/bash -e
-################################################################################
-# echo wrappers
-INFO(){ echo "INFO: $*";}
-WARN(){ echo "WARN: $*";}
-ERRO(){ echo "ERRO: $*"; exit 1;}
+#!/bin/bash
+
+set -euo pipefail
+
+msg() {
+    echo -e "[+] ${1-}" >&2
+}
+
+die() {
+    echo -e "[!] ${1-}" >&2
+    exit 1
+}
 
 debian_package(){
     cd "$(dirname "$0")"
     VERSION=$(git tag | tail -n 1)
-    [ -z "$VERSION" ] && ERRO "Can't get git tag, VERSION are empty!"
+    [ -z "$VERSION" ] && die "Can't get git tag, VERSION is empty"
 
     DEB_NAME="leagueoflegends-${VERSION}_any"
     mkdir -p "$DEB_NAME"
@@ -40,5 +46,5 @@ archlinux_package(){
 case $1 in
     debian) debian_package ;;
     archlinux) archlinux_package ;;
-    *) echo "$0 <debian|archlinux>" ;;
+    *) die "Usage: $(basename "${BASH_SOURCE[0]}") <debian|archlinux>" ;;
 esac

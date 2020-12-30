@@ -2,3 +2,12 @@ REGEDIT4
 
 [HKEY_CURRENT_USER\Software\Wine\DirectInput]
 "MouseWarpOverride"="enable"
+
+[HKEY_CURRENT_USER\Software\Wine\X11 Driver]
+"GrabFullScreen"="Y"
+
+[HKEY_CURRENT_USER\Software\Wine\X11 Driver]
+"UseXVidMode"="N"
+
+[HKEY_CURRENT_USER\Control Panel\Colors]
+"background"="40 40 40"

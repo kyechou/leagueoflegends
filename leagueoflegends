@@ -1,263 +1,291 @@
 #!/bin/bash
-set -e
 
-############################################################
-## Logging functions
-############################################################
-INFO() { echo "INFO: $*"; }
-WARN() { echo "WARN: $*"; }
-ERRO() { echo "ERRO: $*"; exit 1; }
+set -euo pipefail
 
-############################################################
-## Ask question to user
-############################################################
-function askQ () {
-  count=1
-  first_arg="$2"
-  echo
-  echo "    $1"
-  for var in "${@:2}"
-  do
-    echo "    #$count - $2"
-    ((count++))
-    shift
-  done
-  echo
+msg() {
+    echo -e "[+] ${1-}" >&2
 }
 
-############################################################
-## Check dependencies
-############################################################
-deps=("wine" "wineboot" "winetricks" "winepath" "winecfg" "wineserver" "wget")
-check_dep() { command -v "$1" >/dev/null 2>&1 || ERRO "Missing $1"; }
-for dep in ${deps[@]}; do
-    check_dep "$dep"
-done
-
-############################################################
-## Preset default variable values
-############################################################
-export PATH="/opt/wine-lol/bin:$PATH"
-export CONF="/etc/leagueoflegends.conf"
-export USER_CONF="$HOME/.config/leagueoflegends.conf"
-export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
-export CACHE_DIR="$HOME/.cache/leagueoflegends"
-export LOL_CLIENT_BIN="LeagueClient.exe"
-export WINEARCH=win32
-export WINEDLLOVERRIDES="msvcp140=n,b"
-export WINE_REQ_MOD=("d3dx9" "corefonts" "vcrun2017" "win7")
-export BASE_DIR="$HOME/.local/share/leagueoflegends"
-export WINEPREFIX="$BASE_DIR/wine.$WINEARCH"
-export INSTALL_PATH="$BASE_DIR/LOL"
-export CLIENT_PATH="$(find "$INSTALL_PATH" -name "$LOL_CLIENT_BIN" 2>/dev/null \
-                    | sort | head -n1)"
-export PREFIXCOMMAND
-export MESA_GLTHREAD=true
-export __GL_THREADED_OPTIMIZATIONS=0
-
-############################################################
-## Load configuration files
-############################################################
-source "$CONF" >/dev/null 2>&1 || ERRO "Missing $CONF"
-[ -f "$USER_CONF" ] && source "$USER_CONF"
-
-############################################################
-## Check arguments
-############################################################
-case "$1" in
-    launch)
-        [ -z "$CLIENT_PATH" ] && ERRO "Game is not properly installed"
-        CLIENT_PATH="$(winepath -w "$CLIENT_PATH" \
-            | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-        INFO "Starting game"
-        $PREFIXCOMMAND wine "$CLIENT_PATH"
-        exit 0
-        ;;
-    install)
-        [ -n "$CLIENT_PATH" ] && ERRO "Game has been installed"
-        ;;
-    uninstall)
-        rm -rf "$USER_CONF" "$CACHE_DIR" "$BASE_DIR" "$WINEPREFIX" \
-            "$INSTALL_PATH"
-        exit 0
-        ;;
-    cleanup_logs)
-        INFO "Removing log files"
-        [ -d "$BASE_DIR" ] && {
-            find -H "$BASE_DIR" -name "*.log" -delete -print
-            [ -d "$INSTALL_PATH" ] && {
-                find -H "$INSTALL_PATH" -name "*.log?" -delete -print
-                [ -d "$INSTALL_PATH/Logs" ] && {
-                    find -H "$INSTALL_PATH/Logs" -type f -delete -print
-                    find -H "$INSTALL_PATH/Logs" -empty -delete -print
-                }
-            }
-        }
-        exit 0
-        ;;
-    winecfg|wineserver|winetricks)
-        ARG="$1"; shift; exec "$ARG" "$@"
-        ;;
-    make_wineprefix|regen_wineprefix) : ;;
-    *)
-        echo "League of Legends - helper program"
-        echo "Usage: $0 <command>"
-        echo "Commands:"
-        echo "    launch            - Launch LoL"
-        echo "    install           - Install LoL"
-        echo "    uninstall         - Uninstall LoL"
-        echo "    cleanup_logs      - Remove log files"
-        echo "    winecfg           - Run winecfg with WINEPREFIX"
-        echo "    wineserver [...]  - Run wineserver with WINEPREFIX"
-        echo "    winetricks [...]  - Run winetricks with WINEPREFIX"
-        echo "    make_wineprefix   - Create WINEPREFIX only"
-        echo "    regen_wineprefix  - Backup and recreate WINEPREFIX"
-        exit 1
-        ;;
-esac
-
-############################################################
-## Create directories if needed
-############################################################
-[ ! -d "$BASE_DIR" ] && {
-    INFO "Creating directory $BASE_DIR"
-    mkdir -p "$BASE_DIR"
+die() {
+    echo -e "[!] ${1-}" >&2
+    exit 1
 }
-[ ! -d "$CACHE_DIR" ] && {
-    INFO "Creating directory $CACHE_DIR"
+
+askQ() {
+    count=1
+    first_arg="$2"
+    echo
+    echo "    $1"
+    for var in "${@:2}"; do
+        echo "    #$count - $2"
+        ((count++))
+        shift
+    done
+    echo
+}
+
+check_depends() {
+    depends=(wine wineboot winetricks winepath winecfg wineserver curl)
+    for dep in ${depends[@]}; do
+        if ! command -v "$dep" >/dev/null 2>&1; then
+            die "Missing $dep"
+        fi
+    done
+}
+
+export_default_variables() {
+    export PATH="/opt/wine-lol/bin:$PATH"
+    export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
+    export ETC_CONF="/etc/leagueoflegends.conf"
+    export USER_CONF="$HOME/.config/leagueoflegends.conf"
+    export CACHE_DIR="$HOME/.cache/leagueoflegends"
+
+    export WINEARCH=win32
+    #export WINEDLLOVERRIDES="msvcp140=n,b"
+    export WINEDLLOVERRIDES="mscoree,mshtml="   # mute gecko, mono questions
+    export WINE_REQ_MOD=(d3dcompiler_43 d3dx9 corefonts vcrun2017 win7) # d9vk dxvk
+    export WINEPREFIX="$HOME/.local/share/leagueoflegends"
+    export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
+    #export CLIENT_EXE="$INSTALL_DIR/League of Legends/LeagueClient.exe"
+    export CLIENT_EXE="$INSTALL_DIR/Riot Games/Riot Client/RiotClientServices.exe"
+
+    export MESA_GLTHREAD=true
+    export DXVK_LOG_LEVEL=none
+    export DXVK_STATE_CACHE_PATH="$WINEPREFIX"
+    export STAGING_SHARED_MEMORY=1
+    export WINE_LARGE_ADDRESS_AWARE=1
+    export __GL_SHADER_DISK_CACHE=1
+    export __GL_SHADER_DISK_CACHE_PATH="$WINEPREFIX"
+    export __GL_THREADED_OPTIMIZATIONS=0
+}
+
+load_configs() {
+    if [ ! -f "$ETC_CONF" ]; then
+        die "$ETC_CONF not found"
+    fi
+    source "$ETC_CONF"
+    if [ -f "$USER_CONF" ]; then
+        source "$USER_CONF"
+    fi
+}
+
+create_wineprefix() {
+    if [ -e "$WINEPREFIX" ]; then
+        die "Wineprefix $WINEPREFIX already exists"
+    fi
+
+    msg "Creating wineprefix: $WINEPREFIX"
+    mkdir -p "$WINEPREFIX"
+    wineboot --init >/dev/null 2>&1
+    msg "Installing winetricks verbs: ${WINE_REQ_MOD[*]}"
+    winetricks -q --optout --isolate "${WINE_REQ_MOD[@]}" >/dev/null 2>&1
+    for link in "$WINEPREFIX/dosdevices"/*; do
+        [[ "$link" =~ 'c:' ]] && continue # for drive_c
+        [[ "$link" =~ 'z:' ]] && continue # for /
+        msg "Removing unnecessary device $(basename $link)"
+        unlink "$link"
+    done
+    msg "Modifying WINE registry with $REGFILE"
+    regedit "$REGFILE" >/dev/null 2>&1
+    wineserver --wait
+    msg "Wineprefix created: $WINEPREFIX"
+}
+
+cleanup_logs() {
+    msg "Cleaning up log files..."
+    if [ -d "$INSTALL_DIR" ]; then
+        find -H "$INSTALL_DIR" -name "*.log" -delete -print
+        if [ -d "$INSTALL_DIR/League of Legends/Logs" ]; then
+            find -H "$INSTALL_DIR/League of Legends/Logs" -type f -delete -print
+            find -H "$INSTALL_DIR/League of Legends/Logs" -empty -delete -print
+        fi
+    fi
+}
+
+uninstall_LoL() {
+    msg "Uninstalling league of legends..."
+    rm -rf "$CACHE_DIR" "$WINEPREFIX"
+
+    # clean up menu entries
+    rm -rf \
+        ~/.config/menus/applications-merged/wine-Programs-League\ of\ Legends-* \
+        ~/.local/share/applications/wine/Programs/League\ of\ Legends \
+        ~/.local/share/applications/wine-extension-*.desktop \
+        ~/.local/share/applications/mimeinfo.cache
+
+    # TODO check if it's indeed clean (e.g., menus?)
+}
+
+install_LoL() {
+    if [ ! -d "$WINEPREFIX" ]; then
+        create_wineprefix
+    elif [ -f "$CLIENT_EXE" ]; then
+        while :; do
+            echo -n "[!] The game has been installed. Remove it and reinstall? [Y/n] "
+            read remove
+            remove="$(echo "$remove" | tr '[:upper:]' '[:lower:]')"
+            if [ -z "${remove##y*}" ]; then
+                rm -rf "$INSTALL_DIR"
+                break
+            elif [ -z "${remove##n*}" ]; then
+                exit 1
+            fi
+        done
+    fi
+
+    askQ "Select your region" \
+        "North America" "EU West" "EU Nordic & East" "Latin America North" \
+        "Latin America South" "Brazil" "Turkey" "Russia" "Japan" "Oceania" \
+        "Republic of Korea"
+    read -p "    #: " answer
+
+    case "${answer}" in
+        1) # North America
+            export LANG_CODE="na" ;;
+        2) # EU West
+            export LANG_CODE="euw" ;;
+        3) # EU Nordic & East
+            export LANG_CODE="eune" ;;
+        4) # Latin America North
+            export LANG_CODE="la1" ;;
+        5) # Latin America South
+            export LANG_CODE="la2" ;;
+        6) # Brazil
+            export LANG_CODE="br" ;;
+        7) # Turkey
+            export LANG_CODE="tr" ;;
+        8) # Russia
+            export LANG_CODE="ru" ;;
+        9) # Japan
+            export LANG_CODE="jp" ;;
+        10) # Oceania
+            export LANG_CODE="oc1" ;;
+        11) # Republic of Korea
+            export LANG_CODE="kr" ;;
+        *)
+            die "Unknown region number: $answer" ;;
+    esac
+
+    INSTALLER="$CACHE_DIR/installer.$LANG_CODE.exe"
+    INSTALLER_URL="https://lol.secure.dyn.riotcdn.net/channels/public/x/installer/current/live.$LANG_CODE.exe"
+
+    msg "Downloading installer..."
     mkdir -p "$CACHE_DIR"
-}
-[ ! -d "$INSTALL_PATH" ] && {
-    INFO "Creating directory $INSTALL_PATH"
-    mkdir -p "$INSTALL_PATH"
-}
-[ ! -d "$WINEPREFIX" ] && {
-    INFO "Creating and initializing $WINEPREFIX"
-    env WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -i >/dev/null 2>&1
-}
-INFO "Latest tested version: wine-5.6 (Staging)"
-INFO "Your version: $(wine --version)"
-
-############################################################
-## Prepare the WINE environment
-############################################################
-if [ ! -f "$WINEPREFIX/winetricks.log" ]; then
-    INFO "Installing verbs via winetricks"
-    winetricks -q --optout "${WINE_REQ_MOD[@]}" \
-        || ERRO "Failed to install required modules via winetricks"
-fi
-for link in "$WINEPREFIX/dosdevices"/*; do
-    [[ "$link" =~ 'c:' ]] && continue # For default link to ../drive_c
-    [[ "$link" =~ 'z:' ]] && continue # For default link to /
-    INFO "Removing unnecessary device $link"
-    rm -vf "$link"
-done
-INFO "Linking install path to $INSTALL_PATH"
-ln -Tfsr "$INSTALL_PATH" "$WINEPREFIX/dosdevices/c:/Program Files/League of Legends"
-INFO "Modifying WINE registry"
-wine regedit "$REGFILE"
-
-############################################################
-## make_wineprefix ends here
-############################################################
-[ "$1" == "make_wineprefix" ] && exit 0
-
-############################################################
-## Install League of Legends
-############################################################
-askQ "Select your region" "North America" "EU West" "EU Nordic & East" "Latin America North" "Latin America South" "Brazil" "Turkey" "Russia" "Japan" "Oceania" "Republic of Korea"
-read -p "    #: " answer
-
-case "${answer}" in
-    1)
-        # North America
-        export LANG_CODE="NA"
-        ;;
-    2)
-        # EU West
-        export LANG_CODE="EUW"
-        ;;
-    3)
-        # EU Nordic & East
-        export LANG_CODE="EUNE"
-        ;;
-    4)
-        # Latin America North
-        export LANG_CODE="LA1"
-        ;;
-    5)
-        # Latin America South
-        export LANG_CODE="LA2"
-        ;;
-    6)
-        # Brazil
-        export LANG_CODE="BR"
-        ;;
-    7)
-        # Turkey
-        export LANG_CODE="TR"
-        ;;
-    8)
-        # Russia
-        export LANG_CODE="RU"
-        ;;
-    9)
-        # Japan
-        export LANG_CODE="JP"
-        ;;
-    10)
-        # Oceania
-        export LANG_CODE="OC1"
-        ;;
-    11)
-        # Republic of Korea
-        export LANG_CODE="KR"
-        ;;
-esac
-
-export INSTALLER="$CACHE_DIR/LoL_installer_$LANG_CODE.exe"
-
-if [ "$LANG_CODE" = "KR" ]; then
-    export INSTALLER_URL="https://riotgamespatcher-a.akamaihd.net/KR_CBT/installer/deploy/League of Legends installer KR.exe"
-else
-    export INSTALLER_URL="https://riotgamespatcher-a.akamaihd.net/releases/live/installer/deploy/League%20of%20Legends%20installer%20$LANG_CODE.exe"
-fi
-
-INFO "Downloading installer"
-wget -cO "$INSTALLER" "$INSTALLER_URL"
-[ -z "$CLIENT_PATH" ] && {
-    INFO "Installing League of Legends"
-    wine "$INSTALLER" \
-        --license_agreement 1 \
-        --mode unattended \
-        --installdir "$INSTALL_PATH"
-}
-echo
-INFO "League of Legends installed!"
-INFO
-INFO "The game is installed in $INSTALL_PATH"
-INFO "with WINEPREFIX=$WINEPREFIX"
-echo
-
-############################################################
-## regen_wineprefix ends here
-############################################################
-[ "$1" == "regen_wineprefix" ] && {
-    [ -d "${WINEPREFIX}.backup" ] && \
-        ERRO "Backup of ${WINEPREFIX} already exist"
-    INFO "Backup prefix: ${WINEPREFIX}.backup"
-    mv "${WINEPREFIX}" "${WINEPREFIX}.backup"
-    INFO "Recreating wineprefix"
-    exec "$0" make_wineprefix
+    curl --silent --show-error -Lo "$INSTALLER" "$INSTALLER_URL"
+    msg "Installing League of Legends..."
+    wine "$INSTALLER" >/dev/null 2>&1
+    wineserver --wait
+    msg "The game is installed at $INSTALL_DIR"
 }
 
-############################################################
-## Cleanup the wine-generated user menus
-############################################################
-rm -rf \
-    ~/.config/menus/applications-merged/wine-Programs-League\ of\ Legends-* \
-    ~/.local/share/applications/wine/Programs/League\ of\ Legends \
-    ~/.local/share/applications/wine-extension-*.desktop \
-    ~/.local/share/applications/mimeinfo.cache
+#
+# https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/
+#
+port_waiting_daemon() {
+    # Find PID
+    process=LeagueClientUx.exe
+    uxpid=$(timeout 2m sh -c "until pidof $process; do sleep 1; done")
+    if [ -z "$uxpid" ]; then
+        die "Could not find process ${process}"
+    fi
+
+    # Get the app-port parameter
+    #msg "LeagueClientUx.exe pid: ${uxpid}"
+    port=$(xargs -0 </proc/${uxpid}/cmdline | sed -n 's/.*--app-port=\([[:digit:]]*\).*/\1/p')
+    if [ -z "$port" ]; then
+        die "Could not find --app-port of LeagueClientUx.exe"
+    fi
+
+    # Suspend the league client until app-port gets available
+    #msg "Waiting for port ${port}"
+    kill -STOP ${uxpid}
+    timeout 5m bash -c "
+    until openssl s_client -connect :${port} <<< Q >/dev/null 2>&1; do
+        sleep 1
+    done"
+    kill -CONT ${uxpid}
+}
+
+start_LoL() {
+    if [ ! -f "$CLIENT_EXE" ]; then
+        while :; do
+            echo -n "[!] The game is not installed. Install it? [Y/n] "
+            read install
+            install="$(echo "$install" | tr '[:upper:]' '[:lower:]')"
+            if [ -z "${install##y*}" ]; then
+                install_LoL
+                break
+            elif [ -z "${install##n*}" ]; then
+                exit 1
+            fi
+        done
+    fi
+
+    # prelaunch helper
+    ( port_waiting_daemon ) &
+
+    msg "Starting..."
+    WIN_CLIENT_EXE="$(winepath -w "$CLIENT_EXE" 2>/dev/null | \
+                      sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+    wine "$WIN_CLIENT_EXE" \
+        --launch-product=league_of_legends \
+        --launch-patchline=live
+    wineserver --wait
+    wait
+}
+
+usage() {
+    cat <<EOF
+[!] Usage: $(basename "${BASH_SOURCE[0]}") <command>
+
+League of Legends - helper program
+
+Commands:
+    start               - Start LoL
+    install             - Install LoL
+    uninstall           - Uninstall LoL
+    reinstall           - Reinstall LoL
+    cleanup_logs        - Remove log files
+    run <shell comamnd> - Run shell command with environment variables
+                          (useful for Wine utilities)
+EOF
+}
+
+main() {
+    check_depends
+    export_default_variables
+    load_configs
+
+    cmd="$1"
+    shift
+
+    case "$cmd" in
+        start)
+            start_LoL
+            ;;
+        install)
+            install_LoL
+            ;;
+        uninstall)
+            uninstall_LoL
+            ;;
+        reinstall)
+            uninstall_LoL
+            install_LoL
+            ;;
+        cleanup_logs)
+            cleanup_logs
+            ;;
+        run)
+            $@
+            ;;
+        *)
+            usage
+            ;;
+    esac
+}
+
+
+main $@
 
 # vim: set ts=4 sw=4 et:

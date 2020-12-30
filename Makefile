@@ -35,15 +35,14 @@ $(PNG_D): $(PNG_S)
 $(REG_D): $(REG_S)
 	install -Dm644 $< $@
 
-install: ## Install leagueoflegends wine
+## Install leagueoflegends wine
 install: $(BIN_D) $(CFG_D) $(DSK_D) $(LCS_D) $(PNG_D) $(REG_D)
 
-uninstall: ## Delete leagueoflegends wine
+## Delete leagueoflegends wine
 uninstall:
 	@rm -fv $(BIN_D) $(CFG_D) $(DSK_D) $(LCS_D) $(PNG_D) $(REG_D)
 
-
-deb: ## Create debian package
+## Create debian package
 deb:
 	./package.sh debian
 

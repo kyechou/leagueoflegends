@@ -39,8 +39,8 @@ export_env_variables() {
     export CACHE_DIR="$HOME/.cache/leagueoflegends"
 
     export WINEARCH=win32
-    export WINEDLLOVERRIDES="mscoree,mshtml="   # mute gecko, mono questions
-    export WINE_REQ_MOD=(d3dx9 corefonts vcrun2017) # d9vk win7
+    export WINEDLLOVERRIDES="mscoree,mshtml=;msvcp140=n,b"
+    export WINE_REQ_MOD=(win7 d3dx9) # corefonts vcrun2017)
     export WINEPREFIX="$HOME/.local/share/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
@@ -73,6 +73,7 @@ create_wineprefix() {
     done
     msg "Modifying WINE registry with $REGFILE"
     regedit "$REGFILE" >/dev/null 2>&1
+    msg "Waiting for wine processes..."
     wineserver --wait
     msg "Wineprefix created: $WINEPREFIX"
 }
@@ -160,6 +161,7 @@ install_LoL() {
     curl --silent --show-error -Lo "$INSTALLER" "$INSTALLER_URL"
     msg "Installing League of Legends..."
     wine "$INSTALLER" >/dev/null 2>&1
+    msg "Waiting for wine processes..."
     wineserver --wait
     msg "The game is installed at $INSTALL_DIR"
 }

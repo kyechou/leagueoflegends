@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=League of Legends
-Comment=League of Legends Launcher
+Comment=League of Legends helper script
 Type=Application
-Exec=leagueoflegends launch
+Exec=leagueoflegends start
 Icon=leagueoflegends
 Terminal=false
 Categories=Wine;Game;
@@ -10,8 +10,8 @@ Actions=Client;killall;winecfg;
 
 [Desktop Action killall]
 Name=killall LoL Processes
-Exec=leagueoflegends wineserver -k
+Exec=leagueoflegends kill
 
 [Desktop Action winecfg]
 Name=run winecfg in LoL Prefix
-Exec=leagueoflegends winecfg
+Exec=leagueoflegends run winecfg

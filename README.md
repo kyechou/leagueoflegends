@@ -3,107 +3,107 @@
 League of Legends (www.leagueoflegends.com) helper script for installing and
 running on Linux.
 
+
 ## Dependencies
 
-- wine (please see **Note**)
+- wine-lol (please see **Note**)
 - winetricks
 - bash
+- curl
 - lib32-gnutls
 - lib32-libldap
 - lib32-openal
 - lib32-libpulse
-- curl
+- vulkan-icd-loader, lib32-vulkan-icd-loader
+- [Vulkan drivers](https://wiki.archlinux.org/index.php/Vulkan) for your graphic
+  cards. For example:
+    - lib32-vulkan-intel
+    - lib32-nvidia-utils
+    - lib32-vulkan-radeon
+    - lib32-amdvlk
 
 **Note**
 
-The current version of WINE does not support the game. Game crashes while
-entering the main game after champion selection
+The current version of WINE does not support the game because of some anticheat
+mechanism. Game crashes while entering the main game after champion selection
 ([bug 47198](https://bugs.winehq.org/show_bug.cgi?id=47198)).
-Until that is resolved, please use
-[wine-lol](https://aur.archlinux.org/packages/wine-lol/) instead of wine or
-wine-staging.
+To circumvent the issue, some patches are needed for WINE to successfully run
+the game. Please use [wine-lol](https://aur.archlinux.org/packages/wine-lol/)
+instead of wine or wine-staging.
+
 
 ## Installation
 
+### Arch Linux
+
+Install the package from AUR: [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git).
+
+### Debian/Ubuntu
+
+You could use `make deb` to create the `.deb` package, and then install it with
+
+```sh
+sudo dpkg -i leagueoflegends.deb
+```
+
+### Manual installation from source
+
 You can install the helper script manually by:
 
-```
+```sh
 $ git clone https://github.com/kyechou/leagueoflegends.git
 $ cd leagueoflegends
-# make install
+$ sudo make install
 ```
 
-Alternatively, you can install the script as a package. Pull requests for other
-distributions are welcome.
+The files are installed to `/usr` by default, or you can optionally set
+`DESTDIR` to install the files to `$(DESTDIR)/usr`.
 
-- ![arch logo](http://www.monitorix.org/imgs/archlinux.png) Arch Linux:
-  [AUR/leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git).
-- Debian/Ubuntu: use `make deb` to create the package.
+```sh
+$ sudo make DESTDIR="<preferred root>" install
+```
+
 
 ## Configuration
 
-(TODO)
+The configuration file is removed for simplicity. If you would like to change
+the default location of wine prefix or other parameters, feel free to modify the
+script.
 
-The configuration file is located at `/etc/leagueoflegends.conf`. You can copy
-the file to `~/.config/`, which will take precedence over the system-wide
-configuration file.
-
-All the commented lines in the file are the default configuration. You can
-uncomment and change the values as you desire.
 
 ## Usage
 
 ```
+[!] Usage: leagueoflegends <command>
+
 League of Legends - helper program
-Usage: leagueoflegends <command>
+
 Commands:
-    launch            - Launch LoL
-    install           - Install LoL
-    uninstall         - Uninstall LoL
-    cleanup_logs      - Remove log files
-    winecfg           - Run winecfg with WINEPREFIX
-    wineserver [...]  - Run wineserver with WINEPREFIX
-    winetricks [...]  - Run winetricks with WINEPREFIX
-    make_wineprefix   - Create WINEPREFIX only
-    regen_wineprefix  - Backup and recreate WINEPREFIX
+    start               - Start LoL
+    install             - Install LoL
+    uninstall           - Uninstall LoL
+    reinstall           - Reinstall LoL
+    cleanup_logs        - Remove log files
+    kill                - Kill the wine processes of the wineprefix
+    run <shell comamnd> - Run shell command with environment variables
+                          (useful for wine utilities)
 ```
 
-### Fresh LoL install
+The usage should be intuitive. You firstly would need `leagueoflegends
+install` to construct the wine environment and install the client. **Note** that
+while the client is being installed, please do *NOT* log in or launch the game.
+After the client is installed successfully, you could use `leagueoflegends
+start` to launch the game. It may take a little while before the splash screen
+shows up, due to this
+[issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
 
-```
-$ leagueoflegends install
-```
+### Advanced wine configuration
 
-### Uninstall LoL
+`leagueoflegends kill` would use `wineserver --kill` to try to kill all the wine
+processes of the current wine prefix, which might be helpful if some error
+happens and the script hangs.
 
-Note that this will remove the game files completely.
-
-```
-$ leagueoflegends uninstall
-```
-
-### Launch LoL
-
-```
-$ leagueoflegends launch
-```
-
-or you can launch the game from your application menu.
-
-### Relocate old LoL wine instance
-
-```
-$ leagueoflegends make_wineprefix
-$ mv <Directory with LeagueClient.exe> ~/.local/share/leagueoflegends/LOL/
-```
-
-### Advanced wine configurations
-
-If you need to run winecfg, wineserver, or winetricks toward the wine prefix,
-you can prefix the command with this script, which will prepare and export the
-environment variables needed.
-
-## Troubleshooting
-
-- [Cannot move camera after changing window's focus](https://www.reddit.com/r/leagueoflinux/comments/cb5gdc/locked_camera_after_window_focuss_change/)
-
+`leagueoflegends run <...>` can be use to run any command with the wine-related
+environment variables, such as `WINEARCH`, `WINEDLLOVERRIDES`, and `WINEPREFIX`.
+This way, you could easily run wine utilities like `leagueoflegends run
+winecfg`, or `leagueoflegends run wineserver --kill`, etc.

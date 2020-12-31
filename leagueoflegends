@@ -96,9 +96,14 @@ uninstall_LoL() {
     # clean up menu entries
     rm -rf \
         ~/.config/menus/applications-merged/*-League\ of\ Legends* \
-        ~/.local/share/applications/wine/Programs/Riot\ Games
+        ~/.local/share/applications/wine/Programs/Riot\ Games \
+        ~/.local/share/desktop-directories/*-League\ of\ Legends.directory \
+        ~/.local/share/desktop-directories/*-Riot\ Games.directory
     find -H ~/.config/menus/applications-merged -empty -delete
     find -H ~/.config/menus -empty -delete
+    find -H ~/.local/share/applications/wine/Programs -empty -delete
+    find -H ~/.local/share/applications/wine -empty -delete
+    find -H ~/.local/share/applications -empty -delete
 }
 
 install_LoL() {

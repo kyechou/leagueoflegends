@@ -1,47 +1,37 @@
-PREFIX ?= /
+#
+# Makefile for installing/packaging leagueoflegends helper program
+#
 
-BIN_S := leagueoflegends
-DSK_S := leagueoflegends.desktop
-LCS_S := LICENSE
-PNG_S := leagueoflegends.png
-REG_S := leagueoflegends.reg
+pkgname     := leagueoflegends
 
-BIN_D := $(PREFIX)/usr/bin/leagueoflegends
-DSK_D := $(PREFIX)/usr/share/applications/leagueoflegends.desktop
-LCS_D := $(PREFIX)/usr/share/licenses/leagueoflegends/LICENSE
-PNG_D := $(PREFIX)/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png
-REG_D := $(PREFIX)/usr/share/doc/leagueoflegends/leagueoflegends.reg
+prefix      := $(DESTDIR)/usr
+bindir      := $(prefix)/bin
+datarootdir := $(prefix)/share
+docdir      := $(datarootdir)/doc/$(pkgname)
+iconsdir    := $(datarootdir)/icons
+licensesdir := $(datarootdir)/licenses/$(pkgname)
+bashcompdir := $(datarootdir)/bash-completion/completions
 
 
-default: help
+nop:
 
-$(BIN_D): $(BIN_S)
-	install -Dm755 $< $@
+install:
+	install -Dm755 leagueoflegends          -t $(bindir)
+	install -Dm644 leagueoflegends.desktop  -t $(datarootdir)/applications
+	install -Dm644 leagueoflegends.png      -t $(iconsdir)/hicolor/256x256/apps
+	install -Dm644 leagueoflegends.reg      -t $(docdir)
+	install -Dm644 LICENSE                  -t $(licensesdir)
+	install -Dm644 completion.bash             $(bashcompdir)/$(pkgname)
 
-$(DSK_D): $(DSK_S)
-	install -Dm644 $< $@
-
-$(LCS_D): $(LCS_S)
-	install -Dm644 $< $@
-
-$(PNG_D): $(PNG_S)
-	install -Dm644 $< $@
-
-$(REG_D): $(REG_S)
-	install -Dm644 $< $@
-
-## Install leagueoflegends wine
-install: $(BIN_D) $(DSK_D) $(LCS_D) $(PNG_D) $(REG_D)
-
-## Delete leagueoflegends wine
 uninstall:
-	@rm -fv $(BIN_D) $(DSK_D) $(LCS_D) $(PNG_D) $(REG_D)
+	@rm -vf $(bindir)/leagueoflegends
+	@rm -vf $(datarootdir)/applications/leagueoflegends.desktop
+	@rm -vf $(iconsdir)/hicolor/256x256/apps/leagueoflegends.png
+	@rm -vf $(docdir)/leagueoflegends.reg
+	@rm -vf $(licensesdir)/LICENSE
+	@rm -vf $(bashcompdir)/$(pkgname)
 
-## Create debian package
-deb:
+deb: ## Create debian package
 	./package.sh debian
 
-help: ## Show help
-	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' -e 's/## /\t/'
-
-.PHONY: default install uninstall deb help
+.PHONY: default install uninstall deb

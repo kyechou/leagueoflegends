@@ -39,8 +39,8 @@ export_env_variables() {
     export CACHE_DIR="$HOME/.cache/leagueoflegends"
 
     export WINEARCH=win32
-    export WINEDLLOVERRIDES="mscoree,mshtml=;msvcp140=n,b"
-    export WINE_REQ_MOD=(win7 d3dx9) # corefonts vcrun2017)
+    export WINEDLLOVERRIDES="mscoree,mshtml=;winemenubuilder.exe="
+    export WINE_REQ_MOD=(win10 d3dcompiler_43 d3dx9 vcrun2019)
     export WINEPREFIX="$HOME/.local/share/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
@@ -95,12 +95,10 @@ uninstall_LoL() {
 
     # clean up menu entries
     rm -rf \
-        ~/.config/menus/applications-merged/wine-Programs-League\ of\ Legends-* \
-        ~/.local/share/applications/wine/Programs/League\ of\ Legends \
-        ~/.local/share/applications/wine-extension-*.desktop \
-        ~/.local/share/applications/mimeinfo.cache
-
-    # TODO check if it's indeed clean (e.g., menus?)
+        ~/.config/menus/applications-merged/*-League\ of\ Legends* \
+        ~/.local/share/applications/wine/Programs/Riot\ Games
+    find -H ~/.config/menus/applications-merged -empty -delete
+    find -H ~/.config/menus -empty -delete
 }
 
 install_LoL() {
@@ -215,7 +213,8 @@ start_LoL() {
                       sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
     wine "$WIN_CLIENT_EXE" \
         --launch-product=league_of_legends \
-        --launch-patchline=live
+        --launch-patchline=live \
+        >/dev/null 2>&1
     wineserver --wait
     wait
 }
@@ -232,9 +231,9 @@ Commands:
     uninstall           - Uninstall LoL
     reinstall           - Reinstall LoL
     cleanup_logs        - Remove log files
-    kill                - Kill the wine processes
+    kill                - Kill the wine processes of the wineprefix
     run <shell comamnd> - Run shell command with environment variables
-                          (useful for Wine utilities)
+                          (useful for wine utilities)
 EOF
 }
 

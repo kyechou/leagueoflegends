@@ -6,7 +6,7 @@ running on Linux.
 
 ## Dependencies
 
-- wine-lol (please see **Note**)
+- wine-lol (please see the note below)
 - winetricks
 - bash
 - curl
@@ -44,7 +44,7 @@ You could use `make deb` to create the `.deb` package, and then install it with
 the following command.
 
 ```sh
-sudo dpkg -i leagueoflegends.deb
+sudo dpkg -i <package name>.deb
 ```
 
 Note that the generated debian package does not have the dependency information,
@@ -64,7 +64,7 @@ The files are installed to `/usr` by default, or you can optionally set
 `DESTDIR` to install the files to `$(DESTDIR)/usr`.
 
 ```sh
-$ sudo make DESTDIR="<preferred root>" install
+$ sudo make DESTDIR="..." install
 ```
 
 

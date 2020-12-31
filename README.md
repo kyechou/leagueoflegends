@@ -41,10 +41,14 @@ Install the package from AUR: [leagueoflegends-git](https://aur.archlinux.org/pa
 ### Debian/Ubuntu
 
 You could use `make deb` to create the `.deb` package, and then install it with
+the following command.
 
 ```sh
 sudo dpkg -i leagueoflegends.deb
 ```
+
+Note that the generated debian package does not have the dependency information,
+so please first install the required packages.
 
 ### Manual installation from source
 

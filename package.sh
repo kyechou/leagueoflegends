@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(dirname $(realpath ${BASH_SOURCE[0]}))"
+
 msg() {
     echo -e "[+] ${1-}" >&2
 }
@@ -12,39 +14,42 @@ die() {
 }
 
 debian_package(){
-    cd "$(dirname "$0")"
-    VERSION=$(git tag | tail -n 1)
-    [ -z "$VERSION" ] && die "Can't get git tag, VERSION is empty"
+    cd "$SCRIPT_DIR"
 
-    DEB_NAME="leagueoflegends-${VERSION}_any"
-    mkdir -p "$DEB_NAME"
+    pkgname="leagueoflegends"
+    pkgver="$(git describe --tags --long 2>/dev/null | awk -F- '{print $1}' \
+              | sed -e 's/^v//')"
+    [ -z "$pkgver" ] && die "Version not found"
 
-    make install PREFIX="$DEB_NAME/"
+    debname="${pkgname}-${pkgver}_any"
+    mkdir -p "$debname/DEBIAN"
 
-    mkdir -p "$DEB_NAME/DEBIAN/"
-    {
-        echo "Package: leagueoflegends"
-        echo "Version: $VERSION"
-        echo "Section: custom"
-        echo "Priority: optional"
-        echo "Architecture: all"
-        echo "Essential: no"
-        echo "Installed-Size: 16"
-        echo "Maintainer: nefelim4ag@gmail.com"
-        echo "Description: Linux: League Of Legends www.leagueoflegends.com install/run wrapper"
-    } > "$DEB_NAME/DEBIAN/control"
-    dpkg-deb --build "$DEB_NAME"
+    make DESTDIR="$debname/" install
+
+    cat >"$debname/DEBIAN/control" <<EOF
+Package: $pkgname
+Version: $pkgver
+Section: custom
+Priority: optional
+Architecture: all
+Essential: no
+Installed-Size: 200
+Maintainer: kuanyenchou@gmail.com
+Description: League of Legends helper script
+EOF
+
+    dpkg-deb --build "$debname"
 }
 
 archlinux_package(){
-    git clone https://aur.archlinux.org/leagueoflegends-git.git /tmp/leagueoflegends-git/
-    cd /tmp/leagueoflegends-git/
-    makepkg -srci
-    rm -rf /tmp/leagueoflegends-git/
+    cd "$SCRIPT_DIR"
+    git clone https://aur.archlinux.org/leagueoflegends-git.git aurpkg
+    cd aurpkg
+    makepkg -srcf
 }
 
 case $1 in
     debian) debian_package ;;
     archlinux) archlinux_package ;;
-    *) die "Usage: $(basename "${BASH_SOURCE[0]}") <debian|archlinux>" ;;
+    *) die "Usage: $(basename "${BASH_SOURCE[0]}") (debian|archlinux)" ;;
 esac

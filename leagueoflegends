@@ -91,6 +91,7 @@ cleanup_logs() {
 
 uninstall_LoL() {
     msg "Uninstalling league of legends..."
+    set +e
     rm -rf "$CACHE_DIR" "$WINEPREFIX"
 
     # clean up menu entries
@@ -104,6 +105,7 @@ uninstall_LoL() {
     find -H ~/.local/share/applications/wine/Programs -empty -delete
     find -H ~/.local/share/applications/wine -empty -delete
     find -H ~/.local/share/applications -empty -delete
+    set -e
 }
 
 install_LoL() {

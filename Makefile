@@ -34,4 +34,4 @@ uninstall:
 deb: ## Create debian package
 	./package.sh debian
 
-.PHONY: default install uninstall deb
+.PHONY: nop install uninstall deb

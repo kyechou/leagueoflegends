@@ -64,7 +64,7 @@ create_wineprefix() {
     mkdir -p "$WINEPREFIX"
     wineboot --init >/dev/null 2>&1
     msg "Installing winetricks verbs: ${WINE_REQ_MOD[*]}"
-    winetricks -q --optout --isolate "${WINE_REQ_MOD[@]}" >/dev/null 2>&1
+    winetricks -q --optout "${WINE_REQ_MOD[@]}" >/dev/null 2>&1
     for link in "$WINEPREFIX/dosdevices"/*; do
         [[ "$link" =~ 'c:' ]] && continue # for drive_c
         [[ "$link" =~ 'z:' ]] && continue # for /

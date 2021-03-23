@@ -175,6 +175,7 @@ install_LoL() {
 # https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/
 #
 port_waiting_daemon() {
+
     # Find PID
     process=LeagueClientUx.exe
     uxpid=$(timeout 2m sh -c "until pidof $process; do sleep 1; done")
@@ -213,7 +214,7 @@ start_LoL() {
     fi
 
     # prelaunch helper
-    ( port_waiting_daemon ) &
+    ( port_waiting_daemon ) | zenity --progress --pulsate --no-cancel --title="League of Legends" --text="Waiting for the League of Legends client to load..." --auto-close &
 
     msg "Starting..."
     WIN_CLIENT_EXE="$(winepath -w "$CLIENT_EXE" 2>/dev/null | \
@@ -270,6 +271,296 @@ main() {
             ;;
         kill)
             wineserver --kill
+	    pkill -9 -f \\'--title=League of Legends'
+            ;;
+        run)
+            $@
+            ;;
+        *)
+            usage
+            ;;
+    esac
+}
+
+
+main $@
+
+# vim: set ts=4 sw=4 et:
+absurd@ryzen:~$ cat /usr/bin/leagueoflegends 
+#!/bin/bash
+
+set -euo pipefail
+
+msg() {
+    echo -e "[+] ${1-}" >&2
+}
+
+die() {
+    echo -e "[!] ${1-}" >&2
+    exit 1
+}
+
+askQ() {
+    count=1
+    first_arg="$2"
+    echo
+    echo "    $1"
+    for var in "${@:2}"; do
+        echo "    #$count - $2"
+        ((count++))
+        shift
+    done
+    echo
+}
+
+check_depends() {
+    depends=(wine wineboot winetricks winepath winecfg wineserver curl)
+    for dep in ${depends[@]}; do
+        if ! command -v "$dep" >/dev/null 2>&1; then
+            die "Missing $dep"
+        fi
+    done
+}
+
+export_env_variables() {
+    export PATH="/opt/wine-lol/bin:$PATH"
+    export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
+    export CACHE_DIR="$HOME/.cache/leagueoflegends"
+
+    export WINEARCH=win32
+    export WINEDLLOVERRIDES="mscoree,mshtml=;winemenubuilder.exe="
+    export WINE_REQ_MOD=(win10 d3dcompiler_43 d3dx9 vcrun2019)
+    export WINEPREFIX="$HOME/.local/share/leagueoflegends"
+    export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
+    export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
+
+    export MESA_GLTHREAD=true
+    export DXVK_LOG_LEVEL=none
+    export DXVK_STATE_CACHE_PATH="$WINEPREFIX"
+    export STAGING_SHARED_MEMORY=1
+    export WINE_LARGE_ADDRESS_AWARE=1
+    export __GL_SHADER_DISK_CACHE=1
+    export __GL_SHADER_DISK_CACHE_PATH="$WINEPREFIX"
+    export __GL_THREADED_OPTIMIZATIONS=0
+}
+
+create_wineprefix() {
+    if [ -e "$WINEPREFIX" ]; then
+        die "Wineprefix $WINEPREFIX already exists"
+    fi
+
+    msg "Creating wineprefix: $WINEPREFIX"
+    mkdir -p "$WINEPREFIX"
+    wineboot --init >/dev/null 2>&1
+    msg "Installing winetricks verbs: ${WINE_REQ_MOD[*]}"
+    winetricks -q --optout "${WINE_REQ_MOD[@]}" >/dev/null 2>&1
+    for link in "$WINEPREFIX/dosdevices"/*; do
+        [[ "$link" =~ 'c:' ]] && continue # for drive_c
+        [[ "$link" =~ 'z:' ]] && continue # for /
+        msg "Removing unnecessary device $(basename $link)"
+        unlink "$link"
+    done
+    msg "Modifying WINE registry with $REGFILE"
+    regedit "$REGFILE" >/dev/null 2>&1
+    msg "Waiting for wine processes..."
+    wineserver --wait
+    msg "Wineprefix created: $WINEPREFIX"
+}
+
+cleanup_logs() {
+    msg "Cleaning up log files..."
+    if [ -d "$INSTALL_DIR" ]; then
+        find -H "$INSTALL_DIR" -name "*.log" -delete -print
+        if [ -d "$INSTALL_DIR/League of Legends/Logs" ]; then
+            find -H "$INSTALL_DIR/League of Legends/Logs" -type f -delete -print
+            find -H "$INSTALL_DIR/League of Legends/Logs" -empty -delete -print
+        fi
+    fi
+}
+
+uninstall_LoL() {
+    msg "Uninstalling league of legends..."
+    set +e
+    rm -rf "$CACHE_DIR" "$WINEPREFIX"
+
+    # clean up menu entries
+    rm -rf \
+        ~/.config/menus/applications-merged/*-League\ of\ Legends* \
+        ~/.local/share/applications/wine/Programs/Riot\ Games \
+        ~/.local/share/desktop-directories/*-League\ of\ Legends.directory \
+        ~/.local/share/desktop-directories/*-Riot\ Games.directory
+    find -H ~/.config/menus/applications-merged -empty -delete
+    find -H ~/.config/menus -empty -delete
+    find -H ~/.local/share/applications/wine/Programs -empty -delete
+    find -H ~/.local/share/applications/wine -empty -delete
+    find -H ~/.local/share/applications -empty -delete
+    set -e
+}
+
+install_LoL() {
+    if [ ! -d "$WINEPREFIX" ]; then
+        create_wineprefix
+    elif [ -f "$CLIENT_EXE" ]; then
+        while :; do
+            echo -n "[!] The game has been installed. Remove it and reinstall? [Y/n] "
+            read remove
+            remove="$(echo "$remove" | tr '[:upper:]' '[:lower:]')"
+            if [ -z "${remove##y*}" ]; then
+                rm -rf "$INSTALL_DIR"
+                break
+            elif [ -z "${remove##n*}" ]; then
+                exit 1
+            fi
+        done
+    fi
+
+    askQ "Select your region" \
+        "North America" "EU West" "EU Nordic & East" "Latin America North" \
+        "Latin America South" "Brazil" "Turkey" "Russia" "Japan" "Oceania" \
+        "Republic of Korea"
+    read -p "    #: " answer
+
+    case "${answer}" in
+        1) # North America
+            export LANG_CODE="na" ;;
+        2) # EU West
+            export LANG_CODE="euw" ;;
+        3) # EU Nordic & East
+            export LANG_CODE="eune" ;;
+        4) # Latin America North
+            export LANG_CODE="la1" ;;
+        5) # Latin America South
+            export LANG_CODE="la2" ;;
+        6) # Brazil
+            export LANG_CODE="br" ;;
+        7) # Turkey
+            export LANG_CODE="tr" ;;
+        8) # Russia
+            export LANG_CODE="ru" ;;
+        9) # Japan
+            export LANG_CODE="jp" ;;
+        10) # Oceania
+            export LANG_CODE="oc1" ;;
+        11) # Republic of Korea
+            export LANG_CODE="kr" ;;
+        *)
+            die "Unknown region number: $answer" ;;
+    esac
+
+    INSTALLER="$CACHE_DIR/installer.$LANG_CODE.exe"
+    INSTALLER_URL="https://lol.secure.dyn.riotcdn.net/channels/public/x/installer/current/live.$LANG_CODE.exe"
+
+    msg "Downloading installer..."
+    mkdir -p "$CACHE_DIR"
+    curl --silent --show-error -Lo "$INSTALLER" "$INSTALLER_URL"
+    msg "Installing League of Legends..."
+    wine "$INSTALLER" >/dev/null 2>&1
+    msg "Waiting for wine processes..."
+    wineserver --wait
+    msg "The game is installed at $INSTALL_DIR"
+}
+
+#
+# https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/
+#
+port_waiting_daemon() {
+
+    # Find PID
+    process=LeagueClientUx.exe
+    uxpid=$(timeout 2m sh -c "until pidof $process; do sleep 1; done")
+    if [ -z "$uxpid" ]; then
+        die "Could not find process ${process}"
+    fi
+
+    # Get the app-port parameter
+    port=$(xargs -0 </proc/${uxpid}/cmdline | sed -n 's/.*--app-port=\([[:digit:]]*\).*/\1/p')
+    if [ -z "$port" ]; then
+        die "Could not find --app-port of LeagueClientUx.exe"
+    fi
+
+    # Suspend the league client until app-port gets available
+    kill -STOP ${uxpid}
+    timeout 5m bash -c "
+    until openssl s_client -connect :${port} <<< Q >/dev/null 2>&1; do
+        sleep 1
+    done"
+    kill -CONT ${uxpid}
+}
+
+start_LoL() {
+    if [ ! -f "$CLIENT_EXE" ]; then
+        while :; do
+            echo -n "[!] The game is not installed. Install it? [Y/n] "
+            read install
+            install="$(echo "$install" | tr '[:upper:]' '[:lower:]')"
+            if [ -z "${install##y*}" ]; then
+                install_LoL
+                break
+            elif [ -z "${install##n*}" ]; then
+                exit 1
+            fi
+        done
+    fi
+
+    # prelaunch helper
+    ( port_waiting_daemon ) | zenity --progress --pulsate --no-cancel --title="League of Legends" --text="Waiting for the League of Legends client to load..." --auto-close &
+
+    msg "Starting..."
+    WIN_CLIENT_EXE="$(winepath -w "$CLIENT_EXE" 2>/dev/null | \
+                      sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+    wine "$WIN_CLIENT_EXE" \
+        --launch-product=league_of_legends \
+        --launch-patchline=live \
+        >/dev/null 2>&1
+    wineserver --wait
+    wait
+}
+
+usage() {
+    cat <<EOF
+[!] Usage: $(basename "${BASH_SOURCE[0]}") <command>
+
+League of Legends - helper program
+
+Commands:
+    start               - Start LoL
+    install             - Install LoL
+    uninstall           - Uninstall LoL
+    reinstall           - Reinstall LoL
+    cleanup_logs        - Remove log files
+    kill                - Kill the wine processes of the wineprefix
+    run <shell comamnd> - Run shell command with environment variables
+                          (useful for wine utilities)
+EOF
+}
+
+main() {
+    check_depends
+    export_env_variables
+
+    cmd="$1"
+    shift
+
+    case "$cmd" in
+        start)
+            start_LoL
+            ;;
+        install)
+            install_LoL
+            ;;
+        uninstall)
+            uninstall_LoL
+            ;;
+        reinstall)
+            uninstall_LoL
+            install_LoL
+            ;;
+        cleanup_logs)
+            cleanup_logs
+            ;;
+        kill)
+            wineserver --kill
+	    pkill -9 -f \\'--title=League of Legends'
             ;;
         run)
             $@

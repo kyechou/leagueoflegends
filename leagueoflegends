@@ -212,8 +212,8 @@ start_LoL() {
         done
     fi
 
-    # prelaunch helper
-    ( port_waiting_daemon ) &
+    # prelaunch helper (added the zenity loading screen here)
+    ( port_waiting_daemon ) | zenity --progress --pulsate --no-cancel --title="League of Legends" --text="Waiting for the League of Legends client to load..." --auto-close &
 
     msg "Starting..."
     WIN_CLIENT_EXE="$(winepath -w "$CLIENT_EXE" 2>/dev/null | \
@@ -270,6 +270,7 @@ main() {
             ;;
         kill)
             wineserver --kill
+	    pkill -9 -f \\'--title=League of Legends' #Here I kill the zenity dialog if we kill league before the client starts.
             ;;
         run)
             $@

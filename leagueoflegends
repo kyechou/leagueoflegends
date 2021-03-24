@@ -31,11 +31,19 @@ check_depends() {
             die "Missing $dep"
         fi
     done
+
+    optdepends=(zenity)
+    for dep in ${optdepends[@]}; do
+        if command -v "$dep" >/dev/null 2>&1; then
+            export "HAS_$(echo $dep | awk '{ print toupper($0) }')"=1
+        fi
+    done
 }
 
 export_env_variables() {
     export PATH="/opt/wine-lol/bin:$PATH"
     export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
+    export ICON="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
     export CACHE_DIR="$HOME/.cache/leagueoflegends"
 
     export WINEARCH=win32
@@ -197,6 +205,14 @@ port_waiting_daemon() {
     kill -CONT ${uxpid}
 }
 
+loading_screen() {
+    if [ $HAS_ZENITY -eq 1 ]; then
+        zenity --progress --pulsate --auto-close --no-cancel \
+            --title="League of Legends" --window-icon="$ICON" \
+            --text="Waiting for the League client port to open..."
+    fi
+}
+
 start_LoL() {
     if [ ! -f "$CLIENT_EXE" ]; then
         while :; do
@@ -212,8 +228,8 @@ start_LoL() {
         done
     fi
 
-    # prelaunch helper (added the zenity loading screen here)
-    ( port_waiting_daemon ) | zenity --progress --pulsate --no-cancel --title="League of Legends" --text="Waiting for the League of Legends client to load..." --window-icon="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png" --auto-close &
+    # prelaunch helper
+    ( port_waiting_daemon ) | loading_screen &
 
     msg "Starting..."
     WIN_CLIENT_EXE="$(winepath -w "$CLIENT_EXE" 2>/dev/null | \
@@ -270,7 +286,7 @@ main() {
             ;;
         kill)
             wineserver --kill
-	    pkill -9 -f \\'--title=League of Legends' #Here I kill the zenity dialog if we kill league before the client starts.
+            pkill -f -- '--title=League of Legends' # kill the zenity dialog
             ;;
         run)
             $@

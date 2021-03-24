@@ -21,6 +21,7 @@ running on Linux.
     - lib32-nvidia-utils
     - lib32-vulkan-radeon
     - lib32-amdvlk
+- zenity (optional for loading screen indication, see [#9](https://github.com/kyechou/leagueoflegends/pull/9))
 
 **Note**
 

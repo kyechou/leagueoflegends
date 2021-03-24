@@ -213,7 +213,7 @@ start_LoL() {
     fi
 
     # prelaunch helper (added the zenity loading screen here)
-    ( port_waiting_daemon ) | zenity --progress --pulsate --no-cancel --title="League of Legends" --text="Waiting for the League of Legends client to load..." --auto-close &
+    ( port_waiting_daemon ) | zenity --progress --pulsate --no-cancel --title="League of Legends" --text="Waiting for the League of Legends client to load..." --window-icon="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png" --auto-close &
 
     msg "Starting..."
     WIN_CLIENT_EXE="$(winepath -w "$CLIENT_EXE" 2>/dev/null | \

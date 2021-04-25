@@ -206,7 +206,7 @@ port_waiting_daemon() {
 }
 
 loading_screen() {
-    if [ $HAS_ZENITY -eq 1 ]; then
+    if [ ${HAS_ZENITY-0} -eq 1 ]; then
         zenity --progress --pulsate --auto-close --no-cancel \
             --title="League of Legends" --window-icon="$ICON" \
             --text="Waiting for the League client port to open..."
@@ -244,19 +244,23 @@ start_LoL() {
 
 usage() {
     cat <<EOF
-[!] Usage: $(basename "${BASH_SOURCE[0]}") <command>
+[!] Usage: $(basename "${BASH_SOURCE[0]}") [options] <command>
 
-League of Legends - helper program
+    League of Legends - helper program
 
-Commands:
-    start               - Start LoL
-    install             - Install LoL
-    uninstall           - Uninstall LoL
-    reinstall           - Reinstall LoL
-    cleanup_logs        - Remove log files
-    kill                - Kill the wine processes of the wineprefix
-    run <shell comamnd> - Run shell command with environment variables
-                          (useful for wine utilities)
+    Options:
+        -h, --help          Print this message and exit
+        -v, --verbose       Enable verbose output
+
+    Commands:
+        start               Start LoL
+        install             Install LoL
+        uninstall           Uninstall LoL
+        reinstall           Reinstall LoL
+        cleanup_logs        Remove log files
+        kill                Kill the wine processes of the wineprefix
+        run <shell comamnd> Run shell command with environment variables
+                            (useful for wine utilities)
 EOF
 }
 
@@ -264,36 +268,29 @@ main() {
     check_depends
     export_env_variables
 
-    cmd="$1"
-    shift
+    while :; do
+        case "${1-}" in
+        -h | --help) usage; exit ;;
+        -v | --verbose) set -x ;;
+        --) shift; break ;;
+        -?*) die "Unknown option: ${1-}\n$(usage)" ;;
+        *) break ;;
+        esac
+        shift
+    done
 
-    case "$cmd" in
-        start)
-            start_LoL
-            ;;
-        install)
-            install_LoL
-            ;;
-        uninstall)
-            uninstall_LoL
-            ;;
-        reinstall)
-            uninstall_LoL
-            install_LoL
-            ;;
-        cleanup_logs)
-            cleanup_logs
-            ;;
+    case "${1-}" in
+        start) start_LoL ;;
+        install) install_LoL ;;
+        uninstall) uninstall_LoL ;;
+        reinstall) uninstall_LoL && install_LoL ;;
+        cleanup_logs) cleanup_logs ;;
         kill)
             wineserver --kill
             pkill -f -- '--title=League of Legends' # kill the zenity dialog
             ;;
-        run)
-            $@
-            ;;
-        *)
-            usage
-            ;;
+        run) shift; $@ ;;
+        *) die "Unknown command: ${1-}\n$(usage)" ;;
     esac
 }
 

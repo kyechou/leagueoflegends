@@ -72,35 +72,40 @@ $ sudo make DESTDIR="..." install
 ## Configuration
 
 The configuration file is removed for simplicity. If you would like to change
-the default location of wine prefix or other parameters, feel free to modify the
-script.
+the default location of wine prefix or other parameters, please feel free to
+modify the script.
 
 
 ## Usage
 
+* First install the game: `leagueoflegends install`.
+    * (Note) Please do not log in or launch the game during installation.
+* Exit the window when the game installation is finished.
+* Start the game: `leagueoflegends start`.
+    * (Note) It may take a while before the game shows up, due to this [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
+* To remove the game: `leagueoflegends uninstall`.
+
+`leagueoflegends -h` can be used to view the full list of options and commands.
+
 ```
-[!] Usage: leagueoflegends <command>
+[!] Usage: leagueoflegends [options] <command>
 
-League of Legends - helper program
+    League of Legends - helper program
 
-Commands:
-    start               - Start LoL
-    install             - Install LoL
-    uninstall           - Uninstall LoL
-    reinstall           - Reinstall LoL
-    cleanup_logs        - Remove log files
-    kill                - Kill the wine processes of the wineprefix
-    run <shell comamnd> - Run shell command with environment variables
-                          (useful for wine utilities)
+    Options:
+        -h, --help          Print this message and exit
+        -v, --verbose       Enable verbose output
+
+    Commands:
+        start               Start LoL
+        install             Install LoL
+        uninstall           Uninstall LoL
+        reinstall           Reinstall LoL
+        cleanup_logs        Remove log files
+        kill                Kill the wine processes of the wineprefix
+        run <shell comamnd> Run shell command with environment variables
+                            (useful for wine utilities)
 ```
-
-The usage should be intuitive. You firstly would need `leagueoflegends
-install` to construct the wine environment and install the client. **Note** that
-while the client is being installed, please do *NOT* log in or launch the game.
-After the client is installed successfully, you could use `leagueoflegends
-start` to launch the game. It may take a little while before the splash screen
-shows up, due to this
-[issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
 
 ### Advanced wine configuration
 

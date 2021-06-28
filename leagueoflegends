@@ -70,9 +70,9 @@ create_wineprefix() {
 
     msg "Creating wineprefix: $WINEPREFIX"
     mkdir -p "$WINEPREFIX"
-    wineboot --init >/dev/null 2>&1
+    wineboot --init
     msg "Installing winetricks verbs: ${WINE_REQ_MOD[*]}"
-    winetricks -q --optout "${WINE_REQ_MOD[@]}" >/dev/null 2>&1
+    winetricks -q --optout "${WINE_REQ_MOD[@]}"
     for link in "$WINEPREFIX/dosdevices"/*; do
         [[ "$link" =~ 'c:' ]] && continue # for drive_c
         [[ "$link" =~ 'z:' ]] && continue # for /
@@ -80,7 +80,7 @@ create_wineprefix() {
         unlink "$link"
     done
     msg "Modifying WINE registry with $REGFILE"
-    regedit "$REGFILE" >/dev/null 2>&1
+    regedit "$REGFILE"
     msg "Waiting for wine processes..."
     wineserver --wait
     msg "Wineprefix created: $WINEPREFIX"
@@ -173,7 +173,7 @@ install_LoL() {
     mkdir -p "$CACHE_DIR"
     curl --silent --show-error -Lo "$INSTALLER" "$INSTALLER_URL"
     msg "Installing League of Legends..."
-    wine "$INSTALLER" >/dev/null 2>&1
+    wine "$INSTALLER"
     msg "Waiting for wine processes..."
     wineserver --wait
     msg "The game is installed at $INSTALL_DIR"

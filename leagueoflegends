@@ -185,7 +185,7 @@ install_LoL() {
 port_waiting_daemon() {
     # Find PID
     process=LeagueClientUx.exe
-    uxpid=$(timeout 2m sh -c "until pgrep -u $USER -f $process; do sleep 1; done")
+    uxpid=$(timeout 2m sh -c "until ps -C $process -o pid=; do sleep 1; done | sed 's/[[:space:]]*//g'")
     if [ -z "$uxpid" ]; then
         die "Could not find process ${process}"
     fi

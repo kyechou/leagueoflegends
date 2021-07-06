@@ -191,7 +191,7 @@ port_waiting_daemon() {
     fi
 
     # Get the app-port parameter
-    port=$(xargs -0 </proc/${uxpid}/cmdline | sed -n 's/.*--app-port=\([[:digit:]]*\).*/\1/p')
+    port=$(xargs -0 <"/proc/${uxpid}/cmdline" | sed -n 's/.*--app-port=\([[:digit:]]*\).*/\1/p')
     if [ -z "$port" ]; then
         die "Could not find --app-port of LeagueClientUx.exe"
     fi

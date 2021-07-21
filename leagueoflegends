@@ -247,41 +247,42 @@ start_LoL() {
 add_dxvk() {
     DXVK_VERSION="1.9"
     DXVK_NAME="dxvk-$DXVK_VERSION"
-    DXVK_FILENAME="$DXVK_NAME.tar.gz"
     DXVK_FILEPATH="$CACHE_DIR/$DXVK_NAME.tar.gz"
     DXVK_FOLDER="$CACHE_DIR/$DXVK_NAME"
     DXVK_URL="https://github.com/doitsujin/dxvk/releases/download/v$DXVK_VERSION/$DXVK_NAME.tar.gz"
-    if [ ! -d "$WINEPREFIX" ]; then
-        echo -n "[!] Wineprefix not found!"
-    elif [ -f "$CLIENT_EXE" ]; then        
-        msg "Game installation found!"
-        if [ ! -f "$DXVK_FILEPATH" ]; then
-            msg "Downloading DXVK files from $DXVK_URL"
-            mkdir -p "$CACHE_DIR"        
-            curl --silent --show-error -Lo "$DXVK_FILEPATH" "$DXVK_URL"
-        fi
-        msg "Extracting tarball..."
-        tar xzf "$DXVK_FILEPATH" -C "$CACHE_DIR"
-        msg "Installing DXVK to $WINEPREFIX"
-        $DXVK_FOLDER/setup_dxvk.sh install
-        msg "Done!"
+
+    if [ ! -f "$CLIENT_EXE" ]; then
+        die "The game is not installed. Please install it first"
     fi
+
+    if [ ! -f "$DXVK_FILEPATH" ]; then
+        msg "Downloading DXVK files from $DXVK_URL"
+        mkdir -p "$CACHE_DIR"
+        curl --silent --show-error -Lo "$DXVK_FILEPATH" "$DXVK_URL"
+    fi
+    msg "Extracting tarball..."
+    tar xzf "$DXVK_FILEPATH" -C "$CACHE_DIR"
+    msg "Installing DXVK to $WINEPREFIX"
+    $DXVK_FOLDER/setup_dxvk.sh install
+    msg "Done!"
 }
 
 del_dxvk() {
     DXVK_VERSION="1.9"
     DXVK_NAME="dxvk-$DXVK_VERSION"
     DXVK_FOLDER="$CACHE_DIR/$DXVK_NAME"
-    if [ ! -d "$WINEPREFIX" ]; then
-        echo -n "[!] Wineprefix not found!"
-    elif [ ! -d "$DXVK_FOLDER"]; then
-        echo -n "[!] DXVK not found!"
-    elif [ -f "$CLIENT_EXE" ]; then
-        msg "Game installation found!"
-        msg "Uninstalling DXVK from $WINEPREFIX"
-        $DXVK_FOLDER/setup_dxvk.sh uninstall
-        msg "Done!"
+
+    if [ ! -d "$DXVK_FOLDER"]; then
+        die "DXVK not found"
     fi
+
+    if [ ! -f "$CLIENT_EXE" ]; then
+        die "The game is not installed. Please install it first"
+    fi
+
+    msg "Uninstalling DXVK from $WINEPREFIX"
+    $DXVK_FOLDER/setup_dxvk.sh uninstall
+    msg "Done!"
 }
 
 usage() {

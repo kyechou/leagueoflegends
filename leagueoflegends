@@ -242,6 +242,48 @@ start_LoL() {
     wait
 }
 
+# DXVK automated installer
+
+add_dxvk() {
+    DXVK_VERSION="1.9"
+    DXVK_NAME="dxvk-$DXVK_VERSION"
+    DXVK_FILENAME="$DXVK_NAME.tar.gz"
+    DXVK_FILEPATH="$CACHE_DIR/$DXVK_NAME.tar.gz"
+    DXVK_FOLDER="$CACHE_DIR/$DXVK_NAME"
+    DXVK_URL="https://github.com/doitsujin/dxvk/releases/download/v$DXVK_VERSION/$DXVK_NAME.tar.gz"
+    if [ ! -d "$WINEPREFIX" ]; then
+        echo -n "[!] Wineprefix not found!"
+    elif [ -f "$CLIENT_EXE" ]; then        
+        msg "Game installation found!"
+        if [ ! -f "$DXVK_FILEPATH" ]; then
+            msg "Downloading DXVK files from $DXVK_URL"
+            mkdir -p "$CACHE_DIR"        
+            curl --silent --show-error -Lo "$DXVK_FILEPATH" "$DXVK_URL"
+        fi
+        msg "Extracting tarball..."
+        tar xzf "$DXVK_FILEPATH" -C "$CACHE_DIR"
+        msg "Installing DXVK to $WINEPREFIX"
+        $DXVK_FOLDER/setup_dxvk.sh install
+        msg "Done!"
+    fi
+}
+
+del_dxvk() {
+    DXVK_VERSION="1.9"
+    DXVK_NAME="dxvk-$DXVK_VERSION"
+    DXVK_FOLDER="$CACHE_DIR/$DXVK_NAME"
+    if [ ! -d "$WINEPREFIX" ]; then
+        echo -n "[!] Wineprefix not found!"
+    elif [ ! -d "$DXVK_FOLDER"]; then
+        echo -n "[!] DXVK not found!"
+    elif [ -f "$CLIENT_EXE" ]; then
+        msg "Game installation found!"
+        msg "Uninstalling DXVK from $WINEPREFIX"
+        $DXVK_FOLDER/setup_dxvk.sh uninstall
+        msg "Done!"
+    fi
+}
+
 usage() {
     cat <<EOF
 [!] Usage: $(basename "${BASH_SOURCE[0]}") [options] <command>
@@ -257,6 +299,8 @@ usage() {
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
+        add-dxvk            Install DXVK to the LoL wineprefix
+        del-dxvk            Remove DXVK from the LoL wineprefix
         cleanup_logs        Remove log files
         kill                Kill the wine processes of the wineprefix
         run <shell comamnd> Run shell command with environment variables
@@ -282,6 +326,8 @@ main() {
     case "${1-}" in
         start) start_LoL ;;
         install) install_LoL ;;
+        add-dxvk) add_dxvk ;;
+        del-dxvk) del_dxvk ;;
         uninstall) uninstall_LoL ;;
         reinstall) uninstall_LoL && install_LoL ;;
         cleanup_logs) cleanup_logs ;;

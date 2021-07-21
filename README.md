@@ -101,6 +101,8 @@ modify the script.
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
+        add-dxvk            Install DXVK to the LoL wineprefix
+        del-dxvk            Remove DXVK from the LoL wineprefix
         cleanup_logs        Remove log files
         kill                Kill the wine processes of the wineprefix
         run <shell comamnd> Run shell command with environment variables

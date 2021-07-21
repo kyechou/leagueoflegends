@@ -327,10 +327,10 @@ main() {
     case "${1-}" in
         start) start_LoL ;;
         install) install_LoL ;;
-        add-dxvk) add_dxvk ;;
-        del-dxvk) del_dxvk ;;
         uninstall) uninstall_LoL ;;
         reinstall) uninstall_LoL && install_LoL ;;
+        add-dxvk) add_dxvk ;;
+        del-dxvk) del_dxvk ;;
         cleanup_logs) cleanup_logs ;;
         kill)
             wineserver --kill

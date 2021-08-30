@@ -6,7 +6,7 @@ running on Linux.
 
 ## Dependencies
 
-- wine-lol (please see the note below)
+- [wine-lol](https://aur.archlinux.org/packages/wine-lol/) (>= 5.18)
 - winetricks
 - bash
 - curl
@@ -22,15 +22,6 @@ running on Linux.
     - lib32-vulkan-radeon
     - lib32-amdvlk
 - zenity (optional for loading screen indication, see [#9](https://github.com/kyechou/leagueoflegends/pull/9))
-
-**Note**
-
-The current version of WINE does not support the game because of some anticheat
-mechanism. Game crashes while entering the main game after champion selection
-([bug 47198](https://bugs.winehq.org/show_bug.cgi?id=47198)).
-To circumvent the issue, some patches are needed for WINE to successfully run
-the game. Please use [wine-lol](https://aur.archlinux.org/packages/wine-lol/)
-instead of wine or wine-staging.
 
 
 ## Installation

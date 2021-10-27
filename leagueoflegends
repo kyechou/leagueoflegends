@@ -72,7 +72,7 @@ create_wineprefix() {
     mkdir -p "$WINEPREFIX"
     wineboot --init
     msg "Installing winetricks verbs: ${WINE_REQ_MOD[*]}"
-    winetricks -q --optout "${WINE_REQ_MOD[@]}"
+    winetricks -q --optout --force "${WINE_REQ_MOD[@]}"
     for link in "$WINEPREFIX/dosdevices"/*; do
         [[ "$link" =~ 'c:' ]] && continue # for drive_c
         [[ "$link" =~ 'z:' ]] && continue # for /
@@ -176,6 +176,7 @@ install_LoL() {
     wine "$INSTALLER"
     msg "Waiting for wine processes..."
     wineserver --wait
+    add_dxvk
     msg "The game is installed at $INSTALL_DIR"
 }
 
@@ -245,7 +246,7 @@ start_LoL() {
 # DXVK automated installer
 
 add_dxvk() {
-    DXVK_VERSION="1.9"
+    DXVK_VERSION="$(curl -s https://api.github.com/repos/doitsujin/dxvk/releases/latest | grep 'tag_name' | cut -d\" -f4 | tr -d v)"
     DXVK_NAME="dxvk-$DXVK_VERSION"
     DXVK_FILEPATH="$CACHE_DIR/$DXVK_NAME.tar.gz"
     DXVK_FOLDER="$CACHE_DIR/$DXVK_NAME"
@@ -268,7 +269,7 @@ add_dxvk() {
 }
 
 del_dxvk() {
-    DXVK_VERSION="1.9"
+    DXVK_VERSION="$(curl -s https://api.github.com/repos/doitsujin/dxvk/releases/latest | grep 'tag_name' | cut -d\" -f4 | tr -d v)"
     DXVK_NAME="dxvk-$DXVK_VERSION"
     DXVK_FOLDER="$CACHE_DIR/$DXVK_NAME"
 

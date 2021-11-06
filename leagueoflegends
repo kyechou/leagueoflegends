@@ -273,7 +273,7 @@ del_dxvk() {
     DXVK_NAME="dxvk-$DXVK_VERSION"
     DXVK_FOLDER="$CACHE_DIR/$DXVK_NAME"
 
-    if [ ! -d "$DXVK_FOLDER"]; then
+    if [ ! -d "$DXVK_FOLDER" ]; then
         die "DXVK not found"
     fi
 

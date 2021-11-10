@@ -54,13 +54,12 @@ export_env_variables() {
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
 
     export MESA_GLTHREAD=true
-    export DXVK_LOG_LEVEL=none
-    export DXVK_STATE_CACHE_PATH="$WINEPREFIX"
     export STAGING_SHARED_MEMORY=1
     export WINE_LARGE_ADDRESS_AWARE=1
     export __GL_SHADER_DISK_CACHE=1
     export __GL_SHADER_DISK_CACHE_PATH="$WINEPREFIX"
     export __GL_THREADED_OPTIMIZATIONS=0
+    export DXVK_STATE_CACHE_PATH="$CACHE_DIR"
 }
 
 create_wineprefix() {
@@ -176,6 +175,7 @@ install_LoL() {
     wine "$INSTALLER"
     msg "Waiting for wine processes..."
     wineserver --wait
+    add_dxvk
     msg "The game is installed at $INSTALL_DIR"
 }
 
@@ -236,53 +236,43 @@ start_LoL() {
                       sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
     wine "$WIN_CLIENT_EXE" \
         --launch-product=league_of_legends \
-        --launch-patchline=live \
-        >/dev/null 2>&1
+        --launch-patchline=live
     wineserver --wait
     wait
 }
 
-# DXVK automated installer
+download_dxvk() {
+    DXVK_VERSION="$(curl -s https://api.github.com/repos/doitsujin/dxvk/releases/latest | grep 'tag_name' | cut -d\" -f4 | tr -d v)"
+    DXVK_URL="https://github.com/doitsujin/dxvk/releases/download/v$DXVK_VERSION/dxvk-$DXVK_VERSION.tar.gz"
+    DXVK_TARBALL="$CACHE_DIR/dxvk-$DXVK_VERSION.tar.gz"
+
+    msg "Downloading DXVK tarball"
+    mkdir -p "$CACHE_DIR"
+    curl --silent --show-error -Lo "$DXVK_TARBALL" "$DXVK_URL"
+    msg "Extracting DXVK tarball..."
+    tar xzf "$DXVK_TARBALL" -C "$CACHE_DIR"
+}
 
 add_dxvk() {
-    DXVK_VERSION="$(curl -s https://api.github.com/repos/doitsujin/dxvk/releases/latest | grep 'tag_name' | cut -d\" -f4 | tr -d v)"
-    DXVK_NAME="dxvk-$DXVK_VERSION"
-    DXVK_FILEPATH="$CACHE_DIR/$DXVK_NAME.tar.gz"
-    DXVK_FOLDER="$CACHE_DIR/$DXVK_NAME"
-    DXVK_URL="https://github.com/doitsujin/dxvk/releases/download/v$DXVK_VERSION/$DXVK_NAME.tar.gz"
-
-    if [ ! -f "$CLIENT_EXE" ]; then
+    if [ ! -d "$WINEPREFIX" ]; then
         die "The game is not installed. Please install it first"
     fi
 
-    if [ ! -f "$DXVK_FILEPATH" ]; then
-        msg "Downloading DXVK files from $DXVK_URL"
-        mkdir -p "$CACHE_DIR"
-        curl --silent --show-error -Lo "$DXVK_FILEPATH" "$DXVK_URL"
-    fi
-    msg "Extracting tarball..."
-    tar xzf "$DXVK_FILEPATH" -C "$CACHE_DIR"
+    download_dxvk
     msg "Installing DXVK to $WINEPREFIX"
-    $DXVK_FOLDER/setup_dxvk.sh install
-    msg "Done!"
+    "$CACHE_DIR/dxvk-$DXVK_VERSION/setup_dxvk.sh" install
+    msg "DXVK is installed"
 }
 
 del_dxvk() {
-    DXVK_VERSION="$(curl -s https://api.github.com/repos/doitsujin/dxvk/releases/latest | grep 'tag_name' | cut -d\" -f4 | tr -d v)"
-    DXVK_NAME="dxvk-$DXVK_VERSION"
-    DXVK_FOLDER="$CACHE_DIR/$DXVK_NAME"
-
-    if [ ! -d "$DXVK_FOLDER" ]; then
-        die "DXVK not found"
-    fi
-
-    if [ ! -f "$CLIENT_EXE" ]; then
+    if [ ! -d "$WINEPREFIX" ]; then
         die "The game is not installed. Please install it first"
     fi
 
+    download_dxvk
     msg "Uninstalling DXVK from $WINEPREFIX"
-    $DXVK_FOLDER/setup_dxvk.sh uninstall
-    msg "Done!"
+    "$CACHE_DIR/dxvk-$DXVK_VERSION/setup_dxvk.sh" uninstall
+    msg "DXVK is removed"
 }
 
 usage() {

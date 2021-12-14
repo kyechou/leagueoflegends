@@ -58,8 +58,23 @@ export_env_variables() {
     export WINE_LARGE_ADDRESS_AWARE=1
     export __GL_SHADER_DISK_CACHE=1
     export __GL_SHADER_DISK_CACHE_PATH="$WINEPREFIX"
-    export __GL_THREADED_OPTIMIZATIONS=0
+    export __GL_THREADED_OPTIMIZATIONS=1
+    export DXVK_LOG_LEVEL=none
     export DXVK_STATE_CACHE_PATH="$CACHE_DIR"
+}
+
+export_env_variables_garena() {
+    export_env_variables
+    export WINEPREFIX="$HOME/.local/share/garena"
+    export INSTALL_DIR="$WINEPREFIX/drive_c/Program Files/Garena"
+    export GARENA_EXE="$INSTALL_DIR/Garena/Garena.exe"
+    if ls "$INSTALL_DIR"/Games/*/lol.version &>/dev/null; then
+        export GAME_DIR="$(dirname "$(ls "$INSTALL_DIR"/Games/*/lol.version | head -n1)")"
+        export CLIENT_EXE="$GAME_DIR/Riot Client/RiotClientServices.exe"
+    else
+        export GAME_DIR=""
+        export CLIENT_EXE=""
+    fi
 }
 
 create_wineprefix() {
@@ -83,36 +98,6 @@ create_wineprefix() {
     msg "Waiting for wine processes..."
     wineserver --wait
     msg "Wineprefix created: $WINEPREFIX"
-}
-
-cleanup_logs() {
-    msg "Cleaning up log files..."
-    if [ -d "$INSTALL_DIR" ]; then
-        find -H "$INSTALL_DIR" -name "*.log" -delete -print
-        if [ -d "$INSTALL_DIR/League of Legends/Logs" ]; then
-            find -H "$INSTALL_DIR/League of Legends/Logs" -type f -delete -print
-            find -H "$INSTALL_DIR/League of Legends/Logs" -empty -delete -print
-        fi
-    fi
-}
-
-uninstall_LoL() {
-    msg "Uninstalling league of legends..."
-    set +e
-    rm -rf "$CACHE_DIR" "$WINEPREFIX"
-
-    # clean up menu entries
-    rm -rf \
-        ~/.config/menus/applications-merged/*-League\ of\ Legends* \
-        ~/.local/share/applications/wine/Programs/Riot\ Games \
-        ~/.local/share/desktop-directories/*-League\ of\ Legends.directory \
-        ~/.local/share/desktop-directories/*-Riot\ Games.directory
-    find -H ~/.config/menus/applications-merged -empty -delete
-    find -H ~/.config/menus -empty -delete
-    find -H ~/.local/share/applications/wine/Programs -empty -delete
-    find -H ~/.local/share/applications/wine -empty -delete
-    find -H ~/.local/share/applications -empty -delete
-    set -e
 }
 
 install_LoL() {
@@ -168,15 +153,117 @@ install_LoL() {
     INSTALLER="$CACHE_DIR/installer.$LANG_CODE.exe"
     INSTALLER_URL="https://lol.secure.dyn.riotcdn.net/channels/public/x/installer/current/live.$LANG_CODE.exe"
 
-    msg "Downloading installer..."
-    mkdir -p "$CACHE_DIR"
-    curl --silent --show-error -Lo "$INSTALLER" "$INSTALLER_URL"
+    if [ ! -e "$INSTALLER" ]; then
+        msg "Downloading installer..."
+        mkdir -p "$CACHE_DIR"
+        curl --silent --show-error -Lo "$INSTALLER" "$INSTALLER_URL"
+    fi
     msg "Installing League of Legends..."
     wine "$INSTALLER"
     msg "Waiting for wine processes..."
     wineserver --wait
     add_dxvk
     msg "The game is installed at $INSTALL_DIR"
+}
+
+install_garena() {
+    # Create the wine environment from which we launch the game
+    if [ ! -d "$WINEPREFIX" ]; then
+        create_wineprefix
+        add_dxvk
+    fi
+
+    export_env_variables_garena
+
+    # Create the wine environment in which the game is installed
+    if [ ! -d "$WINEPREFIX" ]; then
+        create_wineprefix
+    elif [ -f "$CLIENT_EXE" ]; then
+        while :; do
+            echo -n "[!] The game has been installed. Remove it and reinstall? [Y/n] "
+            read remove
+            remove="$(echo "$remove" | tr '[:upper:]' '[:lower:]')"
+            if [ -z "${remove##y*}" ]; then
+                rm -rf "$INSTALL_DIR"
+                break
+            elif [ -z "${remove##n*}" ]; then
+                exit 1
+            fi
+        done
+    fi
+
+    askQ "Select your region" \
+        "Taiwan, Hong Kong, Macau" \
+        "Singapore, Malaysia, Indonesia, Philippines" \
+        "Vietnam" \
+        "Thailand"
+    read -p "    #: " answer
+
+    case "${answer}" in
+        1) # Taiwan, Hong Kong, Macau
+            export LANG_CODE="tw"
+            export URL="https://cdn.gxx.garenanow.com/gxx/pc/installer/Garena-v2.0-TW.exe"
+            ;;
+        2) # Singapore, Malaysia, Indonesia, Philippines
+            export LANG_CODE="sg"
+            export URL="https://cdn.gxx.garenanow.com/gxx/pc/installer/Garena-v2.0.exe"
+            ;;
+        3) # Vietnam
+            export LANG_CODE="vn"
+            export URL="https://cdn.gxx.garenanow.com/gxx/pc/installer/Garena-v2.0-VN.exe"
+            ;;
+        4) # Thailand
+            export LANG_CODE="th"
+            export URL="https://cdn.gxx.garenanow.com/gxx/pc/gameinst/Garena-v2.0-LOLTH.exe"
+            ;;
+        *)
+            die "Unknown region number: $answer" ;;
+    esac
+
+    INSTALLER="$CACHE_DIR/garena-installer.$LANG_CODE.exe"
+    if [ ! -e "$INSTALLER" ]; then
+        msg "Downloading Garena..."
+        mkdir -p "$CACHE_DIR"
+        curl --silent --show-error -Lo "$INSTALLER" "$URL"
+    fi
+    msg "Installing Garena..."
+    wine "$INSTALLER" &
+    until ! ps -C "$(basename "$INSTALLER")" -o pid=; do sleep 1; done
+    msg "Garena is installed at $INSTALL_DIR/Garena"
+
+    wineserver --kill
+    sleep 1
+    msg "Installing LoL from Garena..."
+    wine "$GARENA_EXE" &
+    until ! ps -C "$(basename "$GARENA_EXE")" -o pid=; do sleep 1; done
+    export_env_variables_garena
+    msg "The game is installed at $GAME_DIR"
+}
+
+uninstall_LoL() {
+    msg "Uninstalling league of legends..."
+    set +e
+    rm -rf "$CACHE_DIR" "$WINEPREFIX"
+
+    # clean up menu entries
+    rm -rf \
+        ~/.config/menus/applications-merged/*-League\ of\ Legends* \
+        ~/.local/share/applications/wine/Programs/Riot\ Games \
+        ~/.local/share/desktop-directories/*-League\ of\ Legends.directory \
+        ~/.local/share/desktop-directories/*-Riot\ Games.directory
+    find -H ~/.config/menus/applications-merged -empty -delete
+    find -H ~/.config/menus -empty -delete
+    find -H ~/.local/share/applications/wine/Programs -empty -delete
+    find -H ~/.local/share/applications/wine -empty -delete
+    find -H ~/.local/share/applications -empty -delete
+    set -e
+}
+
+uninstall_garena() {
+    export_env_variables_garena
+
+    msg "Uninstalling Garena..."
+    rm -rf "$WINEPREFIX"
 }
 
 #
@@ -232,11 +319,58 @@ start_LoL() {
     ( port_waiting_daemon ) | loading_screen &
 
     msg "Starting..."
-    WIN_CLIENT_EXE="$(winepath -w "$CLIENT_EXE" 2>/dev/null | \
+    WIN_CLIENT_EXE="$(winepath -w "$CLIENT_EXE" | \
                       sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
     wine "$WIN_CLIENT_EXE" \
         --launch-product=league_of_legends \
         --launch-patchline=live
+    wineserver --wait
+    wait
+}
+
+start_garena() {
+    export_env_variables_garena
+
+    if [ ! -f "$CLIENT_EXE" ]; then
+        while :; do
+            echo -n "[!] The game is not installed. Install it? [Y/n] "
+            read install
+            install="$(echo "$install" | tr '[:upper:]' '[:lower:]')"
+            if [ -z "${install##y*}" ]; then
+                install_garena
+                break
+            elif [ -z "${install##n*}" ]; then
+                exit 1
+            fi
+        done
+    fi
+
+    # Start Garena in the background with wine >= 6.0
+    # https://github.com/nhubaotruong/league-of-legends-linux-garena-script
+    # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/
+    # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/comment/gt7td4k/
+    export PATH="$(echo "$PATH" | sed 's,/opt/wine-lol/bin:,,g')"
+    wine "$GARENA_EXE" &
+
+    # Get the Riot Client pid and command-line argument
+    name=RiotClientServices.exe
+    process="$(until ps -C $name -o cmd=,; do sleep 1; done)"
+    riot_argument="$(echo "$process" | awk -F '.exe ' '{print $2}')"
+
+    # Kill the Garena process
+    wineserver --kill
+    wineserver --wait
+
+    # prelaunch helper
+    ( port_waiting_daemon ) | loading_screen &
+
+    # Launch the game directly with the riot argument (garena tokens)
+    msg "Starting..."
+    REAL_CLIENT_EXE="$CLIENT_EXE"
+    export_env_variables
+    WIN_CLIENT_EXE="$(winepath -w "$REAL_CLIENT_EXE" | \
+                      sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+    wine "$WIN_CLIENT_EXE" $riot_argument
     wineserver --wait
     wait
 }
@@ -246,9 +380,11 @@ download_dxvk() {
     DXVK_URL="https://github.com/doitsujin/dxvk/releases/download/v$DXVK_VERSION/dxvk-$DXVK_VERSION.tar.gz"
     DXVK_TARBALL="$CACHE_DIR/dxvk-$DXVK_VERSION.tar.gz"
 
-    msg "Downloading DXVK tarball"
-    mkdir -p "$CACHE_DIR"
-    curl --silent --show-error -Lo "$DXVK_TARBALL" "$DXVK_URL"
+    if [ ! -e "$DXVK_TARBALL" ]; then
+        msg "Downloading DXVK tarball"
+        mkdir -p "$CACHE_DIR"
+        curl --silent --show-error -Lo "$DXVK_TARBALL" "$DXVK_URL"
+    fi
     msg "Extracting DXVK tarball..."
     tar xzf "$DXVK_TARBALL" -C "$CACHE_DIR"
 }
@@ -275,6 +411,17 @@ del_dxvk() {
     msg "DXVK is removed"
 }
 
+cleanup_logs() {
+    msg "Cleaning up log files..."
+    if [ -d "$INSTALL_DIR" ]; then
+        find -H "$INSTALL_DIR" -name "*.log" -delete -print
+        if [ -d "$INSTALL_DIR/League of Legends/Logs" ]; then
+            find -H "$INSTALL_DIR/League of Legends/Logs" -type f -delete -print
+            find -H "$INSTALL_DIR/League of Legends/Logs" -empty -delete -print
+        fi
+    fi
+}
+
 usage() {
     cat <<EOF
 [!] Usage: $(basename "${BASH_SOURCE[0]}") [options] <command>
@@ -290,10 +437,15 @@ usage() {
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
+        start-garena        Start Garena
+        install-garena      Install Garena
+        uninstall-garena    Uninstall Garena
+        reinstall-garena    Reinstall Garena
         add-dxvk            Install DXVK to the LoL wineprefix
         del-dxvk            Remove DXVK from the LoL wineprefix
-        cleanup_logs        Remove log files
+        cleanup-logs        Remove log files
         kill                Kill the wine processes of the wineprefix
+        kill-garena         Kill the Garena wine processes
         run <shell command> Run shell command with environment variables
                             (useful for wine utilities)
 EOF
@@ -319,10 +471,19 @@ main() {
         install) install_LoL ;;
         uninstall) uninstall_LoL ;;
         reinstall) uninstall_LoL && install_LoL ;;
+        start-garena) start_garena ;;
+        install-garena) install_garena ;;
+        uninstall-garena) uninstall_garena ;;
+        reinstall-garena) uninstall_garena && install_garena ;;
         add-dxvk) add_dxvk ;;
         del-dxvk) del_dxvk ;;
-        cleanup_logs) cleanup_logs ;;
+        cleanup-logs) cleanup_logs ;;
         kill)
+            wineserver --kill
+            pkill -f -- '--title=League of Legends' # kill the zenity dialog
+            ;;
+        kill-garena)
+            export_env_variables_garena
             wineserver --kill
             pkill -f -- '--title=League of Legends' # kill the zenity dialog
             ;;

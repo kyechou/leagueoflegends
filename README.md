@@ -62,9 +62,10 @@ $ sudo make DESTDIR="..." install
 
 ## Configuration
 
-The configuration file is removed for simplicity. If you would like to change
-the default location of wine prefix or other parameters, please feel free to
-modify the script.
+The configuration file is removed for simplicity. The game is installed at
+`~/.local/share/leagueoflegends/` by default. If you want to change the default
+location of the wine prefix or other parameters, please feel free to modify the
+script.
 
 
 ## Usage
@@ -73,7 +74,8 @@ modify the script.
     * (Note) Please do not log in or launch the game during installation.
 * Exit the window when the game installation is finished.
 * Start the game: `leagueoflegends start`.
-    * (Note) It may take a while before the game shows up, due to this [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
+    * (Note) It may take a while (1-2 minutes) before the game shows up, due to
+      this [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
 * To remove the game: `leagueoflegends uninstall`.
 
 `leagueoflegends -h` can be used to view the full list of options and commands.
@@ -92,13 +94,51 @@ modify the script.
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
+        start-garena        Start Garena
+        install-garena      Install Garena
+        uninstall-garena    Uninstall Garena
+        reinstall-garena    Reinstall Garena
         add-dxvk            Install DXVK to the LoL wineprefix
         del-dxvk            Remove DXVK from the LoL wineprefix
-        cleanup_logs        Remove log files
+        cleanup-logs        Remove log files
         kill                Kill the wine processes of the wineprefix
-        run <shell comamnd> Run shell command with environment variables
+        kill-garena         Kill the Garena wine processes
+        run <shell command> Run shell command with environment variables
                             (useful for wine utilities)
 ```
+
+### Setting up Garena (Southeast Asia)
+
+* First install Garena: `leagueoflegends install-garena`
+    * Choose the region when prompted.
+    * There are two wine prefixes (environments) involved in this setup. Both
+      Garena and LoL will be installed in `~/.local/share/garena/`. However,
+      the game will be launched from the other prefix,
+      `~/.local/share/leagueoflegends/`.
+    * It's recommended to not change the default location of Garena, which is
+      `C:\Program Files\Garena\Garena\`. If you do want to change the default
+      location, remember to also change it in the script.
+    * Once Garena is successfully installed, it will be automatically started.
+      Please log in and go ahead to install LoL from Garena.
+    * LoL will by default be installed at `Z:\Garena\Games\`, which is in most
+      cases not desirable. Please change it to `C:\Program Files\Garena\Games\`,
+      or any other location you desire as long as it is consistent with the
+      script variables.
+* Exit the Garena window when the game installation is finished.
+* Kill the Garena process to finish installation: `leagueoflegends kill-garena`.
+    * Because the process will only be minimized to system tray during exit.
+* Start the game: `leagueoflegends start-garena`.
+    * This will start Garena. Navigate to LoL and press "Play" from Garena.
+    * The game will not really start, but the script will remember the
+      command-line arguments needed to launch the game, and then respawn a new
+      game by invoking the Riot client directly with the arguments.
+      For more information, please refer to the script and the related Reddit
+      threads documented inside.
+    * Similarly, it may take a while (1-2 minutes) before the game shows up,
+      due to this [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
+* To remove the game: `leagueoflegends uninstall-garena`.
+* To also remove the environment from which the game is launched:
+  `leagueoflegends uninstall`.
 
 ### Advanced wine configuration
 

@@ -126,7 +126,7 @@ script.
       script variables.
 * Exit the Garena window when the game installation is finished.
 * Kill the Garena process to finish installation: `leagueoflegends kill-garena`.
-    * Because the process will only be minimized to system tray during exit.
+    * Because the process will only be minimized to system tray upon exit.
 * Start the game: `leagueoflegends start-garena`.
     * This will start Garena. Navigate to LoL and press "Play" from Garena.
     * The game will not really start, but the script will remember the

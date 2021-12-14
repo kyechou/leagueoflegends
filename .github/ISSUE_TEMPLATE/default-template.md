@@ -1,6 +1,6 @@
 ---
-name: Issue template
-about: Provide the information when creating an issue
+name: Default template
+about: ''
 title: ''
 labels: ''
 assignees: ''
@@ -20,12 +20,13 @@ assignees: ''
 A clear and concise description of what the issue is.
 
 **Steps to reproduce**
-(Use the `-v` option and attach verbose log output when it's needed. For texts/logs longer than one screen, share them via services like [Gist](https://gist.github.com/). Do not attach screenshots for log outputs.)
 
 1. Go to '....'
 2. Click on '....'
 3. Run command '....'
 4. See error...
+
+(Use the `-v` option and attach verbose log outputs when it's needed. For texts/logs longer than one screen, share them via services like [Gist](https://gist.github.com/). Do not attach screenshots for text/log outputs.)
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.

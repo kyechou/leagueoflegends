@@ -1,6 +1,6 @@
 ---
 name: Default template
-about: ''
+about: 'Default template for creating new issues'
 title: ''
 labels: ''
 assignees: ''

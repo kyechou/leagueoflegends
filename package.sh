@@ -13,43 +13,73 @@ die() {
     exit 1
 }
 
-debian_package(){
+arch_pkg() {
+    cd "$SCRIPT_DIR"
+    git clone https://aur.archlinux.org/leagueoflegends-git.git aur
+    pushd aur
+    makepkg -srcf
+    mv leagueoflegends-git-*.pkg.tar.* ../
+    popd
+}
+
+debian_pkg() {
     cd "$SCRIPT_DIR"
 
     pkgname="leagueoflegends"
-    pkgver="$(git describe --tags --long 2>/dev/null | awk -F- '{print $1}' \
-              | sed -e 's/^v//')"
+    pkgver="$(git describe --tags --long 2>/dev/null | awk -F- '{print $1}' | sed -e 's/^v//')"
     [ -z "$pkgver" ] && die "Version not found"
-
-    debname="${pkgname}-${pkgver}_any"
+    debname="${pkgname}_${pkgver}_any"
     mkdir -p "$debname/DEBIAN"
 
-    make DESTDIR="$debname/" install
-
+    make DESTDIR="$debname" install
+    pushd "$debname"
+    find * -type f ! -path 'DEBIAN/*' -exec md5sum '{}' \; > "DEBIAN/md5sums"
+    popd
+    SIZE="$(du "$debname" --exclude '*/DEBIAN/*' -s | cut -f 1)"
     cat >"$debname/DEBIAN/control" <<EOF
 Package: $pkgname
 Version: $pkgver
-Section: custom
-Priority: optional
 Architecture: all
-Essential: no
-Installed-Size: 200
-Maintainer: kuanyenchou@gmail.com
+Maintainer: Kuan-Yen Chou <kuanyenchou@gmail.com>
+Installed-Size: $SIZE
+Depends: wine-lol, winetricks, bash, curl, libgnutls30, libldap, libopenal1, libpulse0, libvulkan1, mesa-vulkan-drivers
+Suggests: zenity
+Priority: optional
+Homepage: https://github.com/kyechou/leagueoflegends
 Description: League of Legends helper script
 EOF
 
-    dpkg-deb --build "$debname"
+    dpkg-deb --root-owner-group --build "$debname"
 }
 
-archlinux_package(){
-    cd "$SCRIPT_DIR"
-    git clone https://aur.archlinux.org/leagueoflegends-git.git aurpkg
-    cd aurpkg
-    makepkg -srcf
+usage() {
+    cat <<EOF
+[!] Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] <distro>
+    Distro: all arch debian
+EOF
 }
 
-case $1 in
-    debian) debian_package ;;
-    archlinux) archlinux_package ;;
-    *) die "Usage: $(basename "${BASH_SOURCE[0]}") (debian|archlinux)" ;;
-esac
+main() {
+    while :; do
+        case "${1-}" in
+        -h | --help) usage; exit ;;
+        -v | --verbose) set -x ;;
+        --) shift; break ;;
+        -?*) die "Unknown option: ${1-}\n$(usage)" ;;
+        *) break ;;
+        esac
+        shift
+    done
+
+    case "${1-}" in
+        all) arch_pkg; debian_pkg ;;
+        arch) arch_pkg ;;
+        debian) debian_pkg ;;
+        *) die "Unknown distro: ${1-}\n$(usage)" ;;
+    esac
+}
+
+
+main $@
+
+# vim: set ts=4 sw=4 et:

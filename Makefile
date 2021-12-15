@@ -32,7 +32,4 @@ uninstall:
 	@rm -vf $(licensesdir)/LICENSE
 	@rm -vf $(bashcompdir)/$(pkgname)
 
-deb: ## Create debian package
-	./package.sh debian
-
-.PHONY: nop install uninstall deb
+.PHONY: nop install uninstall

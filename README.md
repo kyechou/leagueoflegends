@@ -32,31 +32,21 @@ Install the package from AUR: [leagueoflegends-git](https://aur.archlinux.org/pa
 
 ### Debian/Ubuntu
 
-You could use `make deb` to create the `.deb` package, and then install it with
-the following command.
+Use the following commands to build and install the `.deb` package.
 
 ```sh
+./package.sh debian
 sudo dpkg -i <package name>.deb
 ```
 
-Note that the generated debian package does not have the dependency information,
-so please first install the required packages.
-
 ### Manual installation from source
 
-You can install the helper script manually by:
+You can also install the helper script manually by:
 
 ```sh
 $ git clone https://github.com/kyechou/leagueoflegends.git
 $ cd leagueoflegends
 $ sudo make install
-```
-
-The files are installed to `/usr` by default, or you can optionally set
-`DESTDIR` to install the files to `$(DESTDIR)/usr`.
-
-```sh
-$ sudo make DESTDIR="..." install
 ```
 
 
@@ -103,8 +93,8 @@ script.
         cleanup-logs        Remove log files
         kill                Kill the wine processes of the wineprefix
         kill-garena         Kill the Garena wine processes
-        run <shell command> Run shell command with environment variables
-                            (useful for wine utilities)
+        run <cmd>           Run shell command with environment variables
+        run-garena <cmd>    Run shell command with environment variables
 ```
 
 ### Setting up Garena (Southeast Asia)

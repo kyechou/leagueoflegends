@@ -42,7 +42,7 @@ Version: $pkgver
 Architecture: all
 Maintainer: Kuan-Yen Chou <kuanyenchou@gmail.com>
 Installed-Size: $SIZE
-Depends: wine-lol, winetricks, bash, curl, libgnutls30, libldap, libopenal1, libpulse0, libvulkan1, mesa-vulkan-drivers
+Depends: wine-lol, winetricks, bash, curl, openssl, winbind, libgnutls30, libldap, libopenal1, libpulse0, libasound2, libodbc1, libvkd3d1, libvulkan1, mesa-vulkan-drivers
 Suggests: zenity
 Priority: optional
 Homepage: https://github.com/kyechou/leagueoflegends

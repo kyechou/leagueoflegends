@@ -10,10 +10,15 @@ running on Linux.
 - winetricks
 - bash
 - curl
+- openssl
+- samba
 - lib32-gnutls
 - lib32-libldap
 - lib32-openal
 - lib32-libpulse
+- lib32-alsa-lib
+- lib32-unixodbc
+- lib32-vkd3d
 - vulkan-icd-loader, lib32-vulkan-icd-loader
 - [Vulkan drivers](https://wiki.archlinux.org/index.php/Vulkan) for your graphic
   cards. For example:

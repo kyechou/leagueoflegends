@@ -47,6 +47,7 @@ export_env_variables() {
     export CACHE_DIR="$HOME/.cache/leagueoflegends"
 
     export WINEARCH=win32
+    export WINEDEBUG=fixme-all
     export WINEDLLOVERRIDES="mscoree,mshtml=;winemenubuilder.exe="
     export WINE_REQ_MOD=(win10 d3dcompiler_43 d3dx9 vcrun2019)
     export WINEPREFIX="$HOME/.local/share/leagueoflegends"

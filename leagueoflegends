@@ -25,7 +25,7 @@ askQ() {
 }
 
 check_depends() {
-    depends=(wine wineboot winetricks winepath winecfg wineserver curl)
+    depends=(wine wineboot winetricks winecfg wineserver curl)
     for dep in ${depends[@]}; do
         if ! command -v "$dep" >/dev/null 2>&1; then
             die "Missing $dep"
@@ -228,14 +228,18 @@ install_garena() {
     fi
     msg "Installing Garena..."
     wine "$INSTALLER" &
-    until ! ps -C "$(basename "$INSTALLER")" -o pid=; do sleep 1; done
+    pid=$!
+    until ! ps -p $pid >/dev/null; do sleep 1; done
+    wineserver --kill
+    wineserver --wait
     msg "Garena is installed at $INSTALL_DIR/Garena"
 
-    wineserver --kill
-    sleep 1
     msg "Installing LoL from Garena..."
     wine "$GARENA_EXE" &
-    until ! ps -C "$(basename "$GARENA_EXE")" -o pid=; do sleep 1; done
+    pid=$!
+    until ! ps -p $pid >/dev/null; do sleep 1; done
+    wineserver --kill
+    wineserver --wait
     export_env_variables_garena
     msg "The game is installed at $GAME_DIR"
 }
@@ -319,9 +323,7 @@ start_LoL() {
     ( port_waiting_daemon ) | loading_screen &
 
     msg "Starting..."
-    WIN_CLIENT_EXE="$(winepath -w "$CLIENT_EXE" | \
-                      sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-    wine "$WIN_CLIENT_EXE" \
+    wine "$CLIENT_EXE" \
         --launch-product=league_of_legends \
         --launch-patchline=live
     wineserver --wait
@@ -330,6 +332,7 @@ start_LoL() {
 
 start_garena() {
     export_env_variables_garena
+    REAL_CLIENT_EXE="$CLIENT_EXE"
 
     if [ ! -f "$CLIENT_EXE" ]; then
         while :; do
@@ -366,11 +369,8 @@ start_garena() {
 
     # Launch the game directly with the riot argument (garena tokens)
     msg "Starting..."
-    REAL_CLIENT_EXE="$CLIENT_EXE"
     export_env_variables
-    WIN_CLIENT_EXE="$(winepath -w "$REAL_CLIENT_EXE" | \
-                      sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-    wine "$WIN_CLIENT_EXE" $riot_argument
+    wine "$REAL_CLIENT_EXE" $riot_argument
     wineserver --wait
     wait
 }
@@ -488,6 +488,7 @@ main() {
             pkill -f -- '--title=League of Legends' # kill the zenity dialog
             ;;
         run) shift; $@ ;;
+        run-garena) shift; export_env_variables_garena; $@ ;;
         *) die "Unknown command: ${1-}\n$(usage)" ;;
     esac
 }

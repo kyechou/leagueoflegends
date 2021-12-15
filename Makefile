@@ -4,7 +4,8 @@
 
 pkgname     := leagueoflegends
 
-prefix      := $(DESTDIR)/usr
+PREFIX		?= /usr
+prefix      := $(DESTDIR)$(PREFIX)
 bindir      := $(prefix)/bin
 datarootdir := $(prefix)/share
 docdir      := $(datarootdir)/doc/$(pkgname)

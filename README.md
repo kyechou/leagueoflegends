@@ -123,6 +123,10 @@ script.
 * Kill the Garena process to finish installation: `leagueoflegends kill-garena`.
     * Because the process will only be minimized to system tray upon exit.
 * Start the game: `leagueoflegends start-garena`.
+    * **[Note]** If the Garena client shows a black screen after logging in,
+      try removing the `libEGL.dll` files with `find
+      ~/.local/share/garena/drive_c/Program\ Files/Garena -type f -name
+      '*libEGL.dll' -exec rm {} \;`, and then restart the game.
     * This will start Garena. Navigate to LoL and press "Play" from Garena.
     * The game will not really start, but the script will remember the
       command-line arguments needed to launch the game, and then respawn a new

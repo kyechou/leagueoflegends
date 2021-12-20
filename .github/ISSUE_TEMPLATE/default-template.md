@@ -15,7 +15,9 @@ assignees: ''
  - DE/WM: [e.g. Gnome, KDE, i3, bspwm]
  - CPU: [e.g. Intel i7-9750H]
  - GPU: [e.g. GTX 1080 Ti]
- - Graphics card drivers: [e.g. `mesa`, `xf86-video-intel`, `nvidia`, `xf86-video-nouveau`]
+ - Graphics card drivers installed: [e.g. `mesa`, `xf86-video-intel`, `nvidia`, `xf86-video-nouveau`]
+
+If your issue is related to graphics display, please attach the output of `vulkaninfo`.
 
 ### Describe the issue
 

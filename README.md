@@ -7,6 +7,7 @@ running on Linux.
 ## Dependencies
 
 - [wine-ge-lol](https://github.com/GloriousEggroll/wine-ge-custom) (>= 6.0)
+    - [AUR](https://aur.archlinux.org/packages/wine-ge-lol)
 - winetricks
 - bash
 - curl

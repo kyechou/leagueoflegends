@@ -25,7 +25,7 @@ askQ() {
 }
 
 check_depends() {
-    depends=(wine wineboot winetricks winecfg wineserver curl)
+    depends=(wine wineboot winetricks winecfg wineserver winepath curl)
     for dep in ${depends[@]}; do
         if ! command -v "$dep" >/dev/null 2>&1; then
             die "Missing $dep"
@@ -40,8 +40,18 @@ check_depends() {
     done
 }
 
+check_syscall() {
+    if [ "$(cat /proc/sys/abi/vsyscall32)" -ne 0 ]; then
+        if [ ${HAS_ZENITY-0} -eq 1 ]; then
+            message="Your system is not configured to work with League's anticheat.\nPlease make sure the kernel parameter abi.vsyscall32 is set to 0."
+            zenity --warning --width=500 --title="League of Legends" \
+                --window-icon="$ICON" --text="$message"
+        fi
+        die "$message"
+    fi
+}
+
 export_env_variables() {
-    export PATH="/opt/wine-lol/bin:$PATH"
     export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
     export ICON="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
     export CACHE_DIR="$HOME/.cache/leagueoflegends"
@@ -67,6 +77,8 @@ export_env_variables() {
 export_env_variables_garena() {
     export_env_variables
     export WINEPREFIX="$HOME/.local/share/garena"
+    WINE_REQ_MOD+=(vcrun2013)   # https://github.com/GloriousEggroll/wine-ge-custom/releases/tag/7.0-GE-1-LoL
+    export WINE_REQ_MOD
     export INSTALL_DIR="$WINEPREFIX/drive_c/Program Files/Garena"
     export GARENA_EXE="$INSTALL_DIR/Garena/Garena.exe"
     if ls "$INSTALL_DIR"/Games/*/lol.version &>/dev/null; then
@@ -160,7 +172,7 @@ install_LoL() {
         curl --silent --show-error -Lo "$INSTALLER" "$INSTALLER_URL"
     fi
     msg "Installing League of Legends..."
-    wine "$INSTALLER"
+    wine "$(winepath -w "$INSTALLER")"
     msg "Waiting for wine processes..."
     wineserver --wait
     add_dxvk
@@ -228,7 +240,7 @@ install_garena() {
         curl --silent --show-error -Lo "$INSTALLER" "$URL"
     fi
     msg "Installing Garena..."
-    wine "$INSTALLER" &
+    wine "$(winepath -w "$INSTALLER")" &
     pid=$!
     until ! ps -p $pid >/dev/null; do sleep 1; done
     wineserver --kill
@@ -236,7 +248,7 @@ install_garena() {
     msg "Garena is installed at $INSTALL_DIR/Garena"
 
     msg "Installing LoL from Garena..."
-    wine "$GARENA_EXE" &
+    wine "$(winepath -w "$GARENA_EXE")" &
     pid=$!
     until ! ps -p $pid >/dev/null; do sleep 1; done
     wineserver --kill
@@ -324,7 +336,7 @@ start_LoL() {
     ( port_waiting_daemon ) | loading_screen &
 
     msg "Starting..."
-    wine "$CLIENT_EXE" \
+    wine "$(winepath -w "$CLIENT_EXE")" \
         --launch-product=league_of_legends \
         --launch-patchline=live
     wineserver --wait
@@ -333,7 +345,6 @@ start_LoL() {
 
 start_garena() {
     export_env_variables_garena
-    REAL_CLIENT_EXE="$CLIENT_EXE"
 
     if [ ! -f "$CLIENT_EXE" ]; then
         while :; do
@@ -353,8 +364,7 @@ start_garena() {
     # https://github.com/nhubaotruong/league-of-legends-linux-garena-script
     # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/
     # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/comment/gt7td4k/
-    export PATH="$(echo "$PATH" | sed 's,/opt/wine-lol/bin:,,g')"
-    wine "$GARENA_EXE" &
+    wine "$(winepath -w "$GARENA_EXE")" &
 
     # Get the Riot Client pid and command-line argument
     name=RiotClientServices.exe
@@ -370,8 +380,7 @@ start_garena() {
 
     # Launch the game directly with the riot argument (garena tokens)
     msg "Starting..."
-    export_env_variables
-    wine "$REAL_CLIENT_EXE" $riot_argument
+    wine "$(winepath -w "$CLIENT_EXE")" $riot_argument
     wineserver --wait
     wait
 }
@@ -455,6 +464,7 @@ EOF
 main() {
     check_depends
     export_env_variables
+    check_syscall
 
     while :; do
         case "${1-}" in

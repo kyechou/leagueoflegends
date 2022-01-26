@@ -6,7 +6,7 @@ running on Linux.
 
 ## Dependencies
 
-- [wine-lol](https://aur.archlinux.org/packages/wine-lol/) (>= 5.18)
+- [wine-ge-lol](https://github.com/GloriousEggroll/wine-ge-custom) (>= 6.0)
 - winetricks
 - bash
 - curl
@@ -69,8 +69,11 @@ script.
     * (Note) Please do not log in or launch the game during installation.
 * Exit the window when the game installation is finished.
 * Start the game: `leagueoflegends start`.
-    * (Note) It may take a while (1-2 minutes) before the game shows up, due to
-      this [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
+    * (Note) It may take a while (less than 5 minutes) before the game shows
+      up, due to this
+      [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
+      Please check out [here](https://bugs.winehq.org/show_bug.cgi?id=49412#c23)
+      for more details.
 * To remove the game: `leagueoflegends uninstall`.
 
 `leagueoflegends -h` can be used to view the full list of options and commands.

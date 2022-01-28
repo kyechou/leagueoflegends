@@ -41,17 +41,20 @@ check_depends() {
 }
 
 check_syscall() {
-    if [ "$(cat /proc/sys/abi/vsyscall32)" -ne 0 ]; then
-        if [ ${HAS_ZENITY-0} -eq 1 ]; then
-            message="Your system is not configured to work with League's anticheat.\nPlease make sure the kernel parameter abi.vsyscall32 is set to 0."
-            zenity --warning --width=500 --title="League of Legends" \
-                --window-icon="$ICON" --text="$message"
+    if [ "$(command -v wine)" = "/opt/wine-ge-lol/bin/wine" ]; then
+        if [ "$(cat /proc/sys/abi/vsyscall32)" -ne 0 ]; then
+            message="Your system is not configured to work with League's anticheat.\nPlease make sure the kernel parameter abi.vsyscall32 is set to 0.\nFor more detail, see https://github.com/kyechou/leagueoflegends"
+            if [ ${HAS_ZENITY-0} -eq 1 ]; then
+                zenity --warning --width=500 --title="League of Legends" \
+                    --window-icon="$ICON" --text="$message"
+            fi
+            die "$message"
         fi
-        die "$message"
     fi
 }
 
 export_env_variables() {
+    export PATH="/opt/wine-lol/bin:$PATH"
     export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
     export ICON="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
     export CACHE_DIR="$HOME/.cache/leagueoflegends"
@@ -77,7 +80,7 @@ export_env_variables() {
 export_env_variables_garena() {
     export_env_variables
     export WINEPREFIX="$HOME/.local/share/garena"
-    WINE_REQ_MOD+=(vcrun2013)   # https://github.com/GloriousEggroll/wine-ge-custom/releases/tag/7.0-GE-1-LoL
+    WINE_REQ_MOD+=(vcrun2013)   # https://bugs.winehq.org/show_bug.cgi?id=47375
     export WINE_REQ_MOD
     export INSTALL_DIR="$WINEPREFIX/drive_c/Program Files/Garena"
     export GARENA_EXE="$INSTALL_DIR/Garena/Garena.exe"

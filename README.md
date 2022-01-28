@@ -6,8 +6,10 @@ running on Linux.
 
 ## Dependencies
 
-- [wine-ge-lol](https://github.com/GloriousEggroll/wine-ge-custom) (>= 6.0)
-    - [AUR](https://aur.archlinux.org/packages/wine-ge-lol)
+- [wine-lol](https://github.com/M-Reimer/wine-lol)
+    ([AUR](https://aur.archlinux.org/packages/wine-lol))
+    or [wine-ge-lol](https://github.com/GloriousEggroll/wine-ge-custom)
+    ([AUR](https://aur.archlinux.org/packages/wine-ge-lol))
 - winetricks
 - bash
 - curl
@@ -34,7 +36,12 @@ running on Linux.
 
 ### Arch Linux
 
-Install the package from AUR: [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git).
+Install either one of the packages from AUR:
+- [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git)
+    uses `wine-lol` and `wine-lol-glibc`, not requiring setting
+    `abi.vsyscall32=0` globally.
+- [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git)
+    uses `wine-ge-lol`, and requires setting `abi.vsyscall32=0`.
 
 ### Debian/Ubuntu
 

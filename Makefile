@@ -7,7 +7,6 @@ pkgname     := leagueoflegends
 PREFIX      ?= /usr
 prefix      := $(DESTDIR)$(PREFIX)
 bindir      := $(prefix)/bin
-sysctldir   := $(prefix)/lib/sysctl.d
 datarootdir := $(prefix)/share
 docdir      := $(datarootdir)/doc/$(pkgname)
 iconsdir    := $(datarootdir)/icons
@@ -28,11 +27,9 @@ install:
 install-ge:
 	sed -i leagueoflegends -e 's,/opt/wine-lol/bin,/opt/wine-ge-lol/bin,'
 	make install
-	install -Dm644 90-league.conf -t $(sysctldir)
 
 uninstall:
 	@rm -vf $(bindir)/leagueoflegends
-	@rm -vf $(sysctldir)/90-league.conf
 	@rm -vf $(datarootdir)/applications/leagueoflegends.desktop
 	@rm -vf $(iconsdir)/hicolor/256x256/apps/leagueoflegends.png
 	@rm -vf $(docdir)/leagueoflegends.reg

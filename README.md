@@ -41,10 +41,7 @@ Install either one of the packages from AUR:
     uses `wine-lol` and `wine-lol-glibc`. No need to change any kernel
     parameters.
 - [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git)
-    uses `wine-ge-lol`, and requires setting `abi.vsyscall32=0`. Once
-    installed, the required configuration file should be at
-    `/usr/lib/sysctl.d`. To set the parameter without rebooting, run
-    `sysctl -p /usr/lib/sysctl.d/90-league.conf` with root privilege.
+    uses `wine-ge-lol`, and requires setting `abi.vsyscall32=0`.
 
 ### Debian/Ubuntu
 
@@ -54,7 +51,8 @@ Use the following commands to build the `.deb` packages.
 ./package.sh debian
 ```
 
-Then install either one of them.
+Then install either `leagueoflegends.deb` or `leagueoflegends-ge.deb`. Note
+that the latter requires setting `abi.vsyscall32=0`.
 
 ```sh
 sudo dpkg -i <package name>.deb

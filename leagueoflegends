@@ -364,6 +364,7 @@ start_garena() {
     fi
 
     # Start Garena in the background with wine >= 6.0
+    # Note that Garena is unsupported if wine-lol=5.18 is used.
     # https://github.com/nhubaotruong/league-of-legends-linux-garena-script
     # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/
     # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/comment/gt7td4k/

@@ -29,7 +29,6 @@ install-ge:
 	sed -i leagueoflegends -e 's,/opt/wine-lol/bin,/opt/wine-ge-lol/bin,'
 	make install
 	install -Dm644 90-league.conf -t $(sysctldir)
-	pkexec sysctl -p "$(sysctldir)/90-league.conf"
 
 uninstall:
 	@rm -vf $(bindir)/leagueoflegends

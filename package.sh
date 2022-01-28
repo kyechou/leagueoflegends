@@ -17,14 +17,15 @@ arch_pkg() {
     cd "$SCRIPT_DIR"
     git clone https://aur.archlinux.org/leagueoflegends-git.git aur
     pushd aur
-    makepkg -srcf
-    mv leagueoflegends-git-*.pkg.tar.* ../
+    makepkg -srcf   # This should build both packages
+    mv leagueoflegends-*.pkg.tar.* ../
     popd
 }
 
 debian_pkg() {
     cd "$SCRIPT_DIR"
 
+    # Build the one with wine-lol
     pkgname="leagueoflegends"
     pkgver="$(git describe --tags --long 2>/dev/null | awk -F- '{print $1}' | sed -e 's/^v//')"
     [ -z "$pkgver" ] && die "Version not found"
@@ -43,6 +44,31 @@ Architecture: all
 Maintainer: Kuan-Yen Chou <kuanyenchou@gmail.com>
 Installed-Size: $SIZE
 Depends: wine-lol:i386, winetricks, bash, curl, openssl, winbind, libgnutls30, libldap-2.4-2, libopenal1, libpulse0, libasound2, libodbc1, libvkd3d1, libvulkan1, mesa-vulkan-drivers
+Suggests: zenity
+Priority: optional
+Homepage: https://github.com/kyechou/leagueoflegends
+Description: League of Legends helper script
+EOF
+
+    dpkg-deb --root-owner-group --build "$debname"
+
+    # Build the one with wine-ge-lol
+    pkgname="leagueoflegends-ge"
+    debname="${pkgname}_${pkgver}_any"
+    mkdir -p "$debname/DEBIAN"
+
+    make DESTDIR="$debname" install-ge
+    pushd "$debname"
+    find * -type f ! -path 'DEBIAN/*' -exec md5sum '{}' \; > "DEBIAN/md5sums"
+    popd
+    SIZE="$(du "$debname" --exclude '*/DEBIAN/*' -s | cut -f 1)"
+    cat >"$debname/DEBIAN/control" <<EOF
+Package: $pkgname
+Version: $pkgver
+Architecture: all
+Maintainer: Kuan-Yen Chou <kuanyenchou@gmail.com>
+Installed-Size: $SIZE
+Depends: wine-ge-lol:i386, winetricks, bash, curl, openssl, winbind, libgnutls30, libldap-2.4-2, libopenal1, libpulse0, libasound2, libodbc1, libvkd3d1, libvulkan1, mesa-vulkan-drivers
 Suggests: zenity
 Priority: optional
 Homepage: https://github.com/kyechou/leagueoflegends

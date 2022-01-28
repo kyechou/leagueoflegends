@@ -38,28 +38,37 @@ running on Linux.
 
 Install either one of the packages from AUR:
 - [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git)
-    uses `wine-lol` and `wine-lol-glibc`, not requiring setting
-    `abi.vsyscall32=0` globally.
+    uses `wine-lol` and `wine-lol-glibc`. No need to change any kernel
+    parameters.
 - [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git)
-    uses `wine-ge-lol`, and requires setting `abi.vsyscall32=0`.
+    uses `wine-ge-lol`, and requires setting `abi.vsyscall32=0`. Once
+    installed, the required configuration file should be at
+    `/usr/lib/sysctl.d`. To set the parameter without rebooting, run
+    `sysctl -p /usr/lib/sysctl.d/90-league.conf` with root privilege.
 
 ### Debian/Ubuntu
 
-Use the following commands to build and install the `.deb` package.
+Use the following commands to build the `.deb` packages.
 
 ```sh
 ./package.sh debian
+```
+
+Then install either one of them.
+
+```sh
 sudo dpkg -i <package name>.deb
 ```
 
 ### Manual installation from source
 
-You can also install the helper script manually by:
+You can install the helper script manually by:
 
 ```sh
 $ git clone https://github.com/kyechou/leagueoflegends.git
 $ cd leagueoflegends
-$ sudo make install
+$ sudo make install  # OR
+$ sudo make install-ge
 ```
 
 

@@ -43,6 +43,10 @@ Install either one of the packages from AUR:
 - [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git)
     uses `wine-ge-lol`, and requires setting `abi.vsyscall32=0`.
 
+**Note that if you have trouble starting the client, similar to
+[#26](https://github.com/kyechou/leagueoflegends/issues/26), please use
+`leagueoflegends-ge-git` instead of `leagueoflegends-git`.**
+
 ### Debian/Ubuntu
 
 Use the following commands to build the `.deb` packages.
@@ -52,7 +56,8 @@ Use the following commands to build the `.deb` packages.
 ```
 
 Then install either `leagueoflegends.deb` or `leagueoflegends-ge.deb`. Note
-that the latter requires setting `abi.vsyscall32=0`.
+that some people have trouble starting the client with the former, and the
+latter requires setting `abi.vsyscall32=0`.
 
 ```sh
 sudo dpkg -i <package name>.deb

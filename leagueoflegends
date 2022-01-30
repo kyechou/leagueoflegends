@@ -43,7 +43,12 @@ check_depends() {
 check_syscall() {
     if [ "$(command -v wine)" = "/opt/wine-ge-lol/bin/wine" ]; then
         if [ "$(cat /proc/sys/abi/vsyscall32)" -ne 0 ]; then
-            message="Your system is not configured to work with League's anticheat.\nPlease make sure the kernel parameter abi.vsyscall32 is set to 0.\nFor more detail, see https://github.com/kyechou/leagueoflegends"
+            message=$(cat <<EOF
+Your system is not configured to work with League's anticheat.\n
+Please make sure the kernel parameter abi.vsyscall32 is set to 0.\n
+For more detail, see https://github.com/kyechou/leagueoflegends
+EOF
+            )
             if [ ${HAS_ZENITY-0} -eq 1 ]; then
                 zenity --warning --width=500 --title="League of Legends" \
                     --window-icon="$ICON" --text="$message"
@@ -121,13 +126,12 @@ install_LoL() {
         create_wineprefix
     elif [ -f "$CLIENT_EXE" ]; then
         while :; do
-            echo -n "[!] The game has been installed. Remove it and reinstall? [Y/n] "
-            read remove
-            remove="$(echo "$remove" | tr '[:upper:]' '[:lower:]')"
-            if [ -z "${remove##y*}" ]; then
-                rm -rf "$INSTALL_DIR"
+            echo -n "[!] The game has been installed. Install anyway? [Y/n] "
+            read force
+            force="$(echo "$force" | tr '[:upper:]' '[:lower:]')"
+            if [ -z "${force##y*}" ]; then
                 break
-            elif [ -z "${remove##n*}" ]; then
+            elif [ -z "${force##n*}" ]; then
                 exit 1
             fi
         done

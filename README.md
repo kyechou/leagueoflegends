@@ -3,8 +3,16 @@
 League of Legends (www.leagueoflegends.com) helper script for installing and
 running on Linux.
 
+**Note**: If you use Nvidia graphics card and have trouble launching the League
+client or start the game (after champion selection), please take a look at
+[here](https://www.reddit.com/r/leagueoflinux/comments/r0oo0p/i_got_league_working_again_on_my_nvidia_drivers/).
+
 
 ## Dependencies
+
+The following dependencies should be included in the AUR packages and the
+generated `.deb` package. If there's anything incorrect or missing, pull
+requests are appreciated.
 
 - [wine-lol](https://github.com/M-Reimer/wine-lol)
     ([AUR](https://aur.archlinux.org/packages/wine-lol))
@@ -20,6 +28,7 @@ running on Linux.
 - lib32-openal
 - lib32-libpulse
 - lib32-alsa-lib
+- lib32-mpg123
 - lib32-unixodbc
 - lib32-vkd3d
 - vulkan-icd-loader, lib32-vulkan-icd-loader
@@ -32,68 +41,47 @@ running on Linux.
 - zenity (optional for loading screen indication, see [#9](https://github.com/kyechou/leagueoflegends/pull/9))
 
 
-## Installation
-
-### Arch Linux
-
-Install either one of the packages from AUR:
-- [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git)
-    uses `wine-lol` and `wine-lol-glibc`. No need to change any kernel
-    parameters.
-- [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git)
-    uses `wine-ge-lol`, and requires setting `abi.vsyscall32=0`.
-
-**Note that if you have trouble starting the client, similar to
-[#26](https://github.com/kyechou/leagueoflegends/issues/26), please use
-`leagueoflegends-ge-git` instead of `leagueoflegends-git`.**
-
-### Debian/Ubuntu
-
-Use the following commands to build the `.deb` packages.
-
-```sh
-./package.sh debian
-```
-
-Then install either `leagueoflegends.deb` or `leagueoflegends-ge.deb`. Note
-that some people have trouble starting the client with the former, and the
-latter requires setting `abi.vsyscall32=0`.
-
-```sh
-sudo dpkg -i <package name>.deb
-```
-
-### Manual installation from source
-
-You can install the helper script manually by:
-
-```sh
-$ git clone https://github.com/kyechou/leagueoflegends.git
-$ cd leagueoflegends
-$ sudo make install  # OR
-$ sudo make install-ge
-```
-
-
 ## Configuration
 
-The configuration file is removed for simplicity. The game is installed at
+There is no configuration file. The game is installed at
 `~/.local/share/leagueoflegends/` by default. If you want to change the default
 location of the wine prefix or other parameters, please feel free to modify the
 script.
 
 
-## Usage
+## Installation
+
+### Install the helper script
+
+Please choose either of the two versions. The first one depends on M-Reimer's
+wine-lol and wine-lol-glibc, and does not require changing kernel parameters.
+The second one depends on GloriousEggroll's wine-ge-custom, and requires
+setting `abi.vsyscall32=0`, which may have a negative impact on the performance
+of other 32-bit wine applications.
+
+| Arch User Repository (AUR)                                                          | Debian/Ubuntu                                                   | Manual installation    |
+|-------------------------------------------------------------------------------------|-----------------------------------------------------------------|------------------------|
+| [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git)       | `./package.sh debian`<br/>`sudo dpkg -i leagueoflegends.deb`    | `sudo make install`    |
+| [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git) | `./package.sh debian`<br/>`sudo dpkg -i leagueoflegends-ge.deb` | `sudo make install-ge` |
+
+### Install the League client
 
 * First install the game: `leagueoflegends install`.
-    * (Note) Please do not log in or launch the game during installation.
-* Exit the window when the game installation is finished.
+    * Please do not log in or launch the game during installation.
+* When the Riot client appears and if the installation progress stucks at 100%,
+  close the window, and run `leagueoflegends install` again.
+    * For more detail, check out [this thread](https://www.reddit.com/r/leagueoflinux/comments/qavc89/install_stuck_on_downloading_100/).
+* Exit the window when the game installation is finished. (The progress circle
+  disappears.)
 * Start the game: `leagueoflegends start`.
-    * (Note) It may take a while (less than 5 minutes) before the game shows
+    * It may take a while (usually less than 5 minutes) before the game shows
       up, due to this
       [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
       Please check out [here](https://bugs.winehq.org/show_bug.cgi?id=49412#c23)
       for more details.
+* Log in with your Riot credentials.
+* Now the League client should show up. Please try a practice match to make
+  sure everything works.
 * To remove the game: `leagueoflegends uninstall`.
 
 `leagueoflegends -h` can be used to view the full list of options and commands.
@@ -125,7 +113,7 @@ script.
         run-garena <cmd>    Run shell command with environment variables
 ```
 
-### Setting up Garena (Southeast Asia)
+### Setting up Garena (Southeast Asia) (Todo)
 
 * First install Garena: `leagueoflegends install-garena`
     * Choose the region when prompted.
@@ -162,13 +150,14 @@ script.
 * To also remove the environment from which the game is launched:
   `leagueoflegends uninstall`.
 
-### Advanced wine configuration
+
+## Advanced wine configuration
 
 `leagueoflegends kill` would use `wineserver --kill` to try to kill all the wine
-processes of the current wine prefix, which might be helpful if some error
+processes of the current wine prefix, which can be helpful if some error
 happens and the script hangs.
 
 `leagueoflegends run <...>` can be use to run any command with the wine-related
 environment variables, such as `WINEARCH`, `WINEDLLOVERRIDES`, and `WINEPREFIX`.
 This way, you could easily run wine utilities like `leagueoflegends run
-winecfg`, or `leagueoflegends run wineserver --kill`, etc.
+winecfg`, or `leagueoflegends run winetricks`, etc.

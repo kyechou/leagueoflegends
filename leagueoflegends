@@ -44,8 +44,8 @@ check_syscall() {
     if [ "$(command -v wine)" = "/opt/wine-ge-lol/bin/wine" ]; then
         if [ "$(cat /proc/sys/abi/vsyscall32)" -ne 0 ]; then
             message=$(cat <<EOF
-Your system is not configured to work with League's anticheat.\n
-Please make sure the kernel parameter abi.vsyscall32 is set to 0.\n
+Your system is not configured to work with League's anticheat.
+Please make sure the kernel parameter abi.vsyscall32 is set to 0.
 For more detail, see https://github.com/kyechou/leagueoflegends
 EOF
             )
@@ -65,9 +65,9 @@ export_env_variables() {
     export CACHE_DIR="$HOME/.cache/leagueoflegends"
 
     export WINEARCH=win32
-    export WINEDEBUG=fixme-all
-    export WINEDLLOVERRIDES="mscoree,mshtml=;winemenubuilder.exe="
-    export WINE_REQ_MOD=(win10 d3dcompiler_43 d3dx9 vcrun2019)
+    export WINEDEBUG=-all
+    export WINEDLLOVERRIDES="mscoree,mshtml,winemenubuilder.exe=;d3d10,d3d11=n,b"
+    export WINE_REQ_MOD=(d3dx9 vcrun2019)
     export WINEPREFIX="$HOME/.local/share/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
@@ -118,6 +118,7 @@ create_wineprefix() {
     regedit "$REGFILE"
     msg "Waiting for wine processes..."
     wineserver --wait
+    add_dxvk
     msg "Wineprefix created: $WINEPREFIX"
 }
 
@@ -182,7 +183,6 @@ install_LoL() {
     wine "$(winepath -w "$INSTALLER")"
     msg "Waiting for wine processes..."
     wineserver --wait
-    add_dxvk
     msg "The game is installed at $INSTALL_DIR"
 }
 
@@ -190,7 +190,6 @@ install_garena() {
     # Create the wine environment from which we launch the game
     if [ ! -d "$WINEPREFIX" ]; then
         create_wineprefix
-        add_dxvk
     fi
 
     export_env_variables_garena
@@ -414,7 +413,7 @@ add_dxvk() {
 
     download_dxvk
     msg "Installing DXVK to $WINEPREFIX"
-    "$CACHE_DIR/dxvk-$DXVK_VERSION/setup_dxvk.sh" install
+    "$CACHE_DIR/dxvk-$DXVK_VERSION/setup_dxvk.sh" install --with-d3d10
     msg "DXVK is installed"
 }
 
@@ -477,7 +476,7 @@ main() {
     while :; do
         case "${1-}" in
         -h | --help) usage; exit ;;
-        -v | --verbose) set -x ;;
+        -v | --verbose) set -x; export WINEDEBUG=fixme-all ;;
         --) shift; break ;;
         -?*) die "Unknown option: ${1-}\n$(usage)" ;;
         *) break ;;

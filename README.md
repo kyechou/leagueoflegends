@@ -3,10 +3,6 @@
 League of Legends (www.leagueoflegends.com) helper script for installing and
 running on Linux.
 
-**Note**: If you use Nvidia graphics card and have trouble launching the League
-client or start the game (after champion selection), please take a look at
-[here](https://www.reddit.com/r/leagueoflinux/comments/r0oo0p/i_got_league_working_again_on_my_nvidia_drivers/).
-
 
 ## Dependencies
 
@@ -49,7 +45,7 @@ location of the wine prefix or other parameters, please feel free to modify the
 script.
 
 
-## Installation
+## Usage
 
 ### Install the helper script
 
@@ -83,6 +79,11 @@ of other 32-bit wine applications.
 * Now the League client should show up. Please try a practice match to make
   sure everything works.
 * To remove the game: `leagueoflegends uninstall`.
+
+**Note**: If you use Nvidia graphics card and have trouble launching the League
+client or start the game (after champion selection), you may want to purge and
+reinstall Nvidia related packages as described
+[here](https://www.reddit.com/r/leagueoflinux/comments/r0oo0p/i_got_league_working_again_on_my_nvidia_drivers/).
 
 `leagueoflegends -h` can be used to view the full list of options and commands.
 

@@ -49,11 +49,11 @@ script.
 
 ### Install the helper script
 
-Please choose either of the two versions. The first one depends on M-Reimer's
-wine-lol and wine-lol-glibc, and does not require changing kernel parameters.
-The second one depends on GloriousEggroll's wine-ge-custom, and requires
-setting `abi.vsyscall32=0`, which may have a negative impact on the performance
-of other 32-bit wine applications.
+Please choose either of the two versions. The first one (recommended) depends
+on M-Reimer's wine-lol and wine-lol-glibc, and does not require changing kernel
+parameters. The second one depends on GloriousEggroll's wine-ge-custom, and
+requires setting `abi.vsyscall32=0`, which may have a negative impact on the
+performance of other 32-bit wine applications.
 
 | Arch User Repository (AUR)                                                          | Debian/Ubuntu                                                   | Manual installation    |
 |-------------------------------------------------------------------------------------|-----------------------------------------------------------------|------------------------|

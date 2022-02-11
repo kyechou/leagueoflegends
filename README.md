@@ -84,6 +84,10 @@ performance of other 32-bit wine applications.
 client or start the game (after champion selection), you may want to purge and
 reinstall Nvidia related packages as described
 [here](https://www.reddit.com/r/leagueoflinux/comments/r0oo0p/i_got_league_working_again_on_my_nvidia_drivers/).
+Alternatively, replacing `export DXVK_STATE_CACHE_PATH="$CACHE_DIR"` with `export DXVK_STATE_CACHE="0"` in the 
+helper script and clearing `.dxvk-cache` files
+([walkthrough here](https://www.reddit.com/r/leagueoflinux/comments/skyg70/fixing_the_nvidia_495_black_screen_crash_problem/))
+may also fix problems with Nvidia cards.
 
 `leagueoflegends -h` can be used to view the full list of options and commands.
 

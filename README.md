@@ -106,6 +106,7 @@ troubleshooting section](#blank-screen-with-nvidia-graphics-card).
         reinstall-garena    Reinstall Garena
         add-dxvk            Install DXVK to the LoL wineprefix
         del-dxvk            Remove DXVK from the LoL wineprefix
+        rm-dxvk-cache       Remove DXVK cache
         cleanup-logs        Remove log files
         kill                Kill the wine processes of the wineprefix
         kill-garena         Kill the Garena wine processes

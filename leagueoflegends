@@ -67,7 +67,7 @@ export_env_variables() {
     export WINEARCH=win32
     export WINEDEBUG=-all
     export WINEDLLOVERRIDES="mscoree,mshtml,winemenubuilder.exe=;d3d10,d3d11=n,b"
-    export WINE_REQ_MOD=(d3dx9 vcrun2019)
+    export WINE_REQ_MOD=(vcrun2019)
     export WINEPREFIX="$HOME/.local/share/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
@@ -79,7 +79,7 @@ export_env_variables() {
     export __GL_SHADER_DISK_CACHE_PATH="$WINEPREFIX"
     export __GL_THREADED_OPTIMIZATIONS=1
     export DXVK_LOG_LEVEL=none
-    export DXVK_STATE_CACHE_PATH="$CACHE_DIR"
+    export DXVK_STATE_CACHE=0
 }
 
 export_env_variables_garena() {
@@ -406,6 +406,12 @@ download_dxvk() {
     tar xzf "$DXVK_TARBALL" -C "$CACHE_DIR"
 }
 
+rm_dxvk_cache() {
+    if [ -d "$CACHE_DIR" ]; then
+        find "$CACHE_DIR" -type f -name '*.dxvk-cache' -exec rm {} +
+    fi
+}
+
 add_dxvk() {
     if [ ! -d "$WINEPREFIX" ]; then
         die "The game is not installed. Please install it first"
@@ -460,6 +466,7 @@ usage() {
         reinstall-garena    Reinstall Garena
         add-dxvk            Install DXVK to the LoL wineprefix
         del-dxvk            Remove DXVK from the LoL wineprefix
+        rm-dxvk-cache       Remove DXVK cache
         cleanup-logs        Remove log files
         kill                Kill the wine processes of the wineprefix
         kill-garena         Kill the Garena wine processes
@@ -495,6 +502,7 @@ main() {
         reinstall-garena) uninstall_garena && install_garena ;;
         add-dxvk) add_dxvk ;;
         del-dxvk) del_dxvk ;;
+        rm-dxvk-cache) rm_dxvk_cache ;;
         cleanup-logs) cleanup_logs ;;
         kill)
             wineserver --kill

@@ -55,6 +55,10 @@ parameters. The second one depends on GloriousEggroll's wine-ge-custom, and
 requires setting `abi.vsyscall32=0`, which may have a negative impact on the
 performance of other 32-bit wine applications.
 
+For auto setting `abi.vsyscall32=0`, you can create a file `/etc/sysctl.d/99-vsyscall32.conf` with `abi.vsyscall32=0` content.
+`# echo "abi.vsyscall32=0" >> /etc/sysctl.d/99-vsyscall32.conf`
+
+
 | Arch User Repository (AUR)                                                          | Debian/Ubuntu                                                   | Manual installation    |
 |-------------------------------------------------------------------------------------|-----------------------------------------------------------------|------------------------|
 | [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git)       | `./package.sh debian`<br/>`sudo dpkg -i leagueoflegends.deb`    | `sudo make install`    |

@@ -171,3 +171,8 @@ caching is currently disabled.
 If the issue still remains, you may want to purge and reinstall the Nvidia
 related packages as described
 [here](https://www.reddit.com/r/leagueoflinux/comments/r0oo0p/i_got_league_working_again_on_my_nvidia_drivers/).
+
+Alternatively, as a quick (and dirty?) solution, remove the `nvidia` package and
+install `nvidia-dkms` instead. Remember to also install the kernel headers
+packages according to your kernel (e.g., `linux-headers`). Then reboot and
+reinstall LoL.

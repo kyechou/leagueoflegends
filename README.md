@@ -114,7 +114,7 @@ troubleshooting section](#blank-screen-with-nvidia-graphics-card).
         run-garena <cmd>    Run shell command with environment variables
 ```
 
-### Setting up Garena (Southeast Asia) (Todo)
+### Setting up Garena (Southeast Asia)
 
 * First install Garena: `leagueoflegends install-garena`
     * Choose the region when prompted.
@@ -135,18 +135,10 @@ troubleshooting section](#blank-screen-with-nvidia-graphics-card).
 * Kill the Garena process to finish installation: `leagueoflegends kill-garena`.
     * Because the process will only be minimized to system tray upon exit.
 * Start the game: `leagueoflegends start-garena`.
-    * **[Note]** If the Garena client shows a black screen after logging in,
-      try removing the `libEGL.dll` files with `find
-      ~/.local/share/garena/drive_c/Program\ Files/Garena -type f -name
-      '*libEGL.dll' -exec rm {} \;`, and then restart the game.
     * This will start Garena. Navigate to LoL and press "Play" from Garena.
-    * The game will not really start, but the script will remember the
-      command-line arguments needed to launch the game, and then respawn a new
-      game by invoking the Riot client directly with the arguments.
-      For more information, please refer to the script and the related Reddit
-      threads documented inside.
-    * Similarly, it may take a while (1-2 minutes) before the game shows up,
-      due to this [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
+    * Similarly, it may take a while (usually less than 5 minutes) before the
+      game shows up, due to this
+      [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
 * To remove the game: `leagueoflegends uninstall-garena`.
 * To also remove the environment from which the game is launched:
   `leagueoflegends uninstall`.
@@ -174,8 +166,8 @@ start the game (after champion selection), please exit the game (with
 Garena version) and then try `leagueoflegends rm-dxvk-cache` before restarting
 it. This should only need to be done once to clean up the old cache, since DXVK
 caching is currently disabled.
-([Reference](https://www.reddit.com/r/leagueoflinux/comments/r0oo0p/i_got_league_working_again_on_my_nvidia_drivers/))
+([Reference](https://www.reddit.com/r/leagueoflinux/comments/skyg70/fixing_the_nvidia_495_black_screen_crash_problem/))
 
 If the issue still remains, you may want to purge and reinstall the Nvidia
 related packages as described
-[here](https://www.reddit.com/r/leagueoflinux/comments/skyg70/fixing_the_nvidia_495_black_screen_crash_problem/).
+[here](https://www.reddit.com/r/leagueoflinux/comments/r0oo0p/i_got_league_working_again_on_my_nvidia_drivers/).

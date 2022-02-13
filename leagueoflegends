@@ -11,6 +11,11 @@ die() {
     exit 1
 }
 
+version_le() {
+    lesser_version="$(echo -e "$1\n$2" | sort -V | head -n1)"
+    [ "$1" = "$lesser_version" ]
+}
+
 askQ() {
     count=1
     first_arg="$2"
@@ -95,6 +100,18 @@ export_env_variables_garena() {
     else
         export GAME_DIR=""
         export CLIENT_EXE=""
+    fi
+
+    WINE_VERSION="$(wine --version | cut -d ' ' -f 1 | sed 's/wine-//')"
+    if version_le "6.0" "$WINE_VERSION"; then
+        export PATH_GARENA="$PATH"
+    else
+        local PATH="$(echo "$PATH" | sed 's,/opt/wine-lol/bin:,,g')"
+        export PATH_GARENA="$PATH"
+        WINE_GARENA_VERSION="$(wine --version | cut -d ' ' -f 1 | sed 's/wine-//')"
+        if ! version_le "6.0" "$WINE_GARENA_VERSION"; then
+            die "The wine version $WINE_GARENA_VERSION is too old for running Garena client"
+        fi
     fi
 }
 
@@ -366,11 +383,16 @@ start_garena() {
         done
     fi
 
+    # Remove libEGL.dll files for Garena client having blank screen
+    find "$INSTALL_DIR" -type f -name '*libEGL.dll' -exec rm {} +
+
     # Start Garena in the background with wine >= 6.0
     # Note that Garena is unsupported if wine-lol=5.18 is used.
     # https://github.com/nhubaotruong/league-of-legends-linux-garena-script
     # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/
     # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/comment/gt7td4k/
+    OLD_PATH=$PATH
+    export PATH=$PATH_GARENA
     wine "$(winepath -w "$GARENA_EXE")" &
 
     # Get the Riot Client pid and command-line argument
@@ -387,6 +409,7 @@ start_garena() {
 
     # Launch the game directly with the riot argument (garena tokens)
     msg "Starting..."
+    export PATH=$OLD_PATH
     wine "$(winepath -w "$CLIENT_EXE")" $riot_argument
     wineserver --wait
     wait

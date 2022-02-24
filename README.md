@@ -60,10 +60,10 @@ changes between reboots, please checkout the documentation of your own
 distribution. Typically you may want to do something like `echo 'abi.vsyscall32
 = 0' >> /etc/sysctl.d/99-league.conf`.
 
-| Arch User Repository (AUR)                                                          | Debian/Ubuntu                                                   | Manual installation    |
-|-------------------------------------------------------------------------------------|-----------------------------------------------------------------|------------------------|
-| [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git)       | `./package.sh debian`<br/>`sudo dpkg -i leagueoflegends.deb`    | `sudo make install`    |
-| [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git) | `./package.sh debian`<br/>`sudo dpkg -i leagueoflegends-ge.deb` | `sudo make install-ge` |
+| Arch User Repository (AUR)                                                          | Debian/Ubuntu                                       | Manual installation    |
+|-------------------------------------------------------------------------------------|-----------------------------------------------------|------------------------|
+| [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git)       | `./package.sh debian`<br/>`sudo dpkg -i <deb_file>` | `sudo make install`    |
+| [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git) | `./package.sh debian`<br/>`sudo dpkg -i <deb_file>` | `sudo make install-ge` |
 
 ### Install the League client
 

@@ -28,8 +28,8 @@ requests are appreciated.
 - lib32-unixodbc
 - lib32-vkd3d
 - vulkan-icd-loader, lib32-vulkan-icd-loader
-- [Vulkan drivers](https://wiki.archlinux.org/index.php/Vulkan) for your graphic
-  cards. For example:
+- [Vulkan drivers](https://wiki.archlinux.org/title/Vulkan) *for your graphic
+  cards*. For example:
     - lib32-vulkan-intel
     - lib32-nvidia-utils
     - lib32-vulkan-radeon
@@ -64,6 +64,20 @@ distribution. Typically you may want to do something like `echo 'abi.vsyscall32
 |-------------------------------------------------------------------------------------|-----------------------------------------------------|------------------------|
 | [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git)       | `./package.sh debian`<br/>`sudo dpkg -i <deb_file>` | `sudo make install`    |
 | [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git) | `./package.sh debian`<br/>`sudo dpkg -i <deb_file>` | `sudo make install-ge` |
+
+### Pre-installation checks (Important!)
+
+1. Please make sure you have installed the Vulkan driver for your graphic card
+   that you will be using. You can check what is installed by running `pacman
+   -Qi <pkg-name>` or `ls /usr/share/vulkan/icd.d/`.
+2. Please *use the driver of your active graphic card* to run the script!
+   Accidentally using the wrong driver is the cause of most issues. You can set
+   the preference of the Vulkan drivers by setting the environment variable
+   `VK_ICD_FILENAMES`. You don't have to do this step if there is only one
+   driver installed. For `VK_ICD_FILENAMES`, please supply the full path of the
+   file under `/usr/share/vulkan/icd.d/`. Colons can be used to separate
+   multiple files. (Please see [the
+   wiki](https://wiki.archlinux.org/title/Vulkan) for more information.)
 
 ### Install the League client
 

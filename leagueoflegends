@@ -506,7 +506,10 @@ main() {
     while :; do
         case "${1-}" in
         -h | --help) usage; exit ;;
-        -v | --verbose) set -x; export WINEDEBUG=fixme-all ;;
+        -v | --verbose)
+            set -x
+            export WINEDEBUG=fixme-all
+            export VK_LOADER_DEBUG=all ;;
         --) shift; break ;;
         -?*) die "Unknown option: ${1-}\n$(usage)" ;;
         *) break ;;

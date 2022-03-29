@@ -28,13 +28,18 @@ requests are appreciated.
 - lib32-unixodbc
 - lib32-vkd3d
 - vulkan-icd-loader, lib32-vulkan-icd-loader
-- [Vulkan drivers](https://wiki.archlinux.org/title/Vulkan) *for your graphic
-  cards*. For example:
+- [Vulkan drivers](https://wiki.archlinux.org/title/Vulkan) **for your graphic
+  cards**. For example:
     - lib32-vulkan-intel
-    - lib32-nvidia-utils
+    - lib32-nvidia-utils (Debian/Ubuntu: libnvidia-glvkspirv:i386 libglx-nvidia0:i386)
     - lib32-vulkan-radeon
     - lib32-amdvlk
 - zenity (optional for loading screen indication, see [#9](https://github.com/kyechou/leagueoflegends/pull/9))
+
+Note that the above package names are based on Arch Linux. For other
+distributions that are not Arch-based, the names will most likely differ.
+Please refer to the documentation of your distribution for installing the
+correct Vulkan drivers and other dependencies.
 
 
 ## Configuration
@@ -70,7 +75,7 @@ distribution. Typically you may want to do something like `echo 'abi.vsyscall32
 1. Please make sure you have installed the Vulkan driver for your graphic card
    that you will be using. You can check what is installed by running `pacman
    -Qi <pkg-name>` or `ls /usr/share/vulkan/icd.d/`.
-2. Please *use the driver of your active graphic card* to run the script!
+2. Please **use the driver of your active graphic card** to run the script!
    Accidentally using the wrong driver is the cause of most issues. You can set
    the preference of the Vulkan drivers by setting the environment variable
    `VK_ICD_FILENAMES`. You don't have to do this step if there is only one

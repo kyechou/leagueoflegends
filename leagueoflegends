@@ -76,6 +76,7 @@ export_env_variables() {
     export WINEPREFIX="$HOME/.local/share/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
+    export RUNES_FILE="$INSTALL_DIR/League of Legends/Config/PerksPreferences.yaml"
 
     export MESA_GLTHREAD=true
     export STAGING_SHARED_MEMORY=1
@@ -97,9 +98,11 @@ export_env_variables_garena() {
     if ls "$INSTALL_DIR"/Games/*/lol.version &>/dev/null; then
         export GAME_DIR="$(dirname "$(ls "$INSTALL_DIR"/Games/*/lol.version | head -n1)")"
         export CLIENT_EXE="$GAME_DIR/Riot Client/RiotClientServices.exe"
+        export RUNES_FILE="$GAME_DIR/League of Legends/Config/PerksPreferences.yaml"
     else
         export GAME_DIR=""
         export CLIENT_EXE=""
+        export RUNES_FILE=""
     fi
 
     WINE_VERSION="$(wine --version | cut -d ' ' -f 1 | sed 's/wine-//')"
@@ -340,6 +343,14 @@ loading_screen() {
     fi
 }
 
+save_runes() {
+    # Temporary workaround to prevent the rune pages getting overwritten when
+    # the League client launches (https://github.com/kyechou/leagueoflegends/issues/38)
+    if [ -f "$RUNES_FILE" ]; then
+        chmod a-w "$RUNES_FILE"
+    fi
+}
+
 start_LoL() {
     if [ ! -f "$CLIENT_EXE" ]; then
         while :; do
@@ -359,6 +370,7 @@ start_LoL() {
     ( port_waiting_daemon ) | loading_screen &
 
     msg "Starting..."
+    save_runes
     wine "$(winepath -w "$CLIENT_EXE")" \
         --launch-product=league_of_legends \
         --launch-patchline=live
@@ -409,6 +421,7 @@ start_garena() {
 
     # Launch the game directly with the riot argument (garena tokens)
     msg "Starting..."
+    save_runes
     export PATH=$OLD_PATH
     wine "$(winepath -w "$CLIENT_EXE")" $riot_argument
     wineserver --wait

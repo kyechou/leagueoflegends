@@ -73,17 +73,9 @@ distribution. Typically you may want to do something like `echo 'abi.vsyscall32
 
 ### Pre-installation checks (Important!)
 
-1. Please make sure you have installed the Vulkan driver for your graphic card
-   that you will be using. You can check what is installed by running `pacman
-   -Qi <pkg-name>` or `ls /usr/share/vulkan/icd.d/`.
-2. Please **use the driver of your active graphic card** to run the script!
-   Accidentally using the wrong driver is the cause of most issues. You can set
-   the preference of the Vulkan drivers by setting the environment variable
-   `VK_ICD_FILENAMES`. You don't have to do this step if there is only one
-   driver installed. For `VK_ICD_FILENAMES`, please supply the full path of the
-   file under `/usr/share/vulkan/icd.d/`. Colons can be used to separate
-   multiple files. (Please see [the
-   wiki](https://wiki.archlinux.org/title/Vulkan) for more information.)
+* Please make sure you have installed the Vulkan driver for your graphic card
+  that you will be using. You can check what is installed by running `pacman
+  -Qi <pkg-name>` or `ls /usr/share/vulkan/icd.d/`.
 
 ### Install the League client
 

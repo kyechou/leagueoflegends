@@ -19,6 +19,7 @@ requests are appreciated.
 - curl
 - openssl
 - samba
+- mesa-utils
 - lib32-gnutls
 - lib32-libldap
 - lib32-openal

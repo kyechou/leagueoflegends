@@ -7,7 +7,8 @@ assignees: ''
 
 ---
 
-!! Before creating an issue, please take a look at the [troubleshooting section](https://old.reddit.com/r/leagueoflinux/wiki/index#wiki_3_-_.1F527_tech_support_and_troubleshooting).
+Before creating an issue, please take a look at the [troubleshooting
+section](https://old.reddit.com/r/leagueoflinux/wiki/index#wiki_3_-_.1F527_tech_support_and_troubleshooting).
 
 ### System information
 
@@ -17,7 +18,7 @@ assignees: ''
  - GPU: [e.g. GTX 1080 Ti]
  - Graphics card drivers installed: [e.g. `mesa`, `xf86-video-intel`, `nvidia`, `xf86-video-nouveau`]
 
-If your issue is related to graphics display, please attach the output of `vulkaninfo`.
+If your issue is related to graphics display, please attach the output of `vulkaninfo --summary`.
 
 ### Describe the issue
 
@@ -25,7 +26,10 @@ A clear and concise description of what the issue is.
 
 ### Steps to reproduce
 
-**Note:** Use the `-v` option and attach the verbose log outputs for all relevant commands. For long texts/logs, consider sharing them via services like [Gist](https://gist.github.com/). Do not attach screenshots for text/log outputs.
+**Note:** Use the `-v` option and attach the verbose log outputs for all
+relevant commands. For long texts/logs, consider sharing them via services like
+[Gist](https://gist.github.com/). Please do not attach screenshots for text/log
+outputs.
 
 1. Go to '....'
 2. Click on '....'
@@ -34,4 +38,4 @@ A clear and concise description of what the issue is.
 
 ### Screenshots
 
-If applicable, add screenshots to help explain your problem.
+If applicable, add screenshots for the issue.

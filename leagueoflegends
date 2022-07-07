@@ -383,14 +383,14 @@ start_LoL() {
         done
     fi
 
-    # prelaunch helper
-    ( port_waiting_daemon ) | loading_screen &
+    # prelaunch helper (disabled for fixed wine-lol)
+    #( port_waiting_daemon ) | loading_screen &
 
     msg "Starting..."
     save_runes
-    wine "$(winepath -w "$CLIENT_EXE")" \
-        --launch-product=league_of_legends \
-        --launch-patchline=live
+    wine "$(winepath -w "$CLIENT_EXE")"# \
+        #--launch-product=league_of_legends \
+        #--launch-patchline=live
     wineserver --wait
     wait
 }

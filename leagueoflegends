@@ -117,24 +117,6 @@ export_env_variables_garena() {
     fi
 }
 
-check_syscall() {
-    if [ "$(command -v wine)" = "/opt/wine-ge-lol/bin/wine" ]; then
-        if [ "$(cat /proc/sys/abi/vsyscall32)" -ne 0 ]; then
-            message=$(cat <<EOF
-Your system is not configured to work with League's anticheat.
-Please make sure the kernel parameter abi.vsyscall32 is set to 0.
-For more detail, see https://github.com/kyechou/leagueoflegends
-EOF
-            )
-            if [ ${HAS_ZENITY-0} -eq 1 ]; then
-                zenity --warning --width=500 --title="League of Legends" \
-                    --window-icon="$ICON" --text="$message"
-            fi
-            die "$message"
-        fi
-    fi
-}
-
 create_wineprefix() {
     if [ -e "$WINEPREFIX" ]; then
         die "Wineprefix $WINEPREFIX already exists"
@@ -383,14 +365,9 @@ start_LoL() {
         done
     fi
 
-    # prelaunch helper
-    ( port_waiting_daemon ) | loading_screen &
-
     msg "Starting..."
     save_runes
-    wine "$(winepath -w "$CLIENT_EXE")" \
-        --launch-product=league_of_legends \
-        --launch-patchline=live
+    wine "$(winepath -w "$CLIENT_EXE")"
     wineserver --wait
     wait
 }
@@ -532,7 +509,6 @@ main() {
     check_depends
     check_vulkan
     export_env_variables
-    check_syscall
 
     while :; do
         case "${1-}" in

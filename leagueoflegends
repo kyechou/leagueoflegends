@@ -63,7 +63,7 @@ check_vulkan() {
 }
 
 export_env_variables() {
-    export PATH="/opt/wine-lol/bin:$PATH"
+    export PATH="/opt/wine-lol/bin:/opt/wine-ge-lol/bin:$PATH"
     export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
     export ICON="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
     export CACHE_DIR="$HOME/.cache/leagueoflegends"
@@ -85,6 +85,8 @@ export_env_variables() {
     export __GL_THREADED_OPTIMIZATIONS=1
     export DXVK_LOG_LEVEL=none
     export DXVK_STATE_CACHE=0
+
+    export WINE_GE_ENABLED=false
 }
 
 export_env_variables_garena() {
@@ -117,13 +119,30 @@ export_env_variables_garena() {
     fi
 }
 
+change_vsyscall32() {
+    # It's an ugly hack but works. Tries to change the value if its set passwordless in the background and then kills it, so it doesnt get stuck in the password prompt
+    sudo sysctl -w abi.vsyscall32=$1 2> /dev/null &
+    sleep 0.1
+    kill %1
+}
+
 check_syscall() {
+    echo `command -v wine`
     if [ "$(command -v wine)" = "/opt/wine-ge-lol/bin/wine" ]; then
+        
+        WINE_GE_ENABLED=true
+
+        # Automated vsyscall here , if fails shows the usual warning (if done the step 3 in this guide https://www.reddit.com/r/leagueoflinux/comments/peylbm/fully_automate_abivsyscall32/)
+        change_vsyscall32 0
+
         if [ "$(cat /proc/sys/abi/vsyscall32)" -ne 0 ]; then
             message=$(cat <<EOF
 Your system is not configured to work with League's anticheat.
 Please make sure the kernel parameter abi.vsyscall32 is set to 0.
 For more detail, see https://github.com/kyechou/leagueoflegends
+
+If you want to automate it, check the step 3 here: done the step 3
+in this guide https://www.reddit.com/r/leagueoflinux/comments/peylbm/fully_automate_abivsyscall32/
 EOF
             )
             if [ ${HAS_ZENITY-0} -eq 1 ]; then
@@ -383,16 +402,24 @@ start_LoL() {
         done
     fi
 
-    # prelaunch helper (disabled for fixed wine-lol)
-    #( port_waiting_daemon ) | loading_screen &
-
     msg "Starting..."
     save_runes
-    wine "$(winepath -w "$CLIENT_EXE")"# \
-        #--launch-product=league_of_legends \
-        #--launch-patchline=live
+
+    # If using wine-lol-ge disable flags and port daemon
+    if [ "$WINE_GE_ENABLED" = true ]; then
+        wine "$(winepath -w "$CLIENT_EXE")"
+    else
+        # prelaunch helper
+        (port_waiting_daemon ) | loading_screen &
+        wine "$(winepath -w "$CLIENT_EXE")" \        
+        --launch-product=league_of_legends \
+        --launch-patchline=live
+    fi
     wineserver --wait
     wait
+
+    # Restore vsyscall when game finishes
+    change_vsyscall32 1
 }
 
 start_garena() {
@@ -562,6 +589,7 @@ main() {
         rm-dxvk-cache) rm_dxvk_cache ;;
         cleanup-logs) cleanup_logs ;;
         kill)
+            change_vsyscall32 1
             wineserver --kill
             pkill -f -- '--title=League of Legends' # kill the zenity dialog
             ;;

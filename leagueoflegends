@@ -388,6 +388,7 @@ save_runes() {
 }
 
 start_LoL() {
+    check_syscall
     if [ ! -f "$CLIENT_EXE" ]; then
         while :; do
             echo -n "[!] The game is not installed. Install it? [Y/n] "
@@ -525,6 +526,22 @@ cleanup_logs() {
     fi
 }
 
+passwordless() {
+    # Creating temp sudoers.d file with current user
+    cat << EOF > /tmp/vsyscall32_passwordless
+`whoami` ALL = NOPASSWD: /sbin/sysctl -w abi.vsyscall32=0
+`whoami` ALL = NOPASSWD: /sbin/sysctl -w abi.vsyscall32=1
+EOF
+
+    # Set correct permissions and copy file
+    msg "We need sudo rights to create /etc/sudoers.d/vsyscall32_passwordless"
+    sudo chown root /tmp/vsyscall32_passwordless
+    sudo chgrp root /tmp/vsyscall32_passwordless
+    sudo chmod 440 /tmp/vsyscall32_passwordless
+    sudo mv /tmp/vsyscall32_passwordless /etc/sudoers.d/
+    msg "Done!"
+}
+
 usage() {
     cat <<EOF
 [!] Usage: $(basename "${BASH_SOURCE[0]}") [options] <command>
@@ -532,7 +549,7 @@ usage() {
     League of Legends - helper program
 
     Options:
-        -h, --help          Print this message and exit
+        -h, --help          Print thiy message and exit
         -v, --verbose       Enable verbose output
 
     Commands:
@@ -544,6 +561,7 @@ usage() {
         install-garena      Install Garena
         uninstall-garena    Uninstall Garena
         reinstall-garena    Reinstall Garena
+        passwordless        Adds the sudoers permissions to automate toggling abi.vsyscall32
         add-dxvk            Install DXVK to the LoL wineprefix
         del-dxvk            Remove DXVK from the LoL wineprefix
         rm-dxvk-cache       Remove DXVK cache
@@ -559,7 +577,6 @@ main() {
     check_depends
     check_vulkan
     export_env_variables
-    check_syscall
 
     while :; do
         case "${1-}" in
@@ -584,6 +601,7 @@ main() {
         install-garena) install_garena ;;
         uninstall-garena) uninstall_garena ;;
         reinstall-garena) uninstall_garena && install_garena ;;
+        passwordless) passwordless ;;
         add-dxvk) add_dxvk ;;
         del-dxvk) del_dxvk ;;
         rm-dxvk-cache) rm_dxvk_cache ;;

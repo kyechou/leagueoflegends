@@ -26,10 +26,6 @@ install:
 	install -Dm644 LICENSE                  -t $(licensesdir)
 	install -Dm644 completion.bash             $(bashcompdir)/$(pkgname)
 
-install-ge:
-	sed -i leagueoflegends -e 's,/opt/wine-lol/bin,/opt/wine-ge-lol/bin,'
-	make install
-
 uninstall:
 	@rm -vf $(bindir)/leagueoflegends
 	@rm -vf $(datarootdir)/applications/leagueoflegends.desktop
@@ -40,4 +36,4 @@ uninstall:
 	@rm -vf $(licensesdir)/LICENSE
 	@rm -vf $(bashcompdir)/$(pkgname)
 
-.PHONY: nop install install-ge uninstall
+.PHONY: nop install uninstall

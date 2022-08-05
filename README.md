@@ -1,19 +1,17 @@
 # League of Legends
 
-League of Legends (www.leagueoflegends.com) helper script for installing and
+[League of Legends](https://www.leagueoflegends.com) helper script for installing and
 running on Linux.
 
 
 ## Dependencies
 
-The following dependencies should be included in the AUR packages and the
-generated `.deb` package. If there's anything incorrect or missing, pull
-requests are appreciated.
+The following dependencies are included in the AUR package and the generated
+`.deb` package. If there's anything incorrect or missing, pull requests are
+appreciated.
 
 - [wine-lol](https://github.com/M-Reimer/wine-lol)
     ([AUR](https://aur.archlinux.org/packages/wine-lol))
-    or [wine-ge-lol](https://github.com/GloriousEggroll/wine-ge-custom)
-    ([AUR](https://aur.archlinux.org/packages/wine-ge-lol))
 - winetricks
 - bash
 - curl
@@ -35,7 +33,8 @@ requests are appreciated.
     - lib32-nvidia-utils (Debian/Ubuntu: libnvidia-glvkspirv:i386 libglx-nvidia0:i386)
     - lib32-vulkan-radeon
     - lib32-amdvlk
-- zenity (optional for loading screen indication, see [#9](https://github.com/kyechou/leagueoflegends/pull/9))
+- zenity (optional for loading screen indication, see
+    [#9](https://github.com/kyechou/leagueoflegends/pull/9))
 
 Note that the above package names are based on Arch Linux. For other
 distributions that are not Arch-based, the names will most likely differ.
@@ -53,48 +52,35 @@ script.
 
 ## Usage
 
-### Install the helper script
+### Install the LoL helper script
 
-Please choose either of the two versions. The first one (recommended) depends
-on M-Reimer's wine-lol and wine-lol-glibc, and does not require changing kernel
-parameters. The second one depends on GloriousEggroll's wine-ge-custom, and
-requires setting `abi.vsyscall32=0`, which may have a negative impact on the
-performance of other 32-bit wine applications.
+| Distribution  | Installation method                                                                |
+|---------------|------------------------------------------------------------------------------------|
+| Arch Linux    | AUR: [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git) |
+| Debian/Ubuntu | `./package.sh debian` <br/> `sudo dpkg -i <deb_file>`                              |
+| Others        | Manual installation: `sudo make install`                                           |
 
-For more information about setting kernel parameters at run time and preserving
-changes between reboots, please checkout the documentation of your own
-distribution. Typically you may want to do something like `echo 'abi.vsyscall32
-= 0' >> /etc/sysctl.d/99-league.conf`.
+### Pre-client-installation checks (Important!)
 
-| Arch User Repository (AUR)                                                          | Debian/Ubuntu                                       | Manual installation    |
-|-------------------------------------------------------------------------------------|-----------------------------------------------------|------------------------|
-| [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git)       | `./package.sh debian`<br/>`sudo dpkg -i <deb_file>` | `sudo make install`    |
-| [leagueoflegends-ge-git](https://aur.archlinux.org/packages/leagueoflegends-ge-git) | `./package.sh debian`<br/>`sudo dpkg -i <deb_file>` | `sudo make install-ge` |
-
-### Pre-installation checks (Important!)
-
-* Please make sure you have installed the Vulkan driver for your graphic card
-  that you will be using. You can check what is installed by running `pacman
-  -Qi <pkg-name>` or `ls /usr/share/vulkan/icd.d/`.
+* Please make sure you have installed the correct Vulkan driver for your
+  graphics card that you will be using. You can check what is installed with
+  ```
+  ls /usr/share/vulkan/icd.d/
+  ```
 
 ### Install the League client
 
 * First install the game: `leagueoflegends install`.
     * Please do not log in or launch the game during installation.
-* When the Riot client appears and if the installation progress stucks at 100%,
-  close the window, and run `leagueoflegends install` again.
-    * For more detail, check out [this thread](https://www.reddit.com/r/leagueoflinux/comments/qavc89/install_stuck_on_downloading_100/).
+    * If the installation progress stucks at 100%, close the window, and run
+    `leagueoflegends install` again.
+        * For more detail, check out [this thread](https://www.reddit.com/r/leagueoflinux/comments/qavc89/install_stuck_on_downloading_100/).
 * Exit the window when the game installation is finished. (The progress circle
   disappears.)
 * Start the game: `leagueoflegends start`.
-    * It may take a while (usually less than 5 minutes) before the game shows
-      up, due to this
-      [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
-      Please check out [here](https://bugs.winehq.org/show_bug.cgi?id=49412#c23)
-      for more details.
-* Log in with your Riot credentials.
-* Now the League client should show up. Please try a practice match to make
-  sure everything works.
+* Log in with your Riot credentials and start LoL as usual.
+* Once the League client shows up, please try a practice match to make sure
+  everything works.
 * To remove the game: `leagueoflegends uninstall`.
 
 Note that if you use Nvidia graphics card and have trouble launching the League
@@ -153,9 +139,6 @@ troubleshooting section](#blank-screen-with-nvidia-graphics-card).
     * Because the process will only be minimized to system tray upon exit.
 * Start the game: `leagueoflegends start-garena`.
     * This will start Garena. Navigate to LoL and press "Play" from Garena.
-    * Similarly, it may take a while (usually less than 5 minutes) before the
-      game shows up, due to this
-      [issue](https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/).
 * To remove the game: `leagueoflegends uninstall-garena`.
 * To also remove the environment from which the game is launched:
   `leagueoflegends uninstall`.
@@ -189,7 +172,7 @@ If the issue still remains, you may want to purge and reinstall the Nvidia
 related packages as described
 [here](https://www.reddit.com/r/leagueoflinux/comments/r0oo0p/i_got_league_working_again_on_my_nvidia_drivers/).
 
-Alternatively, as a quick (and dirty?) solution, remove the `nvidia` package and
-install `nvidia-dkms` instead. Remember to also install the kernel headers
+Alternatively, as a quick (and dirty) workaround, remove the `nvidia` package
+and install `nvidia-dkms` instead. Remember to also install the kernel headers
 packages according to your kernel (e.g., `linux-headers`). Then reboot and
 reinstall LoL.

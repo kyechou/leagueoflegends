@@ -18,29 +18,28 @@ version_le() {
 
 askQ() {
     count=1
-    first_arg="$2"
     echo
     echo "    $1"
-    for var in "${@:2}"; do
-        echo "    #$count - $2"
+    shift
+    for region in "$@"; do
+        echo "    #$count - $region"
         ((count++))
-        shift
     done
     echo
 }
 
 check_depends() {
     depends=(wine wineboot winetricks winecfg wineserver winepath curl glxinfo)
-    for dep in ${depends[@]}; do
+    for dep in "${depends[@]}"; do
         if ! command -v "$dep" >/dev/null 2>&1; then
             die "Missing $dep"
         fi
     done
 
     optdepends=(zenity)
-    for dep in ${optdepends[@]}; do
+    for dep in "${optdepends[@]}"; do
         if command -v "$dep" >/dev/null 2>&1; then
-            export "HAS_$(echo $dep | awk '{ print toupper($0) }')"=1
+            export "HAS_$(echo "$dep" | awk '{ print toupper($0) }')"=1
         fi
     done
 }
@@ -94,8 +93,9 @@ export_env_variables_garena() {
     export WINE_REQ_MOD
     export INSTALL_DIR="$WINEPREFIX/drive_c/Program Files/Garena"
     export GARENA_EXE="$INSTALL_DIR/Garena/Garena.exe"
-    if ls "$INSTALL_DIR"/Games/*/lol.version &>/dev/null; then
-        export GAME_DIR="$(dirname "$(ls "$INSTALL_DIR"/Games/*/lol.version | head -n1)")"
+    if find "$INSTALL_DIR/Games/" -type f -name lol.version &>/dev/null; then
+        GAME_DIR="$(dirname "$(find "$INSTALL_DIR/Games/" -type f -name lol.version | head -n1)")"
+        export GAME_DIR
         export CLIENT_EXE="$GAME_DIR/Riot Client/RiotClientServices.exe"
         export RUNES_FILE="$GAME_DIR/League of Legends/Config/PerksPreferences.yaml"
     else
@@ -105,15 +105,8 @@ export_env_variables_garena() {
     fi
 
     WINE_VERSION="$(wine --version | cut -d ' ' -f 1 | sed 's/wine-//')"
-    if version_le "6.0" "$WINE_VERSION"; then
-        export PATH_GARENA="$PATH"
-    else
-        local PATH="$(echo "$PATH" | sed 's,/opt/wine-lol/bin:,,g')"
-        export PATH_GARENA="$PATH"
-        WINE_GARENA_VERSION="$(wine --version | cut -d ' ' -f 1 | sed 's/wine-//')"
-        if ! version_le "6.0" "$WINE_GARENA_VERSION"; then
-            die "The wine version $WINE_GARENA_VERSION is too old for running Garena client"
-        fi
+    if ! version_le "6.0" "$WINE_VERSION"; then
+        die "Wine version $WINE_VERSION is too old for running Garena client"
     fi
 }
 
@@ -130,7 +123,7 @@ create_wineprefix() {
     for link in "$WINEPREFIX/dosdevices"/*; do
         [[ "$link" =~ 'c:' ]] && continue # for drive_c
         [[ "$link" =~ 'z:' ]] && continue # for /
-        msg "Removing unnecessary device $(basename $link)"
+        msg "Removing unnecessary device $(basename "$link")"
         unlink "$link"
     done
     msg "Modifying WINE registry with $REGFILE"
@@ -147,7 +140,7 @@ install_LoL() {
     elif [ -f "$CLIENT_EXE" ]; then
         while :; do
             echo -n "[!] The game has been installed. Install anyway? [Y/n] "
-            read force
+            read -r force
             force="$(echo "$force" | tr '[:upper:]' '[:lower:]')"
             if [ -z "${force##y*}" ]; then
                 break
@@ -161,7 +154,7 @@ install_LoL() {
         "North America" "EU West" "EU Nordic & East" "Latin America North" \
         "Latin America South" "Brazil" "Turkey" "Russia" "Japan" "Oceania" \
         "Republic of Korea"
-    read -p "    #: " answer
+    read -r -p "    #: " answer
 
     case "${answer}" in
         1) # North America
@@ -219,7 +212,7 @@ install_garena() {
     elif [ -f "$CLIENT_EXE" ]; then
         while :; do
             echo -n "[!] The game has been installed. Remove it and reinstall? [Y/n] "
-            read remove
+            read -r remove
             remove="$(echo "$remove" | tr '[:upper:]' '[:lower:]')"
             if [ -z "${remove##y*}" ]; then
                 rm -rf "$INSTALL_DIR"
@@ -235,7 +228,7 @@ install_garena() {
         "Singapore, Malaysia, Indonesia, Philippines" \
         "Vietnam" \
         "Thailand"
-    read -p "    #: " answer
+    read -r -p "    #: " answer
 
     case "${answer}" in
         1) # Taiwan, Hong Kong, Macau
@@ -308,43 +301,10 @@ uninstall_garena() {
     rm -rf "$WINEPREFIX"
 }
 
-#
-# https://www.reddit.com/r/leagueoflinux/comments/j07yrg/starting_the_client_script/
-#
-port_waiting_daemon() {
-    # Find PID
-    process=LeagueClientUx.exe
-    uxpid=$(timeout 2m sh -c "until ps -C $process -o pid=; do sleep 1; done | sed 's/[[:space:]]*//g'")
-    if [ -z "$uxpid" ]; then
-        die "Could not find process ${process}"
-    fi
-
-    # Get the app-port parameter
-    port=$(xargs -0 <"/proc/${uxpid}/cmdline" | sed -n 's/.*--app-port=\([[:digit:]]*\).*/\1/p')
-    if [ -z "$port" ]; then
-        die "Could not find --app-port of LeagueClientUx.exe"
-    fi
-
-    # Suspend the league client until app-port gets available
-    kill -STOP ${uxpid}
-    timeout 5m bash -c "
-    until openssl s_client -connect :${port} <<< Q >/dev/null 2>&1; do
-        sleep 1
-    done"
-    kill -CONT ${uxpid}
-}
-
-loading_screen() {
-    if [ ${HAS_ZENITY-0} -eq 1 ]; then
-        zenity --progress --pulsate --auto-close --no-cancel \
-            --title="League of Legends" --window-icon="$ICON" \
-            --text="Waiting for the League client port to open..."
-    fi
-}
-
 save_runes() {
     # Temporary workaround to prevent the rune pages getting overwritten when
-    # the League client launches (https://github.com/kyechou/leagueoflegends/issues/38)
+    # the League client launches
+    # (https://github.com/kyechou/leagueoflegends/issues/38)
     if [ -f "$RUNES_FILE" ]; then
         chmod a-w "$RUNES_FILE"
     fi
@@ -354,7 +314,7 @@ start_LoL() {
     if [ ! -f "$CLIENT_EXE" ]; then
         while :; do
             echo -n "[!] The game is not installed. Install it? [Y/n] "
-            read install
+            read -r install
             install="$(echo "$install" | tr '[:upper:]' '[:lower:]')"
             if [ -z "${install##y*}" ]; then
                 install_LoL
@@ -378,7 +338,7 @@ start_garena() {
     if [ ! -f "$CLIENT_EXE" ]; then
         while :; do
             echo -n "[!] The game is not installed. Install it? [Y/n] "
-            read install
+            read -r install
             install="$(echo "$install" | tr '[:upper:]' '[:lower:]')"
             if [ -z "${install##y*}" ]; then
                 install_garena
@@ -390,15 +350,12 @@ start_garena() {
     fi
 
     # Remove libEGL.dll files for Garena client having blank screen
-    find "$INSTALL_DIR" -type f -name '*libEGL.dll' -exec rm {} +
+    # find "$INSTALL_DIR" -type f -name '*libEGL.dll' -exec rm {} +
 
-    # Start Garena in the background with wine >= 6.0
-    # Note that Garena is unsupported if wine-lol=5.18 is used.
+    # Start Garena in the background
     # https://github.com/nhubaotruong/league-of-legends-linux-garena-script
     # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/
     # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/comment/gt7td4k/
-    OLD_PATH=$PATH
-    export PATH=$PATH_GARENA
     wine "$(winepath -w "$GARENA_EXE")" &
 
     # Get the Riot Client pid and command-line argument
@@ -410,14 +367,10 @@ start_garena() {
     wineserver --kill
     wineserver --wait
 
-    # prelaunch helper
-    ( port_waiting_daemon ) | loading_screen &
-
     # Launch the game directly with the riot argument (garena tokens)
     msg "Starting..."
     save_runes
-    export PATH=$OLD_PATH
-    wine "$(winepath -w "$CLIENT_EXE")" $riot_argument
+    wine "$(winepath -w "$CLIENT_EXE")" "$riot_argument"
     wineserver --wait
     wait
 }
@@ -546,13 +499,13 @@ main() {
             wineserver --kill
             pkill -f -- '--title=League of Legends' # kill the zenity dialog
             ;;
-        run) shift; $@ ;;
-        run-garena) shift; export_env_variables_garena; $@ ;;
+        run) shift; "$@" ;;
+        run-garena) shift; export_env_variables_garena; "$@" ;;
         *) die "Unknown command: ${1-}\n$(usage)" ;;
     esac
 }
 
 
-main $@
+main "$@"
 
 # vim: set ts=4 sw=4 et:

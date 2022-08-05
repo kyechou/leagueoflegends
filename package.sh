@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(dirname $(realpath ${BASH_SOURCE[0]}))"
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 
 msg() {
     echo -e "[+] ${1-}" >&2
@@ -34,7 +34,7 @@ debian_pkg() {
 
     make DESTDIR="$debname" install
     pushd "$debname"
-    find * -type f ! -path 'DEBIAN/*' -exec md5sum '{}' \; > "DEBIAN/md5sums"
+    find ./* -type f ! -path 'DEBIAN/*' -exec md5sum '{}' \; > "DEBIAN/md5sums"
     popd
     SIZE="$(du "$debname" --exclude '*/DEBIAN/*' -s | cut -f 1)"
     cat >"$debname/DEBIAN/control" <<EOF
@@ -49,32 +49,6 @@ Priority: optional
 Homepage: https://github.com/kyechou/leagueoflegends
 Description: League of Legends helper script
 EOF
-
-    dpkg-deb --root-owner-group --build "$debname"
-
-    # Build the one with wine-ge-lol
-    pkgname="leagueoflegends-ge"
-    debname="${pkgname}_${pkgver}_any"
-    mkdir -p "$debname/DEBIAN"
-
-    make DESTDIR="$debname" install-ge
-    pushd "$debname"
-    find * -type f ! -path 'DEBIAN/*' -exec md5sum '{}' \; > "DEBIAN/md5sums"
-    popd
-    SIZE="$(du "$debname" --exclude '*/DEBIAN/*' -s | cut -f 1)"
-    cat >"$debname/DEBIAN/control" <<EOF
-Package: $pkgname
-Version: $pkgver
-Architecture: all
-Maintainer: Kuan-Yen Chou <kuanyenchou@gmail.com>
-Installed-Size: $SIZE
-Depends: wine-ge-lol:i386, winetricks, bash, curl, openssl, winbind, mesa-utils, libgnutls30, libldap-2.4-2, libopenal1, libpulse0, libasound2, libodbc1, libvkd3d1, libvulkan1, mesa-vulkan-drivers
-Suggests: zenity
-Priority: optional
-Homepage: https://github.com/kyechou/leagueoflegends
-Description: League of Legends helper script
-EOF
-
     dpkg-deb --root-owner-group --build "$debname"
 }
 
@@ -106,6 +80,6 @@ main() {
 }
 
 
-main $@
+main "$@"
 
 # vim: set ts=4 sw=4 et:

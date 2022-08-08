@@ -75,6 +75,7 @@ export_env_variables() {
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
     export RUNES_FILE="$INSTALL_DIR/League of Legends/Config/PerksPreferences.yaml"
+    export SKIP_RIOT=0
 
     export MESA_GLTHREAD=true
     export STAGING_SHARED_MEMORY=1
@@ -327,7 +328,13 @@ start_LoL() {
 
     msg "Starting..."
     save_runes
-    wine "$(winepath -w "$CLIENT_EXE")"
+    if [ "$SKIP_RIOT" -ne 0 ]; then
+        wine "$(winepath -w "$CLIENT_EXE")" \
+            --launch-product=league_of_legends \
+            --launch-patchline=live
+    else
+        wine "$(winepath -w "$CLIENT_EXE")"
+    fi
     wineserver --wait
     wait
 }
@@ -437,6 +444,7 @@ usage() {
     Options:
         -h, --help          Print this message and exit
         -v, --verbose       Enable verbose output
+        -s, --skip-riot     Skip the Riot client
 
     Commands:
         start               Start LoL
@@ -470,6 +478,8 @@ main() {
             set -x
             export WINEDEBUG=fixme-all
             export VK_LOADER_DEBUG=all ;;
+        -s | --skip-riot)
+            export SKIP_RIOT=1 ;;
         --) shift; break ;;
         -?*) die "Unknown option: ${1-}\n$(usage)" ;;
         *) break ;;

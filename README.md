@@ -33,8 +33,6 @@ appreciated.
     - lib32-nvidia-utils (Debian/Ubuntu: libnvidia-glvkspirv:i386 libglx-nvidia0:i386)
     - lib32-vulkan-radeon
     - lib32-amdvlk
-- zenity (optional for loading screen indication, see
-    [#9](https://github.com/kyechou/leagueoflegends/pull/9))
 
 Note that the above package names are based on Arch Linux. For other
 distributions that are not Arch-based, the names will most likely differ.

@@ -36,7 +36,7 @@ check_depends() {
         fi
     done
 
-    optdepends=(zenity)
+    optdepends=()
     for dep in "${optdepends[@]}"; do
         if command -v "$dep" >/dev/null 2>&1; then
             export "HAS_$(echo "$dep" | awk '{ print toupper($0) }')"=1
@@ -500,14 +500,10 @@ main() {
         del-dxvk) del_dxvk ;;
         rm-dxvk-cache) rm_dxvk_cache ;;
         cleanup-logs) cleanup_logs ;;
-        kill)
-            wineserver --kill
-            pkill -f -- '--title=League of Legends' # kill the zenity dialog
-            ;;
+        kill) wineserver --kill ;;
         kill-garena)
             export_env_variables_garena
             wineserver --kill
-            pkill -f -- '--title=League of Legends' # kill the zenity dialog
             ;;
         run) shift; "$@" ;;
         run-garena) shift; export_env_variables_garena; "$@" ;;

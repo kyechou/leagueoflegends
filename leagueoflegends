@@ -74,6 +74,8 @@ export_env_variables() {
     export WINEPREFIX="$HOME/.local/share/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
+    export GAME_EXE_DIR="$INSTALL_DIR/League of Legends/Game"
+    export GAME_EXE="$GAME_EXE_DIR/League of Legends.exe"
     export RUNES_FILE="$INSTALL_DIR/League of Legends/Config/PerksPreferences.yaml"
     export SKIP_RIOT=0
 
@@ -339,6 +341,30 @@ start_LoL() {
     wait
 }
 
+play_replay_LoL()  {
+    if [ ! -f "$GAME_EXE" ]; then
+        while :; do
+            echo -n "[!] The game is not installed. Install it? [Y/n] "
+            read -r install
+            install="$(echo "$install" | tr '[:upper:]' '[:lower:]')"
+            if [ -z "${install##y*}" ]; then
+                install_LoL
+                break
+            elif [ -z "${install##n*}" ]; then
+                exit 1
+            fi
+        done
+    fi
+
+    msg "Playing replay..."
+    replayPath=$(winepath -w "$@")
+    pushd "$GAME_EXE_DIR"
+    exec wine "$(winepath -w "$GAME_EXE")" "$replayPath"
+    popd
+    wineserver --wait
+    wait
+}
+
 start_garena() {
     export_env_variables_garena
 
@@ -451,6 +477,7 @@ usage() {
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
+        replay              Play LoL replay (.rofl file)
         start-garena        Start Garena
         install-garena      Install Garena
         uninstall-garena    Uninstall Garena
@@ -492,6 +519,7 @@ main() {
         install) install_LoL ;;
         uninstall) uninstall_LoL ;;
         reinstall) uninstall_LoL && install_LoL ;;
+        replay) shift; play_replay_LoL "$@" ;;
         start-garena) start_garena ;;
         install-garena) install_garena ;;
         uninstall-garena) uninstall_garena ;;

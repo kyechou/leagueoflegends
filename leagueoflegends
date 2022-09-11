@@ -477,7 +477,7 @@ usage() {
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
-        replay              Play LoL replay (.rofl file)
+        replay <path>       Play LoL replay (.rofl file)
         start-garena        Start Garena
         install-garena      Install Garena
         uninstall-garena    Uninstall Garena

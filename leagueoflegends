@@ -341,26 +341,17 @@ start_LoL() {
     wait
 }
 
-play_replay_LoL()  {
+replay_match()  {
     if [ ! -f "$GAME_EXE" ]; then
-        while :; do
-            echo -n "[!] The game is not installed. Install it? [Y/n] "
-            read -r install
-            install="$(echo "$install" | tr '[:upper:]' '[:lower:]')"
-            if [ -z "${install##y*}" ]; then
-                install_LoL
-                break
-            elif [ -z "${install##n*}" ]; then
-                exit 1
-            fi
-        done
+        die "The game is not installed. Please install it first"
     fi
 
-    msg "Playing replay..."
-    replayPath=$(winepath -w "$@")
-    pushd "$GAME_EXE_DIR"
-    exec wine "$(winepath -w "$GAME_EXE")" "$replayPath"
-    popd
+    if [ ! -f "$1" ]; then
+        die "File not found: $1"
+    fi
+
+    msg "Replaying... $1"
+    wine "$(winepath -w "$GAME_EXE")" "$(winepath -w "$1")"
     wineserver --wait
     wait
 }
@@ -477,7 +468,7 @@ usage() {
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
-        replay <path>       Play LoL replay (.rofl file)
+        replay <path>       Replay match (.rofl file)
         start-garena        Start Garena
         install-garena      Install Garena
         uninstall-garena    Uninstall Garena
@@ -519,7 +510,7 @@ main() {
         install) install_LoL ;;
         uninstall) uninstall_LoL ;;
         reinstall) uninstall_LoL && install_LoL ;;
-        replay) shift; play_replay_LoL "$@" ;;
+        replay) shift; replay_match "${1-}" ;;
         start-garena) start_garena ;;
         install-garena) install_garena ;;
         uninstall-garena) uninstall_garena ;;

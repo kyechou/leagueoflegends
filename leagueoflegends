@@ -351,6 +351,7 @@ replay_match()  {
     fi
 
     msg "Replaying... $1"
+    cd "$GAME_EXE_DIR"
     wine "$(winepath -w "$GAME_EXE")" "$(winepath -w "$1")"
     wineserver --wait
     wait

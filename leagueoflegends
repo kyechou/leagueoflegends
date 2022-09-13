@@ -350,9 +350,9 @@ replay_match()  {
         die "File not found: $1"
     fi
 
-    msg "Replaying... $1"
-    cd "$GAME_EXE_DIR"
-    wine "$(winepath -w "$GAME_EXE")" "$(winepath -w "$1")"
+    msg "Replaying $1"
+    replay_path="$(winepath -w "$1")"
+    (cd "$GAME_EXE_DIR" && wine "$(winepath -w "$GAME_EXE")" "$replay_path")
     wineserver --wait
     wait
 }

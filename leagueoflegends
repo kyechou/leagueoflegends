@@ -61,7 +61,7 @@ check_vulkan() {
     export VK_ICD_FILENAMES
 }
 
-parse_params() {
+parse_args() {
     VERBOSE=0
     SKIP_RIOT=0
 
@@ -79,8 +79,10 @@ parse_params() {
         shift
     done
 
+    CMD=("$@")
     export VERBOSE
     export SKIP_RIOT
+    export CMD
 }
 
 read_configs() {
@@ -543,13 +545,7 @@ usage() {
 EOF
 }
 
-main() {
-    check_depends
-    check_vulkan
-    parse_params "$@"
-    read_configs
-    export_env_variables
-
+run_command() {
     case "${1-}" in
         start) start_LoL ;;
         install) install_LoL ;;
@@ -573,6 +569,15 @@ main() {
         run-garena) shift; export_env_variables_garena; "$@" ;;
         *) die "Unknown command: ${1-}\n$(usage)" ;;
     esac
+}
+
+main() {
+    check_depends
+    check_vulkan
+    parse_args "$@"
+    read_configs
+    export_env_variables
+    run_command "${CMD[@]}"
 }
 
 

@@ -61,17 +61,49 @@ check_vulkan() {
     export VK_ICD_FILENAMES
 }
 
+read_configs() {
+    if [ -n "${XDG_CONFIG_HOME+x}" ]; then
+        CONFIG_FILE="$XDG_CONFIG_HOME/league.sh"
+    else
+        CONFIG_FILE="$HOME/.config/league.sh"
+    fi
+
+    if [ -f "$CONFIG_FILE" ]; then
+        # shellcheck source=/dev/null
+        source "$CONFIG_FILE"
+    fi
+
+    if [ -z "${DATA_HOME+x}" ]; then
+        if [ -n "${XDG_DATA_HOME+x}" ]; then
+            DATA_HOME="$XDG_DATA_HOME"
+        else
+            DATA_HOME="$HOME/.local/share"
+        fi
+    fi
+
+    if [ -z "${CACHE_HOME+x}" ]; then
+        if [ -n "${XDG_CACHE_HOME+x}" ]; then
+            CACHE_HOME="$XDG_CACHE_HOME"
+        else
+            CACHE_HOME="$HOME/.cache"
+        fi
+    fi
+
+    export DATA_HOME
+    export CACHE_HOME
+}
+
 export_env_variables() {
     export PATH="/opt/wine-lol/bin:$PATH"
     export REGFILE="/usr/share/doc/leagueoflegends/leagueoflegends.reg"
     export ICON="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
-    export CACHE_DIR="$HOME/.cache/leagueoflegends"
+    export CACHE_DIR="$CACHE_HOME/leagueoflegends"
 
     export WINEARCH=win32
     export WINEDEBUG=-all
     export WINEDLLOVERRIDES="mscoree,mshtml,winemenubuilder.exe=;d3d10,d3d11=n,b"
     export WINE_REQ_MOD=(vcrun2019)
-    export WINEPREFIX="$HOME/.local/share/leagueoflegends"
+    export WINEPREFIX="$DATA_HOME/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
     export GAME_EXE_DIR="$INSTALL_DIR/League of Legends/Game"
@@ -91,7 +123,7 @@ export_env_variables() {
 
 export_env_variables_garena() {
     export_env_variables
-    export WINEPREFIX="$HOME/.local/share/garena"
+    export WINEPREFIX="$DATA_HOME/garena"
     WINE_REQ_MOD+=(vcrun2013)   # https://bugs.winehq.org/show_bug.cgi?id=47375
     export WINE_REQ_MOD
     export INSTALL_DIR="$WINEPREFIX/drive_c/Program Files/Garena"
@@ -488,6 +520,7 @@ EOF
 main() {
     check_depends
     check_vulkan
+    read_configs
     export_env_variables
 
     while :; do

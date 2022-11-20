@@ -42,10 +42,24 @@ correct Vulkan drivers and other dependencies.
 
 ## Configuration
 
-There is no configuration file. The game is installed at
-`~/.local/share/leagueoflegends/` by default. If you want to change the default
-location of the wine prefix or other parameters, please feel free to modify the
-script.
+There is no need for configuration. You may feel free to skip this part, unless
+you want to change the install path of the game or where the cache is placed.
+
+The helper script looks for configuration files located at
+`$XDG_CONFIG_HOME/league.sh` or `~/.config/league.sh`, in that order. The
+configuration file is a shell script and will be sourced before starting the
+game. You may define any environment variables or run any commands you want,
+which might be helpful in special situations.
+
+These are the variables that will be explicitly referenced and used:
+- `DATA_HOME`: The path where the game is, or will be, installed. (Default:
+    `$XDG_DATA_HOME` or `~/.local/share`)
+- `CACHE_HOME`: The path for the cache files. (Default: `$XDG_CACHE_HOME` or
+    `~/.cache`)
+
+For example, if the configuration file doesn't exist or if the `DATA_HOME`
+variable is not defined, the game would then be installed at
+`~/.local/share/leagueoflegends/` by default.
 
 
 ## Usage

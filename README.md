@@ -48,6 +48,7 @@ appreciated.
     - lib32-amdvlk
 
 > **Note**
+>
 > The above package names are based on Arch Linux. For other non-Arch based
 > distributions, the names will most likely differ. Please refer to the
 > documentation of your distribution for installing the correct Vulkan drivers
@@ -89,6 +90,7 @@ variable is not defined, the game would then be installed at
 ### Install the Riot and League client
 
 > **Note**
+>
 > For Garena client (Southeast Asia), please skip to the section below.
 
 * First install the game: `leagueoflegends install`.
@@ -140,7 +142,8 @@ troubleshooting section](#blank-screen-with-nvidia-graphics-card).
 
 ### Setting up Garena (Southeast Asia)
 
-> **Warning**
+> **Note**
+>
 > I haven't tested the Garena setup for years. Please proceed with your own
 > risk. That being said, any pull requests or testing aid would be greatly
 > appreciated.

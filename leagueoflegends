@@ -546,7 +546,7 @@ EOF
 main() {
     check_depends
     check_vulkan
-    parse_params
+    parse_params "$@"
     read_configs
     export_env_variables
 

@@ -1,7 +1,20 @@
 # League of Legends
 
-[League of Legends](https://www.leagueoflegends.com) helper script for installing and
-running on Linux.
+[League of Legends](https://www.leagueoflegends.com) helper script for
+installing and running on Linux.
+
+
+## Installation
+
+Please choose an installation method suitable for your distribution. Remember to
+check all dependencies are installed properly if it's installed manually.
+
+| Distribution  | Installation method                                                                |
+|---------------|------------------------------------------------------------------------------------|
+| Arch Linux    | AUR: [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git) |
+| Debian/Ubuntu | `./package.sh debian` <br/> `sudo dpkg -i <deb_file>`                              |
+| Others        | Manual installation: `sudo make install`                                           |
+
 
 
 ## Dependencies
@@ -34,10 +47,11 @@ appreciated.
     - lib32-vulkan-radeon
     - lib32-amdvlk
 
-Note that the above package names are based on Arch Linux. For other
-distributions that are not Arch-based, the names will most likely differ.
-Please refer to the documentation of your distribution for installing the
-correct Vulkan drivers and other dependencies.
+> **Note**
+> The above package names are based on Arch Linux. For other non-Arch based
+> distributions, the names will most likely differ. Please refer to the
+> documentation of your distribution for installing the correct Vulkan drivers
+> and other dependencies.
 
 
 ## Configuration
@@ -64,14 +78,6 @@ variable is not defined, the game would then be installed at
 
 ## Usage
 
-### Install the LoL helper script
-
-| Distribution  | Installation method                                                                |
-|---------------|------------------------------------------------------------------------------------|
-| Arch Linux    | AUR: [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git) |
-| Debian/Ubuntu | `./package.sh debian` <br/> `sudo dpkg -i <deb_file>`                              |
-| Others        | Manual installation: `sudo make install`                                           |
-
 ### Pre-client-installation checks (Important!)
 
 * Please make sure you have installed the correct Vulkan driver for your
@@ -80,7 +86,10 @@ variable is not defined, the game would then be installed at
   ls /usr/share/vulkan/icd.d/
   ```
 
-### Install the League client
+### Install the Riot and League client
+
+> **Note**
+> For Garena client (Southeast Asia), please skip to the section below.
 
 * First install the game: `leagueoflegends install`.
     * Please do not log in or launch the game during installation.
@@ -130,6 +139,11 @@ troubleshooting section](#blank-screen-with-nvidia-graphics-card).
 ```
 
 ### Setting up Garena (Southeast Asia)
+
+> **Warning**
+> I haven't tested the Garena setup for years. Please proceed with your own
+> risk. That being said, any pull requests or testing aid would be greatly
+> appreciated.
 
 * First install Garena: `leagueoflegends install-garena`
     * Choose the region when prompted.

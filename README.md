@@ -142,8 +142,8 @@ variable is not defined, the game would then be installed at
 ### Setting up Garena (Southeast Asia)
 
 > **Note** <br/>
-> I haven't tested the Garena setup for years. Please proceed with your own
-> risk. That being said, any pull requests or testing aid would be greatly
+> I haven't tested the Garena setup for years. Please proceed at your own risk.
+> That being said, any pull requests or testing aid would be greatly
 > appreciated.
 
 * First install Garena: `leagueoflegends install-garena`

@@ -47,8 +47,7 @@ appreciated.
     - lib32-vulkan-radeon
     - lib32-amdvlk
 
-> **Note**
->
+> **Note** <br/>
 > The above package names are based on Arch Linux. For other non-Arch based
 > distributions, the names will most likely differ. Please refer to the
 > documentation of your distribution for installing the correct Vulkan drivers
@@ -89,8 +88,7 @@ variable is not defined, the game would then be installed at
 
 ### Install the Riot and League client
 
-> **Note**
->
+> **Note** <br/>
 > For Garena client (Southeast Asia), please skip to the section below.
 
 * First install the game: `leagueoflegends install`.
@@ -106,9 +104,10 @@ variable is not defined, the game would then be installed at
   everything works.
 * To remove the game: `leagueoflegends uninstall`.
 
-Note that if you use Nvidia graphics card and have trouble launching the League
-client or start the game (after champion selection), please check out [the
-troubleshooting section](#blank-screen-with-nvidia-graphics-card).
+> **Note** <br/>
+> If you use Nvidia graphics card and have trouble launching the League client
+> or start the game (after champion selection), please check out [the
+> troubleshooting section](#blank-screen-with-nvidia-graphics-card).
 
 `leagueoflegends -h` can be used to view the full list of options and commands.
 
@@ -142,8 +141,7 @@ troubleshooting section](#blank-screen-with-nvidia-graphics-card).
 
 ### Setting up Garena (Southeast Asia)
 
-> **Note**
->
+> **Note** <br/>
 > I haven't tested the Garena setup for years. Please proceed with your own
 > risk. That being said, any pull requests or testing aid would be greatly
 > appreciated.

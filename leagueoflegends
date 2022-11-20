@@ -61,6 +61,28 @@ check_vulkan() {
     export VK_ICD_FILENAMES
 }
 
+parse_params() {
+    VERBOSE=0
+    SKIP_RIOT=0
+
+    while :; do
+        case "${1-}" in
+        -h | --help) usage; exit ;;
+        -v | --verbose)
+            VERBOSE=1; set -x ;;
+        -s | --skip-riot)
+            SKIP_RIOT=1 ;;
+        --) shift; break ;;
+        -?*) die "Unknown option: ${1-}\n$(usage)" ;;
+        *) break ;;
+        esac
+        shift
+    done
+
+    export VERBOSE
+    export SKIP_RIOT
+}
+
 read_configs() {
     if [ -n "${XDG_CONFIG_HOME+x}" ]; then
         CONFIG_FILE="$XDG_CONFIG_HOME/league.sh"
@@ -109,7 +131,11 @@ export_env_variables() {
     export GAME_EXE_DIR="$INSTALL_DIR/League of Legends/Game"
     export GAME_EXE="$GAME_EXE_DIR/League of Legends.exe"
     export RUNES_FILE="$INSTALL_DIR/League of Legends/Config/PerksPreferences.yaml"
-    export SKIP_RIOT=0
+
+    if [ "$VERBOSE" -ne 0 ]; then
+        export WINEDEBUG=fixme-all
+        export VK_LOADER_DEBUG=all
+    fi
 
     export MESA_GLTHREAD=true
     export STAGING_SHARED_MEMORY=1
@@ -520,24 +546,9 @@ EOF
 main() {
     check_depends
     check_vulkan
+    parse_params
     read_configs
     export_env_variables
-
-    while :; do
-        case "${1-}" in
-        -h | --help) usage; exit ;;
-        -v | --verbose)
-            set -x
-            export WINEDEBUG=fixme-all
-            export VK_LOADER_DEBUG=all ;;
-        -s | --skip-riot)
-            export SKIP_RIOT=1 ;;
-        --) shift; break ;;
-        -?*) die "Unknown option: ${1-}\n$(usage)" ;;
-        *) break ;;
-        esac
-        shift
-    done
 
     case "${1-}" in
         start) start_LoL ;;

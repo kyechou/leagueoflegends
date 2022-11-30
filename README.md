@@ -119,12 +119,14 @@ variable is not defined, the game would then be installed at
     Options:
         -h, --help          Print this message and exit
         -v, --verbose       Enable verbose output
+        -s, --skip-riot     Skip the Riot client
 
     Commands:
         start               Start LoL
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
+        replay <path>       Replay match (.rofl file)
         start-garena        Start Garena
         install-garena      Install Garena
         uninstall-garena    Uninstall Garena

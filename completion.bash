@@ -5,6 +5,7 @@ COMMANDS=(
     install
     uninstall
     reinstall
+    replay
     start-garena
     install-garena
     uninstall-garena

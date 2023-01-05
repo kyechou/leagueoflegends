@@ -6,18 +6,12 @@ COMMANDS=(
     uninstall
     reinstall
     replay
-    start-garena
-    install-garena
-    uninstall-garena
-    reinstall-garena
     add-dxvk
     del-dxvk
     rm-dxvk-cache
     cleanup-logs
     kill
-    kill-garena
     run
-    run-garena
 )
 
 complete -W "${COMMANDS[*]}" leagueoflegends

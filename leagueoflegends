@@ -216,7 +216,7 @@ install_LoL() {
     askQ "Select your region" \
         "North America" "EU West" "EU Nordic & East" "Latin America North" \
         "Latin America South" "Brazil" "Turkey" "Russia" "Japan" "Oceania" \
-        "Republic of Korea"
+        "Republic of Korea" "Singapore/SEA (NEW)"
     read -r -p "    #: " answer
 
     case "${answer}" in
@@ -242,6 +242,8 @@ install_LoL() {
             export LANG_CODE="oc1" ;;
         11) # Republic of Korea
             export LANG_CODE="kr" ;;
+        12) # Singapore - SEA
+            export LANG_CODE="sg2" ;;
         *)
             die "Unknown region number: $answer" ;;
     esac

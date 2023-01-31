@@ -116,7 +116,8 @@ variable is not defined, the game would then be installed at
     Options:
         -h, --help          Print this message and exit
         -v, --verbose       Enable verbose output
-        -s, --skip-riot     Skip the Riot client
+        --pbe               Launch the PBE patchline
+        --locale <locale>   Set locale (if different from the region)
 
     Commands:
         start               Start LoL

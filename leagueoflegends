@@ -69,15 +69,20 @@ check_vulkan() {
 
 parse_args() {
     VERBOSE=0
-    SKIP_RIOT=0
+    PATCHLINE=live
+    LOCALE=
 
     while :; do
         case "${1-}" in
         -h | --help) usage; exit ;;
         -v | --verbose)
             VERBOSE=1; set -x ;;
-        -s | --skip-riot)
-            SKIP_RIOT=1 ;;
+        --pbe)
+            PATCHLINE=pbe ;;
+        --locale)
+            LOCALE="${2-}"
+            shift
+            ;;
         --) shift; break ;;
         -?*) die "Unknown option: ${1-}\n$(usage)" ;;
         *) break ;;
@@ -87,7 +92,8 @@ parse_args() {
 
     CMD=("$@")
     export VERBOSE
-    export SKIP_RIOT
+    export PATCHLINE
+    export LOCALE
     export CMD
 }
 
@@ -135,7 +141,8 @@ export_env_variables() {
     export WINE_REQ_MOD=(vcrun2019)
     export WINEPREFIX="$DATA_HOME/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
-    export CLIENT_EXE="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
+    export RIOT_CLIENT="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
+    export LEAGUE_CLIENT="$INSTALL_DIR/League of Legends/LeagueClient.exe"
     export GAME_EXE_DIR="$INSTALL_DIR/League of Legends/Game"
     export GAME_EXE="$GAME_EXE_DIR/League of Legends.exe"
     export RUNES_FILE="$INSTALL_DIR/League of Legends/Config/PerksPreferences.yaml"
@@ -186,7 +193,7 @@ _create_wineprefix() {
 install_LoL() {
     if [ ! -d "$WINEPREFIX" ]; then
         _create_wineprefix
-    elif [ -f "$CLIENT_EXE" ]; then
+    elif [ -f "$RIOT_CLIENT" ]; then
         while :; do
             echo -n "[!] The game has been installed. Install anyway? [Y/n] "
             read -r force
@@ -288,7 +295,7 @@ _save_runes() {
 }
 
 start_LoL() {
-    if [ ! -f "$CLIENT_EXE" ]; then
+    if [ ! -f "$RIOT_CLIENT" ]; then
         while :; do
             echo -n "[!] The game is not installed. Install it? [Y/n] "
             read -r install
@@ -304,13 +311,16 @@ start_LoL() {
 
     msg "Starting..."
     _save_runes
-    if [ "$SKIP_RIOT" -ne 0 ]; then
-        wine "$(winepath -w "$CLIENT_EXE")" \
-            --launch-product=league_of_legends \
-            --launch-patchline=live
+
+    if [ -n "$LOCALE" ]; then
+        wine "$(winepath -w "$LEAGUE_CLIENT")" \
+            --locale="$LOCALE"
     else
-        wine "$(winepath -w "$CLIENT_EXE")"
+        wine "$(winepath -w "$RIOT_CLIENT")" \
+            --launch-product=league_of_legends \
+            --launch-patchline="$PATCHLINE"
     fi
+
     wineserver --wait
     wait
 }
@@ -421,7 +431,8 @@ usage() {
     Options:
         -h, --help          Print this message and exit
         -v, --verbose       Enable verbose output
-        -s, --skip-riot     Skip the Riot client
+        --pbe               Launch the PBE patchline
+        --locale <locale>   Set locale (if different from the region)
 
     Commands:
         start               Start LoL

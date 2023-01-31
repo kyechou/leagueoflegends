@@ -150,10 +150,9 @@ winecfg`, or `leagueoflegends run winetricks`, etc.
 
 If you use Nvidia graphics card and have trouble launching the League client or
 start the game (after champion selection), please exit the game (with
-`leagueoflegends kill` or `leagueoflegends kill-garena` if you are running the
-Garena version) and then try `leagueoflegends rm-dxvk-cache` before restarting
-it. This should only need to be done once to clean up the old cache, since DXVK
-caching is currently disabled.
+`leagueoflegends kill`) and then try `leagueoflegends rm-dxvk-cache` before
+restarting it. This should only need to be done once to clean up the old cache,
+since DXVK caching is currently disabled.
 ([Reference](https://www.reddit.com/r/leagueoflinux/comments/skyg70/fixing_the_nvidia_495_black_screen_crash_problem/))
 
 If the issue still remains, you may want to purge and reinstall the Nvidia

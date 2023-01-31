@@ -16,6 +16,12 @@ version_le() {
     [ "$1" = "$lesser_version" ]
 }
 
+join_array() {
+    local IFS="$1"
+    shift
+    echo "$*"
+}
+
 askQ() {
     count=1
     echo
@@ -125,7 +131,7 @@ export_env_variables() {
 
     export WINEARCH=win32
     export WINEDEBUG=-all
-    export WINEDLLOVERRIDES="mscoree,mshtml,winemenubuilder.exe=;d3d10,d3d11=n,b"
+    export WINEDLLOVERRIDES="mscoree,mshtml,winemenubuilder.exe="
     export WINE_REQ_MOD=(vcrun2019)
     export WINEPREFIX="$DATA_HOME/leagueoflegends"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
@@ -139,17 +145,21 @@ export_env_variables() {
         export VK_LOADER_DEBUG=all
     fi
 
+    export DXVK_DLLS=(d3d9 d3d10core d3d11 dxgi)
+    export DXVK_LOG_LEVEL=none
+    export DXVK_STATE_CACHE=0
+    DXVKDLLOVERRIDES="$(join_array , "${DXVK_DLLS[@]}")=n,b"
+    WINEDLLOVERRIDES="${WINEDLLOVERRIDES};${DXVKDLLOVERRIDES}"
+
     export MESA_GLTHREAD=true
     export STAGING_SHARED_MEMORY=1
     export WINE_LARGE_ADDRESS_AWARE=1
     export __GL_SHADER_DISK_CACHE=1
     export __GL_SHADER_DISK_CACHE_PATH="$WINEPREFIX"
     export __GL_THREADED_OPTIMIZATIONS=1
-    export DXVK_LOG_LEVEL=none
-    export DXVK_STATE_CACHE=0
 }
 
-create_wineprefix() {
+_create_wineprefix() {
     if [ -e "$WINEPREFIX" ]; then
         die "Wineprefix $WINEPREFIX already exists"
     fi
@@ -175,7 +185,7 @@ create_wineprefix() {
 
 install_LoL() {
     if [ ! -d "$WINEPREFIX" ]; then
-        create_wineprefix
+        _create_wineprefix
     elif [ -f "$CLIENT_EXE" ]; then
         while :; do
             echo -n "[!] The game has been installed. Install anyway? [Y/n] "
@@ -268,7 +278,7 @@ uninstall_LoL() {
     set -e
 }
 
-save_runes() {
+_save_runes() {
     # Temporary workaround to prevent the rune pages getting overwritten when
     # the League client launches
     # (https://github.com/kyechou/leagueoflegends/issues/38)
@@ -293,7 +303,7 @@ start_LoL() {
     fi
 
     msg "Starting..."
-    save_runes
+    _save_runes
     if [ "$SKIP_RIOT" -ne 0 ]; then
         wine "$(winepath -w "$CLIENT_EXE")" \
             --launch-product=league_of_legends \
@@ -321,12 +331,12 @@ replay_match()  {
     wait
 }
 
-download_dxvk() {
+_download_dxvk() {
     DXVK_VERSION="$(curl -s https://api.github.com/repos/doitsujin/dxvk/releases/latest | grep 'tag_name' | cut -d\" -f4 | tr -d v)"
     DXVK_URL="https://github.com/doitsujin/dxvk/releases/download/v$DXVK_VERSION/dxvk-$DXVK_VERSION.tar.gz"
     DXVK_TARBALL="$CACHE_DIR/dxvk-$DXVK_VERSION.tar.gz"
 
-    if [ ! -e "$DXVK_TARBALL" ]; then
+    if [ ! -f "$DXVK_TARBALL" ]; then
         msg "Downloading DXVK tarball"
         mkdir -p "$CACHE_DIR"
         curl --silent --show-error -Lo "$DXVK_TARBALL" "$DXVK_URL"
@@ -335,20 +345,29 @@ download_dxvk() {
     tar xzf "$DXVK_TARBALL" -C "$CACHE_DIR"
 }
 
-rm_dxvk_cache() {
-    if [ -d "$CACHE_DIR" ]; then
-        find "$CACHE_DIR" -type f -name '*.dxvk-cache' -exec rm {} +
-    fi
-}
-
 add_dxvk() {
     if [ ! -d "$WINEPREFIX" ]; then
         die "The game is not installed. Please install it first"
     fi
 
-    download_dxvk
+    _download_dxvk
     msg "Installing DXVK to $WINEPREFIX"
-    "$CACHE_DIR/dxvk-$DXVK_VERSION/setup_dxvk.sh" install --with-d3d10
+
+    for dll in "${DXVK_DLLS[@]}"; do
+        local src_file="$CACHE_DIR/dxvk-$DXVK_VERSION/x32/$dll.dll"
+        local dst_file="$WINEPREFIX/drive_c/windows/system32/$dll.dll"
+
+        if [ ! -f "$src_file" ]; then
+            die "File not found: $src_file"
+        fi
+
+        if [ -f "$dst_file" ] && [ ! -f "$dst_file.old" ]; then
+            mv -v "$dst_file" "$dst_file.old"
+        fi
+
+        cp -v --reflink=auto "$src_file" "$dst_file"
+    done
+
     msg "DXVK is installed"
 }
 
@@ -357,10 +376,29 @@ del_dxvk() {
         die "The game is not installed. Please install it first"
     fi
 
-    download_dxvk
+    _download_dxvk
     msg "Uninstalling DXVK from $WINEPREFIX"
-    "$CACHE_DIR/dxvk-$DXVK_VERSION/setup_dxvk.sh" uninstall
+
+    for dll in "${DXVK_DLLS[@]}"; do
+        local src_file="$CACHE_DIR/dxvk-$DXVK_VERSION/x32/$dll.dll"
+        local dst_file="$WINEPREFIX/drive_c/windows/system32/$dll.dll"
+
+        if [ ! -f "$src_file" ]; then
+            die "File not found: $src_file"
+        fi
+
+        if [ -f "$dst_file.old" ]; then
+            mv -v "$dst_file.old" "$dst_file"
+        fi
+    done
+
     msg "DXVK is removed"
+}
+
+rm_dxvk_cache() {
+    if [ -d "$CACHE_DIR" ]; then
+        find "$CACHE_DIR" -type f -name '*.dxvk-cache' -exec rm {} +
+    fi
 }
 
 cleanup_logs() {

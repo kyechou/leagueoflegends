@@ -149,30 +149,6 @@ export_env_variables() {
     export DXVK_STATE_CACHE=0
 }
 
-export_env_variables_garena() {
-    export_env_variables
-    export WINEPREFIX="$DATA_HOME/garena"
-    WINE_REQ_MOD+=(vcrun2013)   # https://bugs.winehq.org/show_bug.cgi?id=47375
-    export WINE_REQ_MOD
-    export INSTALL_DIR="$WINEPREFIX/drive_c/Program Files/Garena"
-    export GARENA_EXE="$INSTALL_DIR/Garena/Garena.exe"
-    if find "$INSTALL_DIR/Games/" -type f -name lol.version &>/dev/null; then
-        GAME_DIR="$(dirname "$(find "$INSTALL_DIR/Games/" -type f -name lol.version | head -n1)")"
-        export GAME_DIR
-        export CLIENT_EXE="$GAME_DIR/Riot Client/RiotClientServices.exe"
-        export RUNES_FILE="$GAME_DIR/League of Legends/Config/PerksPreferences.yaml"
-    else
-        export GAME_DIR=""
-        export CLIENT_EXE=""
-        export RUNES_FILE=""
-    fi
-
-    WINE_VERSION="$(wine --version | cut -d ' ' -f 1 | sed 's/wine-//')"
-    if ! version_le "6.0" "$WINE_VERSION"; then
-        die "Wine version $WINE_VERSION is too old for running Garena client"
-    fi
-}
-
 create_wineprefix() {
     if [ -e "$WINEPREFIX" ]; then
         die "Wineprefix $WINEPREFIX already exists"
@@ -216,7 +192,9 @@ install_LoL() {
     askQ "Select your region" \
         "North America" "EU West" "EU Nordic & East" "Latin America North" \
         "Latin America South" "Brazil" "Turkey" "Russia" "Japan" "Oceania" \
-        "Republic of Korea"
+        "Republic of Korea" "Taiwan" "Philippines" "Singapore" "Vietnam" \
+        "Thailand"
+
     read -r -p "    #: " answer
 
     case "${answer}" in
@@ -242,6 +220,16 @@ install_LoL() {
             export LANG_CODE="oc1" ;;
         11) # Republic of Korea
             export LANG_CODE="kr" ;;
+        12) # Taiwan
+            export LANG_CODE="tw2" ;;
+        13) # Philippines
+            export LANG_CODE="ph2" ;;
+        14) # Singapore
+            export LANG_CODE="sg2" ;;
+        15) # Vietnam
+            export LANG_CODE="vn2" ;;
+        16) # Thailand
+            export LANG_CODE="th2" ;;
         *)
             die "Unknown region number: $answer" ;;
     esac
@@ -261,83 +249,6 @@ install_LoL() {
     msg "The game is installed at $INSTALL_DIR"
 }
 
-install_garena() {
-    # Create the wine environment from which we launch the game
-    if [ ! -d "$WINEPREFIX" ]; then
-        create_wineprefix
-    fi
-
-    export_env_variables_garena
-
-    # Create the wine environment in which the game is installed
-    if [ ! -d "$WINEPREFIX" ]; then
-        create_wineprefix
-    elif [ -f "$CLIENT_EXE" ]; then
-        while :; do
-            echo -n "[!] The game has been installed. Remove it and reinstall? [Y/n] "
-            read -r remove
-            remove="$(echo "$remove" | tr '[:upper:]' '[:lower:]')"
-            if [ -z "${remove##y*}" ]; then
-                rm -rf "$INSTALL_DIR"
-                break
-            elif [ -z "${remove##n*}" ]; then
-                exit 1
-            fi
-        done
-    fi
-
-    askQ "Select your region" \
-        "Taiwan, Hong Kong, Macau" \
-        "Singapore, Malaysia, Indonesia, Philippines" \
-        "Vietnam" \
-        "Thailand"
-    read -r -p "    #: " answer
-
-    case "${answer}" in
-        1) # Taiwan, Hong Kong, Macau
-            export LANG_CODE="tw"
-            export URL="https://cdn.gxx.garenanow.com/gxx/pc/installer/Garena-v2.0-TW.exe"
-            ;;
-        2) # Singapore, Malaysia, Indonesia, Philippines
-            export LANG_CODE="sg"
-            export URL="https://cdn.gxx.garenanow.com/gxx/pc/installer/Garena-v2.0.exe"
-            ;;
-        3) # Vietnam
-            export LANG_CODE="vn"
-            export URL="https://cdn.gxx.garenanow.com/gxx/pc/installer/Garena-v2.0-VN.exe"
-            ;;
-        4) # Thailand
-            export LANG_CODE="th"
-            export URL="https://cdn.gxx.garenanow.com/gxx/pc/gameinst/Garena-v2.0-LOLTH.exe"
-            ;;
-        *)
-            die "Unknown region number: $answer" ;;
-    esac
-
-    INSTALLER="$CACHE_DIR/garena-installer.$LANG_CODE.exe"
-    if [ ! -e "$INSTALLER" ]; then
-        msg "Downloading Garena..."
-        mkdir -p "$CACHE_DIR"
-        curl --silent --show-error -Lo "$INSTALLER" "$URL"
-    fi
-    msg "Installing Garena..."
-    wine "$(winepath -w "$INSTALLER")" &
-    pid=$!
-    until ! ps -p $pid >/dev/null; do sleep 1; done
-    wineserver --kill
-    wineserver --wait
-    msg "Garena is installed at $INSTALL_DIR/Garena"
-
-    msg "Installing LoL from Garena..."
-    wine "$(winepath -w "$GARENA_EXE")" &
-    pid=$!
-    until ! ps -p $pid >/dev/null; do sleep 1; done
-    wineserver --kill
-    wineserver --wait
-    export_env_variables_garena
-    msg "The game is installed at $GAME_DIR"
-}
-
 uninstall_LoL() {
     msg "Uninstalling league of legends..."
     set +e
@@ -355,13 +266,6 @@ uninstall_LoL() {
     find -H ~/.local/share/applications/wine -empty -delete
     find -H ~/.local/share/applications -empty -delete
     set -e
-}
-
-uninstall_garena() {
-    export_env_variables_garena
-
-    msg "Uninstalling Garena..."
-    rm -rf "$WINEPREFIX"
 }
 
 save_runes() {
@@ -413,49 +317,6 @@ replay_match()  {
     msg "Replaying $1"
     replay_path="$(winepath -w "$1")"
     (cd "$GAME_EXE_DIR" && wine "$(winepath -w "$GAME_EXE")" "$replay_path")
-    wineserver --wait
-    wait
-}
-
-start_garena() {
-    export_env_variables_garena
-
-    if [ ! -f "$CLIENT_EXE" ]; then
-        while :; do
-            echo -n "[!] The game is not installed. Install it? [Y/n] "
-            read -r install
-            install="$(echo "$install" | tr '[:upper:]' '[:lower:]')"
-            if [ -z "${install##y*}" ]; then
-                install_garena
-                break
-            elif [ -z "${install##n*}" ]; then
-                exit 1
-            fi
-        done
-    fi
-
-    # Remove libEGL.dll files for Garena client having blank screen
-    # find "$INSTALL_DIR" -type f -name '*libEGL.dll' -exec rm {} +
-
-    # Start Garena in the background
-    # https://github.com/nhubaotruong/league-of-legends-linux-garena-script
-    # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/
-    # https://www.reddit.com/r/leagueoflinux/comments/jzbfzb/comment/gt7td4k/
-    wine "$(winepath -w "$GARENA_EXE")" &
-
-    # Get the Riot Client pid and command-line argument
-    name=RiotClientServices.exe
-    process="$(until ps -C $name -o cmd=,; do sleep 1; done)"
-    riot_argument="$(echo "$process" | awk -F '.exe ' '{print $2}')"
-
-    # Kill the Garena process
-    wineserver --kill
-    wineserver --wait
-
-    # Launch the game directly with the riot argument (garena tokens)
-    msg "Starting..."
-    save_runes
-    wine "$(winepath -w "$CLIENT_EXE")" "$riot_argument"
     wineserver --wait
     wait
 }
@@ -530,18 +391,12 @@ usage() {
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
         replay <path>       Replay match (.rofl file)
-        start-garena        Start Garena
-        install-garena      Install Garena
-        uninstall-garena    Uninstall Garena
-        reinstall-garena    Reinstall Garena
         add-dxvk            Install DXVK to the LoL wineprefix
         del-dxvk            Remove DXVK from the LoL wineprefix
         rm-dxvk-cache       Remove DXVK cache
         cleanup-logs        Remove log files
         kill                Kill the wine processes of the wineprefix
-        kill-garena         Kill the Garena wine processes
         run <cmd>           Run shell command with environment variables
-        run-garena <cmd>    Run shell command with environment variables
 EOF
 }
 
@@ -552,21 +407,12 @@ run_command() {
         uninstall) uninstall_LoL ;;
         reinstall) uninstall_LoL && install_LoL ;;
         replay) shift; replay_match "${1-}" ;;
-        start-garena) start_garena ;;
-        install-garena) install_garena ;;
-        uninstall-garena) uninstall_garena ;;
-        reinstall-garena) uninstall_garena && install_garena ;;
         add-dxvk) add_dxvk ;;
         del-dxvk) del_dxvk ;;
         rm-dxvk-cache) rm_dxvk_cache ;;
         cleanup-logs) cleanup_logs ;;
         kill) wineserver --kill ;;
-        kill-garena)
-            export_env_variables_garena
-            wineserver --kill
-            ;;
         run) shift; "$@" ;;
-        run-garena) shift; export_env_variables_garena; "$@" ;;
         *) die "Unknown command: ${1-}\n$(usage)" ;;
     esac
 }

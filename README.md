@@ -88,9 +88,6 @@ variable is not defined, the game would then be installed at
 
 ### Install the Riot and League client
 
-> **Note** <br/>
-> For Garena client (Southeast Asia), please skip to the section below.
-
 * First install the game: `leagueoflegends install`.
     * Please do not log in or launch the game during installation.
     * If the installation progress stucks at 100%, close the window, and run
@@ -127,51 +124,13 @@ variable is not defined, the game would then be installed at
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
         replay <path>       Replay match (.rofl file)
-        start-garena        Start Garena
-        install-garena      Install Garena
-        uninstall-garena    Uninstall Garena
-        reinstall-garena    Reinstall Garena
         add-dxvk            Install DXVK to the LoL wineprefix
         del-dxvk            Remove DXVK from the LoL wineprefix
         rm-dxvk-cache       Remove DXVK cache
         cleanup-logs        Remove log files
         kill                Kill the wine processes of the wineprefix
-        kill-garena         Kill the Garena wine processes
         run <cmd>           Run shell command with environment variables
-        run-garena <cmd>    Run shell command with environment variables
 ```
-
-### Setting up Garena (Southeast Asia)
-
-> **Note** <br/>
-> I haven't tested the Garena setup for years. Please proceed at your own risk.
-> That being said, any pull requests or testing aid would be greatly
-> appreciated.
-
-* First install Garena: `leagueoflegends install-garena`
-    * Choose the region when prompted.
-    * There are two wine prefixes (environments) involved in this setup. Both
-      Garena and LoL will be installed in `~/.local/share/garena/`. However,
-      the game will be launched from the other prefix,
-      `~/.local/share/leagueoflegends/`.
-    * It's recommended to not change the default location of Garena, which is
-      `C:\Program Files\Garena\Garena\`. If you do want to change the default
-      location, remember to also change it in the script.
-    * Once Garena is successfully installed, it will be automatically started.
-      Please log in and go ahead to install LoL from Garena.
-    * LoL will by default be installed at `Z:\Garena\Games\`, which is in most
-      cases not desirable. Please change it to `C:\Program Files\Garena\Games\`,
-      or any other location you desire as long as it is consistent with the
-      script variables.
-* Exit the Garena window when the game installation is finished.
-* Kill the Garena process to finish installation: `leagueoflegends kill-garena`.
-    * Because the process will only be minimized to system tray upon exit.
-* Start the game: `leagueoflegends start-garena`.
-    * This will start Garena. Navigate to LoL and press "Play" from Garena.
-* To remove the game: `leagueoflegends uninstall-garena`.
-* To also remove the environment from which the game is launched:
-  `leagueoflegends uninstall`.
-
 
 ## Advanced wine configuration
 
@@ -191,10 +150,9 @@ winecfg`, or `leagueoflegends run winetricks`, etc.
 
 If you use Nvidia graphics card and have trouble launching the League client or
 start the game (after champion selection), please exit the game (with
-`leagueoflegends kill` or `leagueoflegends kill-garena` if you are running the
-Garena version) and then try `leagueoflegends rm-dxvk-cache` before restarting
-it. This should only need to be done once to clean up the old cache, since DXVK
-caching is currently disabled.
+`leagueoflegends kill`) and then try `leagueoflegends rm-dxvk-cache` before
+restarting it. This should only need to be done once to clean up the old cache,
+since DXVK caching is currently disabled.
 ([Reference](https://www.reddit.com/r/leagueoflinux/comments/skyg70/fixing_the_nvidia_495_black_screen_crash_problem/))
 
 If the issue still remains, you may want to purge and reinstall the Nvidia

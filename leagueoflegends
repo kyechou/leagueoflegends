@@ -498,12 +498,26 @@ run_command() {
     esac
 }
 
+_32_to_64_transition_guard() {
+    local SYSTEM32="$WINEPREFIX/drive_c/windows/system32"
+    local SYSWOW64="$WINEPREFIX/drive_c/windows/syswow64"
+
+    if [[ -e "$SYSTEM32" ]] && [[ ! -e "$SYSWOW64" ]]; then
+        cat <<EOF
+[!] The current installation is 32-bit.
+    Please run 'leagueoflegends reinstall' to switch to a 64-bit installation.
+EOF
+        exit
+    fi
+}
+
 main() {
     check_depends
     check_vulkan
     parse_args "$@"
     read_configs
     export_env_variables
+    _32_to_64_transition_guard
     run_command "${CMD[@]}"
 }
 

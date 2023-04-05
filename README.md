@@ -28,8 +28,8 @@ check all dependencies are installed properly if it's installed manually.
 > not included in the dependencies, even though we do include the virtual
 > packages `vulkan-driver` and `lib32-vulkan-driver` in the AUR package. So
 > please be sure to install the packages required by your specific GPUs. For
-> example, Debian testing requires libnvidia-glvkspirv libglx-nvidia0 for Nvidia
-> GPUs (see [#41](https://github.com/kyechou/leagueoflegends/issues/41)).
+> example, Debian testing requires libnvidia-glvkspirv and libglx-nvidia0 for
+> Nvidia GPUs (see [#41](https://github.com/kyechou/leagueoflegends/issues/41)).
 
 
 ## Dependencies
@@ -67,10 +67,6 @@ appreciated.
 > The above package names are based on Arch Linux. For other distributions, the
 > package names will be different. Please refer to the documentation of the
 > distribution for installing the correct Vulkan drivers and other dependencies.
->
-> Please understand that I don't have the resources to test other distributions
-> with various GPU settings, so any pull requests or testing for different
-> environments will be appreciated.
 
 
 ## Configuration

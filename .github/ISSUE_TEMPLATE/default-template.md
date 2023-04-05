@@ -13,7 +13,7 @@ section](https://old.reddit.com/r/leagueoflinux/wiki/index#wiki_3_-_.1F527_tech_
 ### System information
 
  - Distro: [e.g. Arch, Ubuntu 20.04, Fedora 35]
- - DE/WM: [e.g. Gnome, KDE, i3, bspwm]
+ - DE/WM/Compositor: [e.g. Gnome, KDE, i3, bspwm, Sway]
  - CPU: [e.g. Intel i7-9750H]
  - GPU: [e.g. GTX 1080 Ti]
  - Graphics card drivers installed: [e.g. `mesa`, `xf86-video-intel`, `nvidia`, `xf86-video-nouveau`]

@@ -135,7 +135,7 @@ export_env_variables() {
     export ICON="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
     export CACHE_DIR="$CACHE_HOME/leagueoflegends"
 
-    export WINEARCH=win64
+    export WINEARCH=win32
     export WINEDEBUG=-all
     export WINEDLLOVERRIDES="mscoree,mshtml,winemenubuilder.exe="
     export WINE_REQ_MOD=(vcrun2019)
@@ -481,23 +481,6 @@ usage() {
 EOF
 }
 
-run_command() {
-    case "${1-}" in
-        start) start_LoL ;;
-        install) install_LoL ;;
-        uninstall) uninstall_LoL ;;
-        reinstall) uninstall_LoL && install_LoL ;;
-        replay) shift; replay_match "${1-}" ;;
-        add-dxvk) add_dxvk ;;
-        del-dxvk) del_dxvk ;;
-        rm-dxvk-cache) rm_dxvk_cache ;;
-        cleanup-logs) cleanup_logs ;;
-        kill) wineserver --kill ;;
-        run) shift; "$@" ;;
-        *) die "Unknown command: ${1-}\n$(usage)" ;;
-    esac
-}
-
 _32_to_64_transition_guard() {
     local SYSTEM32="$WINEPREFIX/drive_c/windows/system32"
     local SYSWOW64="$WINEPREFIX/drive_c/windows/syswow64"
@@ -511,13 +494,29 @@ EOF
     fi
 }
 
+run_command() {
+    case "${1-}" in
+        start) _32_to_64_transition_guard && start_LoL ;;
+        install) _32_to_64_transition_guard && install_LoL ;;
+        uninstall) uninstall_LoL ;;
+        reinstall) uninstall_LoL && _32_to_64_transition_guard && install_LoL ;;
+        replay) shift; replay_match "${1-}" ;;
+        add-dxvk) _32_to_64_transition_guard && add_dxvk ;;
+        del-dxvk) _32_to_64_transition_guard && del_dxvk ;;
+        rm-dxvk-cache) rm_dxvk_cache ;;
+        cleanup-logs) cleanup_logs ;;
+        kill) wineserver --kill ;;
+        run) shift; _32_to_64_transition_guard && "$@" ;;
+        *) die "Unknown command: ${1-}\n$(usage)" ;;
+    esac
+}
+
 main() {
     check_depends
     check_vulkan
     parse_args "$@"
     read_configs
     export_env_variables
-    _32_to_64_transition_guard
     run_command "${CMD[@]}"
 }
 

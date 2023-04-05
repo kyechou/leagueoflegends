@@ -47,7 +47,7 @@ Depends: wine-lol, winetricks, bash, curl, openssl, winbind, mesa-utils, libgnut
 Suggests:
 Priority: optional
 Homepage: https://github.com/kyechou/leagueoflegends
-Description: League of Legends install and launch wrapper for Linux
+Description: League of Legends helper script
 EOF
     dpkg-deb --root-owner-group --build "$debname"
 }

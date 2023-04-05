@@ -34,39 +34,6 @@ askQ() {
     echo
 }
 
-check_depends() {
-    depends=(wine wineboot winetricks winecfg wineserver winepath curl glxinfo)
-    for dep in "${depends[@]}"; do
-        if ! command -v "$dep" >/dev/null 2>&1; then
-            die "Missing $dep"
-        fi
-    done
-
-    optdepends=()
-    for dep in "${optdepends[@]}"; do
-        if command -v "$dep" >/dev/null 2>&1; then
-            export "HAS_$(echo "$dep" | awk '{ print toupper($0) }')"=1
-        fi
-    done
-}
-
-check_vulkan() {
-    if [ -z "${VK_ICD_FILENAMES+x}" ]; then
-        # VK_ICD_FILENAMES has not been set
-        # Get the active graphic card vendor
-        VENDOR_STRING="$(glxinfo -B | grep 'OpenGL vendor string' | cut -d: -f2)"
-        if echo "$VENDOR_STRING" | grep -iqF amd; then
-            VK_ICD_FILENAMES="$(echo /usr/share/vulkan/icd.d/{radeon,amd}* | sed 's/ /:/g')"
-        elif echo "$VENDOR_STRING" | grep -iqF nvidia; then
-            VK_ICD_FILENAMES="$(echo /usr/share/vulkan/icd.d/nvidia* | sed 's/ /:/g')"
-        elif echo "$VENDOR_STRING" | grep -iqF intel; then
-            VK_ICD_FILENAMES="$(echo /usr/share/vulkan/icd.d/intel* | sed 's/ /:/g')"
-        fi
-    fi
-
-    export VK_ICD_FILENAMES
-}
-
 parse_args() {
     VERBOSE=0
     PATCHLINE=live
@@ -164,6 +131,47 @@ export_env_variables() {
     export __GL_SHADER_DISK_CACHE=1
     export __GL_SHADER_DISK_CACHE_PATH="$WINEPREFIX"
     export __GL_THREADED_OPTIMIZATIONS=1
+}
+
+check_depends() {
+    depends=(wine wineboot winetricks winecfg wineserver winepath curl glxinfo)
+    for dep in "${depends[@]}"; do
+        if ! command -v "$dep" >/dev/null 2>&1; then
+            die "Missing $dep"
+        fi
+    done
+
+    optdepends=()
+    for dep in "${optdepends[@]}"; do
+        if command -v "$dep" >/dev/null 2>&1; then
+            export "HAS_$(echo "$dep" | awk '{ print toupper($0) }')"=1
+        fi
+    done
+}
+
+check_vulkan() {
+    if [ -z "${VK_ICD_FILENAMES+x}" ]; then
+        # VK_ICD_FILENAMES has not been set
+        # Get the active graphic card vendor
+        VENDOR_STRING="$(glxinfo -B | grep 'OpenGL vendor string' | cut -d: -f2)"
+        if echo "$VENDOR_STRING" | grep -iqF amd; then
+            VK_ICD_FILENAMES="$(echo /usr/share/vulkan/icd.d/{radeon,amd}* | sed 's/ /:/g')"
+        elif echo "$VENDOR_STRING" | grep -iqF nvidia; then
+            VK_ICD_FILENAMES="$(echo /usr/share/vulkan/icd.d/nvidia* | sed 's/ /:/g')"
+        elif echo "$VENDOR_STRING" | grep -iqF intel; then
+            VK_ICD_FILENAMES="$(echo /usr/share/vulkan/icd.d/intel* | sed 's/ /:/g')"
+        fi
+    fi
+
+    export VK_ICD_FILENAMES
+}
+
+check_wine_lol() {
+    wine_path="$(command -v wine)"
+
+    if [[ "$wine_path" != *"wine-lol"* ]]; then
+        die "$wine_path doesn't seem to be wine-lol"
+    fi
 }
 
 _create_wineprefix() {
@@ -512,11 +520,12 @@ run_command() {
 }
 
 main() {
-    check_depends
-    check_vulkan
     parse_args "$@"
     read_configs
     export_env_variables
+    check_depends
+    check_vulkan
+    check_wine_lol
     run_command "${CMD[@]}"
 }
 

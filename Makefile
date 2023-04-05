@@ -12,6 +12,7 @@ docdir      := $(datarootdir)/doc/$(pkgname)
 iconsdir    := $(datarootdir)/icons
 licensesdir := $(datarootdir)/licenses/$(pkgname)
 bashcompdir := $(datarootdir)/bash-completion/completions
+zshcompdir  := $(datarootdir)/zsh/site-functions
 
 
 nop:
@@ -25,6 +26,7 @@ install:
 	install -Dm644 leagueoflegends.reg      -t $(docdir)
 	install -Dm644 LICENSE                  -t $(licensesdir)
 	install -Dm644 completion.bash             $(bashcompdir)/$(pkgname)
+	install -Dm644 completion.zsh              $(zshcompdir)/_$(pkgname)
 
 uninstall:
 	@rm -vf $(bindir)/leagueoflegends
@@ -35,5 +37,6 @@ uninstall:
 	@rm -vf $(docdir)/leagueoflegends.reg
 	@rm -vf $(licensesdir)/LICENSE
 	@rm -vf $(bashcompdir)/$(pkgname)
+	@rm -vf $(zshcompdir)/_$(pkgname)
 
 .PHONY: nop install uninstall

@@ -135,7 +135,7 @@ export_env_variables() {
     export ICON="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
     export CACHE_DIR="$CACHE_HOME/leagueoflegends"
 
-    export WINEARCH=win32
+    export WINEARCH=win64
     export WINEDEBUG=-all
     export WINEDLLOVERRIDES="mscoree,mshtml,winemenubuilder.exe="
     export WINE_REQ_MOD=(vcrun2019)
@@ -363,9 +363,26 @@ add_dxvk() {
     _download_dxvk
     msg "Installing DXVK to $WINEPREFIX"
 
+    # Install 64-bit libraries
+    for dll in "${DXVK_DLLS[@]}"; do
+        local src_file="$CACHE_DIR/dxvk-$DXVK_VERSION/x64/$dll.dll"
+        local dst_file="$WINEPREFIX/drive_c/windows/system32/$dll.dll"
+
+        if [ ! -f "$src_file" ]; then
+            die "File not found: $src_file"
+        fi
+
+        if [ -f "$dst_file" ] && [ ! -f "$dst_file.old" ]; then
+            mv -v "$dst_file" "$dst_file.old"
+        fi
+
+        cp -v --reflink=auto "$src_file" "$dst_file"
+    done
+
+    # Install 32-bit libraries
     for dll in "${DXVK_DLLS[@]}"; do
         local src_file="$CACHE_DIR/dxvk-$DXVK_VERSION/x32/$dll.dll"
-        local dst_file="$WINEPREFIX/drive_c/windows/system32/$dll.dll"
+        local dst_file="$WINEPREFIX/drive_c/windows/syswow64/$dll.dll"
 
         if [ ! -f "$src_file" ]; then
             die "File not found: $src_file"
@@ -389,9 +406,24 @@ del_dxvk() {
     _download_dxvk
     msg "Uninstalling DXVK from $WINEPREFIX"
 
+    # Remove 64-bit libraries
+    for dll in "${DXVK_DLLS[@]}"; do
+        local src_file="$CACHE_DIR/dxvk-$DXVK_VERSION/x64/$dll.dll"
+        local dst_file="$WINEPREFIX/drive_c/windows/system32/$dll.dll"
+
+        if [ ! -f "$src_file" ]; then
+            die "File not found: $src_file"
+        fi
+
+        if [ -f "$dst_file.old" ]; then
+            mv -v "$dst_file.old" "$dst_file"
+        fi
+    done
+
+    # Remove 32-bit libraries
     for dll in "${DXVK_DLLS[@]}"; do
         local src_file="$CACHE_DIR/dxvk-$DXVK_VERSION/x32/$dll.dll"
-        local dst_file="$WINEPREFIX/drive_c/windows/system32/$dll.dll"
+        local dst_file="$WINEPREFIX/drive_c/windows/syswow64/$dll.dll"
 
         if [ ! -f "$src_file" ]; then
             die "File not found: $src_file"

@@ -43,11 +43,11 @@ Version: $pkgver
 Architecture: all
 Maintainer: Kuan-Yen Chou <kuanyenchou@gmail.com>
 Installed-Size: $SIZE
-Depends: wine-lol:i386, winetricks, bash, curl, openssl, winbind, mesa-utils, libgnutls30, libldap-2.4-2, libopenal1, libpulse0, libasound2, libmpg123-0, libodbc1, libvkd3d1, libvulkan1, mesa-vulkan-drivers
+Depends: wine-lol, winetricks, bash, curl, openssl, winbind, mesa-utils, libgnutls30, libldap-2.5-0, libopenal1, libpulse0, libasound2, libmpg123-0, libodbc2, libvkd3d1, libvulkan1, mesa-vulkan-drivers
 Suggests:
 Priority: optional
 Homepage: https://github.com/kyechou/leagueoflegends
-Description: League of Legends helper script
+Description: League of Legends install and launch wrapper for Linux
 EOF
     dpkg-deb --root-owner-group --build "$debname"
 }

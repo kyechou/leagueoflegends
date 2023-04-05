@@ -135,7 +135,7 @@ export_env_variables() {
     export ICON="/usr/share/icons/hicolor/256x256/apps/leagueoflegends.png"
     export CACHE_DIR="$CACHE_HOME/leagueoflegends"
 
-    export WINEARCH=win32
+    export WINEARCH=win64
     export WINEDEBUG=-all
     export WINEDLLOVERRIDES="mscoree,mshtml,winemenubuilder.exe="
     export WINE_REQ_MOD=(vcrun2019)

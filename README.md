@@ -3,6 +3,14 @@
 [League of Legends](https://www.leagueoflegends.com) helper script for
 installing and running on Linux.
 
+> **Note** <br/>
+> "Starting April 4, 2023, League will no longer be supported by 32-bit
+> operating systems." ([dev
+> news](https://www.leagueoflegends.com/en-gb/news/dev/tl-dw-skarner-skins-quick-play-dev-update/))
+> However, currently Riot still ships 32-bit binaries, so both 32-bit and 64-bit
+> dependencies will be needed until all 32-bit binaries are safely rolled out
+> and no longer shipped.
+
 
 ## Installation
 
@@ -15,6 +23,13 @@ check all dependencies are installed properly if it's installed manually.
 | Debian/Ubuntu | `./package.sh debian` <br/> `sudo dpkg -i <deb_file>`                              |
 | Others        | Manual installation: `sudo make install`                                           |
 
+> **Note** <br/>
+> With package installation methods, packages specific to individual GPUs are
+> not included in the dependencies, even though we do include the virtual
+> packages `vulkan-driver` and `lib32-vulkan-driver` in the AUR package. So
+> please be sure to install the packages required by your specific GPUs. For
+> example, Debian testing requires libnvidia-glvkspirv libglx-nvidia0 for Nvidia
+> GPUs (see [#41](https://github.com/kyechou/leagueoflegends/issues/41)).
 
 
 ## Dependencies
@@ -31,27 +46,31 @@ appreciated.
 - openssl
 - samba
 - mesa-utils
-- lib32-gnutls
-- lib32-libldap
-- lib32-openal
-- lib32-libpulse
-- lib32-alsa-lib
-- lib32-mpg123
-- lib32-unixodbc
-- lib32-vkd3d
+- gnutls, lib32-gnutls
+- libldap, lib32-libldap
+- openal, lib32-openal
+- libpulse, lib32-libpulse
+- alsa-lib, lib32-alsa-lib
+- mpg123, lib32-mpg123
+- unixodbc, lib32-unixodbc
+- vkd3d, lib32-vkd3d
 - vulkan-icd-loader, lib32-vulkan-icd-loader
 - [Vulkan drivers](https://wiki.archlinux.org/title/Vulkan) **for your graphic
-  cards**. For example:
-    - lib32-vulkan-intel
-    - lib32-nvidia-utils (Debian/Ubuntu: libnvidia-glvkspirv:i386 libglx-nvidia0:i386)
-    - lib32-vulkan-radeon
-    - lib32-amdvlk
+  cards**, both 64-bit and 32-bit packages are required at the moment until Riot
+  ships only the 64-bit binaries. For example:
+    - vulkan-intel, lib32-vulkan-intel
+    - nvidia-utils, lib32-nvidia-utils
+    - vulkan-radeon, lib32-vulkan-radeon
+    - amdvlk, lib32-amdvlk
 
 > **Note** <br/>
-> The above package names are based on Arch Linux. For other non-Arch based
-> distributions, the names will most likely differ. Please refer to the
-> documentation of your distribution for installing the correct Vulkan drivers
-> and other dependencies.
+> The above package names are based on Arch Linux. For other distributions, the
+> package names will be different. Please refer to the documentation of the
+> distribution for installing the correct Vulkan drivers and other dependencies.
+>
+> Please understand that I don't have the resources to test other distributions
+> with various GPU settings, so any pull requests or testing for different
+> environments will be appreciated.
 
 
 ## Configuration

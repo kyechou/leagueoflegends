@@ -115,8 +115,10 @@ export_env_variables() {
     export RUNES_FILE="$INSTALL_DIR/League of Legends/Config/PerksPreferences.yaml"
 
     if [ "$VERBOSE" -ne 0 ]; then
-        export WINEDEBUG=fixme-all
+        export WINEDEBUG=fixme-all,debug+seh,debug+vulkan,debug+window,debug+sync,debug+virtual
         export VK_LOADER_DEBUG=all
+    else
+        export WINEtrace=fixme-all,trace+seh,trace+vulkan,trace+window
     fi
 
     export DXVK_DLLS=(d3d9 d3d10core d3d11 dxgi)

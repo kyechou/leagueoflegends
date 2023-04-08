@@ -152,20 +152,20 @@ check_depends() {
 }
 
 check_vulkan() {
-    if [ -z "${VK_ICD_FILENAMES+x}" ]; then
-        # VK_ICD_FILENAMES has not been set
+    if [ -z "${VK_DRIVER_FILES+x}" ]; then
+        # VK_DRIVER_FILES has not been set
         # Get the active graphic card vendor
         VENDOR_STRING="$(glxinfo -B | grep 'OpenGL vendor string' | cut -d: -f2)"
         if echo "$VENDOR_STRING" | grep -iqF amd; then
-            VK_ICD_FILENAMES="$(echo /usr/share/vulkan/icd.d/{radeon,amd}* | sed 's/ /:/g')"
+            VK_DRIVER_FILES="$(echo /usr/share/vulkan/icd.d/{radeon,amd}* | sed 's/ /:/g')"
         elif echo "$VENDOR_STRING" | grep -iqF nvidia; then
-            VK_ICD_FILENAMES="$(echo /usr/share/vulkan/icd.d/nvidia* | sed 's/ /:/g')"
+            VK_DRIVER_FILES="$(echo /usr/share/vulkan/icd.d/nvidia* | sed 's/ /:/g')"
         elif echo "$VENDOR_STRING" | grep -iqF intel; then
-            VK_ICD_FILENAMES="$(echo /usr/share/vulkan/icd.d/intel* | sed 's/ /:/g')"
+            VK_DRIVER_FILES="$(echo /usr/share/vulkan/icd.d/intel* | sed 's/ /:/g')"
         fi
     fi
 
-    export VK_ICD_FILENAMES
+    export VK_DRIVER_FILES
 }
 
 check_wine_lol() {

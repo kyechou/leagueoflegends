@@ -3,6 +3,9 @@ REGEDIT4
 [HKEY_CURRENT_USER\Software\Wine\DirectInput]
 "MouseWarpOverride"="enable"
 
+[HKEY_CURRENT_USER\Software\Wine\WineDbg]
+"BreakOnFirstChance"="0"
+
 [HKEY_CURRENT_USER\Software\Wine\X11 Driver]
 "GrabFullScreen"="Y"
 

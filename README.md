@@ -38,8 +38,8 @@ The following dependencies are included in the AUR package and the generated
 `.deb` package. If there's anything incorrect or missing, pull requests are
 appreciated.
 
-- [wine-lol](https://github.com/M-Reimer/wine-lol)
-    ([AUR](https://aur.archlinux.org/packages/wine-lol))
+- wine-lol-staging [AUR](https://aur.archlinux.org/packages/wine-lol-staging)
+ OR Download a prebuilt runner [here](https://github.com/polkaulfield/lol-for-linux-installer/releases/download/wine-lol-staging/wine-lol-staging-8.5-1.tar.xz) and extract to /opt/ if not on ArchLinux
 - winetricks
 - bash
 - curl

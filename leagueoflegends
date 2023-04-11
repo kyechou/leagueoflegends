@@ -529,7 +529,7 @@ usage() {
         del-dxvk            Remove DXVK from the LoL wineprefix
         rm-dxvk-cache       Remove DXVK cache
         cleanup-logs        Remove log files
-        kill                Kill the wine processes of the wineprefix
+        kill,stop           Kill the wine processes of the wineprefix
         run <cmd>           Run shell command with environment variables
 EOF
 }
@@ -560,6 +560,7 @@ run_command() {
         rm-dxvk-cache) rm_dxvk_cache ;;
         cleanup-logs) cleanup_logs ;;
         kill) wineserver --kill ;;
+        stop) wineserver --kill ;;
         run) shift; _32_to_64_transition_guard && "$@" ;;
         *) die "Unknown command: ${1-}\n$(usage)" ;;
     esac

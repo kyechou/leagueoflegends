@@ -38,8 +38,21 @@ The following dependencies are included in the AUR package and the generated
 `.deb` package. If there's anything incorrect or missing, pull requests are
 appreciated.
 
-- wine-lol-staging [AUR](https://aur.archlinux.org/packages/wine-lol-staging)
- OR Download a prebuilt runner [here](https://github.com/polkaulfield/lol-for-linux-installer/releases/download/wine-lol-staging/wine-lol-staging-8.5-1.tar.xz) and extract to /opt/ if not on ArchLinux
+> **Note** <br/>
+> For non-Arch distributions, wine-lol is **not** included in the package
+> dependencies because they don't have those packages for now. So please be sure
+> to manually install wine-lol by either downloading from [a release of
+> wine-ge-custom](https://github.com/GloriousEggroll/wine-ge-custom/releases?q=LoL&expanded=true)
+> (which is the same as wine-lol-bin), or from [a release of
+> lol-for-linux-installer](https://github.com/polkaulfield/lol-for-linux-installer/releases).
+> After downloading the binary release, extract the content to `/opt/wine-lol` or
+> `/opt/wine-lol-staging`.
+
+- wine-lol (please refer to the associated links for their differences)
+  - Provider: [wine-lol (AUR)](https://aur.archlinux.org/packages/wine-lol)
+  - Provider: [wine-lol-bin (AUR)](https://aur.archlinux.org/packages/wine-lol-bin)
+  - Provider: [wine-lol-staging (AUR)](https://aur.archlinux.org/packages/wine-lol-staging)
+  - Provider: [wine-lol-staging (pre-built)](https://github.com/polkaulfield/lol-for-linux-installer/releases)
 - winetricks
 - bash
 - curl

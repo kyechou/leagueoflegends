@@ -6,6 +6,10 @@ msg() {
     echo -e "[+] ${1-}" >&2
 }
 
+warn() {
+    echo -e "[!] ${1-}" >&2
+}
+
 die() {
     echo -e "[!] ${1-}" >&2
     exit 1
@@ -212,7 +216,7 @@ _create_wineprefix() {
 }
 
 install_LoL() {
-    if [ ! -d "$WINEPREFIX" ]; then
+    if [ ! -e "$WINEPREFIX" ]; then
         _create_wineprefix
     elif [ -f "$RIOT_CLIENT" ]; then
         while :; do
@@ -303,7 +307,34 @@ uninstall_LoL() {
     find -H ~/.local/share/applications/wine/Programs -empty -delete
     find -H ~/.local/share/applications/wine -empty -delete
     find -H ~/.local/share/applications -empty -delete
+    find -H ~/.local/share/desktop-directories -empty -delete
     set -e
+}
+
+reset_wineprefix() {
+    if [ ! -e "$WINEPREFIX" ]; then
+        die "Wine prefix $WINEPREFIX does not exist. No need to reset"
+    fi
+
+    local saved_game_dir
+    saved_game_dir="$(realpath "$WINEPREFIX"/../league_save_dir)"
+
+    if [ -e "$saved_game_dir" ]; then
+        die "$saved_game_dir already exists"
+    fi
+
+    if [ -e "$INSTALL_DIR" ]; then
+        msg "Saving $INSTALL_DIR to $saved_game_dir"
+        mv "$INSTALL_DIR" "$saved_game_dir"
+    fi
+
+    uninstall_LoL
+    _create_wineprefix
+
+    if [ -e "$saved_game_dir" ]; then
+        msg "Moving $saved_game_dir back to $INSTALL_DIR"
+        mv "$saved_game_dir" "$INSTALL_DIR"
+    fi
 }
 
 _save_runes() {
@@ -492,6 +523,7 @@ usage() {
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
+        reset-wineprefix    Reset wine prefix
         replay <path>       Replay match (.rofl file)
         add-dxvk            Install DXVK to the LoL wineprefix
         del-dxvk            Remove DXVK from the LoL wineprefix
@@ -521,6 +553,7 @@ run_command() {
         install) _32_to_64_transition_guard && install_LoL ;;
         uninstall) uninstall_LoL ;;
         reinstall) uninstall_LoL && _32_to_64_transition_guard && install_LoL ;;
+        reset-wineprefix) reset_wineprefix ;;
         replay) shift; _32_to_64_transition_guard && replay_match "${1-}" ;;
         add-dxvk) _32_to_64_transition_guard && add_dxvk ;;
         del-dxvk) _32_to_64_transition_guard && del_dxvk ;;

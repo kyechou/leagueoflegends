@@ -5,6 +5,7 @@ COMMANDS=(
     install
     uninstall
     reinstall
+    reset-wineprefix
     replay
     add-dxvk
     del-dxvk

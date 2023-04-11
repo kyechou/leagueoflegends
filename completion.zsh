@@ -5,6 +5,7 @@ _commands=(
 	'install:Install LoL'
 	'uninstall:Uninstall LoL'
 	'reinstall:Reinstall LoL'
+    'reset-wineprefix:Reset wine prefix'
 	'replay:Replay match (.rofl file)'
 	'add-dxvk:Install DXVK to the LoL wineprefix'
 	'del-dxvk:Remove DXVK from the LoL wineprefix'

@@ -152,6 +152,7 @@ variable is not defined, the game would then be installed at
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
+        reset-wineprefix    Reset wine prefix
         replay <path>       Replay match (.rofl file)
         add-dxvk            Install DXVK to the LoL wineprefix
         del-dxvk            Remove DXVK from the LoL wineprefix

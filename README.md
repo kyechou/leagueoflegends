@@ -129,6 +129,14 @@ variable is not defined, the game would then be installed at
   everything works.
 * To remove the game: `leagueoflegends uninstall`.
 
+> **Warning** <br/>
+> If you've run wine-lol-staging or other flavors of wine 8.0+ before and now
+> have issues with launching the client (especially if you're coming from
+> version 8 to 7), and it says something about `unimplemented function
+> winegstreamer.dll.winegstreamer_create_video_decoder`. It's because of the
+> difference in wine versions. You need to recreate the wine prefix for it to
+> work, by running `leagueoflegends reset-wineprefix`.
+
 > **Note** <br/>
 > If you use Nvidia graphics card and have trouble launching the League client
 > or start the game (after champion selection), please check out [the

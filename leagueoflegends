@@ -521,7 +521,7 @@ run_command() {
         install) _32_to_64_transition_guard && install_LoL ;;
         uninstall) uninstall_LoL ;;
         reinstall) uninstall_LoL && _32_to_64_transition_guard && install_LoL ;;
-        replay) shift; replay_match "${1-}" ;;
+        replay) shift; _32_to_64_transition_guard && replay_match "${1-}" ;;
         add-dxvk) _32_to_64_transition_guard && add_dxvk ;;
         del-dxvk) _32_to_64_transition_guard && del_dxvk ;;
         rm-dxvk-cache) rm_dxvk_cache ;;

@@ -157,6 +157,7 @@ variable is not defined, the game would then be installed at
 
     Commands:
         start               Start LoL
+        stop                Same as kill
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL

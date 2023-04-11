@@ -2,6 +2,7 @@
 
 COMMANDS=(
     start
+    stop
     install
     uninstall
     reinstall

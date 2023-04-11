@@ -520,6 +520,7 @@ usage() {
 
     Commands:
         start               Start LoL
+        stop                Same as kill
         install             Install LoL
         uninstall           Uninstall LoL
         reinstall           Reinstall LoL
@@ -550,6 +551,7 @@ EOF
 run_command() {
     case "${1-}" in
         start) _32_to_64_transition_guard && start_LoL ;;
+        stop) wineserver --kill ;;
         install) _32_to_64_transition_guard && install_LoL ;;
         uninstall) uninstall_LoL ;;
         reinstall) uninstall_LoL && _32_to_64_transition_guard && install_LoL ;;

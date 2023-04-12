@@ -27,7 +27,7 @@ install:
 	install -Dm644 LICENSE                  -t $(licensesdir)
 	install -Dm644 completion.bash             $(bashcompdir)/$(pkgname)
 	install -Dm644 completion.zsh              $(zshcompdir)/_$(pkgname)
-	install -Dm644 completion.fish        $(fishcompdir)/$(pkgname).fish
+	install -Dm644 completion.fish        	   $(fishcompdir)/$(pkgname).fish
 
 uninstall:
 	@rm -vf $(bindir)/leagueoflegends

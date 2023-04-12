@@ -13,7 +13,7 @@ iconsdir    := $(datarootdir)/icons
 licensesdir := $(datarootdir)/licenses/$(pkgname)
 bashcompdir := $(datarootdir)/bash-completion/completions
 zshcompdir  := $(datarootdir)/zsh/site-functions
-fishcompdir  := $(datarootdir)/fish/vendor-completions.d
+fishcompdir := $(datarootdir)/fish/vendor-completions.d
 
 nop:
 

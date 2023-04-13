@@ -13,7 +13,7 @@ iconsdir    := $(datarootdir)/icons
 licensesdir := $(datarootdir)/licenses/$(pkgname)
 bashcompdir := $(datarootdir)/bash-completion/completions
 zshcompdir  := $(datarootdir)/zsh/site-functions
-fishcompdir := $(datarootdir)/fish/vendor-completions.d
+fishcompdir := $(datarootdir)/fish/vendor_completions.d
 
 nop:
 
@@ -27,7 +27,7 @@ install:
 	install -Dm644 LICENSE                  -t $(licensesdir)
 	install -Dm644 completion.bash             $(bashcompdir)/$(pkgname)
 	install -Dm644 completion.zsh              $(zshcompdir)/_$(pkgname)
-	install -Dm644 completion.fish        	   $(fishcompdir)/$(pkgname).fish
+	install -Dm644 completion.fish             $(fishcompdir)/$(pkgname).fish
 
 uninstall:
 	@rm -vf $(bindir)/leagueoflegends

@@ -1,25 +1,25 @@
 # Completions for leagueoflegends
 
 set locales \
-		'de_DE	German' \
-		'el_GR	Greek' \
-		'en_AU	English (Australia)' \
-		'en_GB	English (UK)' \
-		'en_US	English (US)' \
-		'es_ES	Spanish (Spain)' \
-		'es_MX	Spanish (Latin America)' \
-		'fr_FR	French' \
-		'hu_HU	Hungarian' \
-		'it_IT	Italian' \
-		'ja_JP	Japanese' \
-		'ko_KR	Korean' \
-		'pl_PL	Polish' \
-		'pt_BR	Portuguese (Brazil)' \
-		'ro_RO	Romanian' \
-		'ru_RU	Russian' \
-		'tr_TR	Turkish' \
-		'zh_CN	Chinese' \
-		'zh_TW	Taiwanese'
+	'de_DE	German' \
+	'el_GR	Greek' \
+	'en_AU	English (Australia)' \
+	'en_GB	English (UK)' \
+	'en_US	English (US)' \
+	'es_ES	Spanish (Spain)' \
+	'es_MX	Spanish (Latin America)' \
+	'fr_FR	French' \
+	'hu_HU	Hungarian' \
+	'it_IT	Italian' \
+	'ja_JP	Japanese' \
+	'ko_KR	Korean' \
+	'pl_PL	Polish' \
+	'pt_BR	Portuguese (Brazil)' \
+	'ro_RO	Romanian' \
+	'ru_RU	Russian' \
+	'tr_TR	Turkish' \
+	'zh_CN	Chinese' \
+	'zh_TW	Taiwanese'
 
 set -l commands (leagueoflegends -h | sed '/Commands:/,$!d' | grep -v 'Commands:' | awk -F ' ' '{print $1}')
 set -l commands_w_desc (

@@ -1,20 +1,11 @@
 #compdef leagueoflegends
 
-_commands=(
-    'start:Start LoL'
-    'stop:Same as kill'
-    'install:Install LoL'
-    'uninstall:Uninstall LoL'
-    'reinstall:Reinstall LoL'
-    'reset-wineprefix:Reset wine prefix'
-    'replay:Replay match (.rofl file)'
-    'add-dxvk:Install DXVK to the LoL wineprefix'
-    'del-dxvk:Remove DXVK from the LoL wineprefix'
-    'rm-dxvk-cache:Remove DXVK cache'
-    'cleanup-logs:Remove log files'
-    'kill:Kill the wine processes of the wineprefix'
-    'run:Run shell command with environment variables'
-)
+_commands=("${(@f)$(
+    leagueoflegends -h \
+        | sed -e '/Commands:/,$!d' -e 's/<[^>]*>//' \
+        | grep -v 'Commands:' \
+        | awk -F ' ' '{printf $1 ":"; for (i=2;i<NF;i++) printf $i " "; print $NF}'
+)}")
 
 _describe_lol_commands() {
 	_describe 'command' _commands -o nosort
@@ -25,7 +16,7 @@ _leagueoflegends() {
         typeset -A opt_args
 
 	_arguments \
-		'(-h --help)'{-h,--help}'[Show help information]' \
+		'(-h --help)'{-h,--help}'[Show help message]' \
 		'(-v --verbose)'{-v,--verbose}'[Enable verbose output]' \
 		'--pbe[Launch the PBE patchline]' \
 		'--locale[Set locale (if different from the region)]:locale:_default' \

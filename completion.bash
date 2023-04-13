@@ -1,19 +1,11 @@
 #!/usr/bin/env bash
 
-COMMANDS=(
-    start
-    stop
-    install
-    uninstall
-    reinstall
-    reset-wineprefix
-    replay
-    add-dxvk
-    del-dxvk
-    rm-dxvk-cache
-    cleanup-logs
-    kill
-    run
+IFS=$'\n' read -r -d '' -a commands < <(
+    leagueoflegends -h \
+        | sed '/Commands:/,$!d' \
+        | grep -v 'Commands:' \
+        | awk -F ' ' '{print $1}' \
+    && printf '\0'
 )
 
-complete -W "${COMMANDS[*]}" leagueoflegends
+complete -W "${commands[*]}" leagueoflegends

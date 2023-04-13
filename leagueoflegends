@@ -535,7 +535,7 @@ usage() {
     League of Legends - helper program
 
     Options:
-        -h, --help          Print this message and exit
+        -h, --help          Show help message
         -v, --verbose       Enable verbose output
         --pbe               Launch the PBE patchline
         --locale <locale>   Set locale (if different from the region)

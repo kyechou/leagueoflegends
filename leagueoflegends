@@ -45,16 +45,25 @@ parse_args() {
 
     while :; do
         case "${1-}" in
-        -h | --help) usage; exit ;;
+        -h | --help)
+            usage
+            exit
+            ;;
         -v | --verbose)
-            VERBOSE=1; set -x ;;
+            VERBOSE=1
+            set -x
+            ;;
         --pbe)
-            PATCHLINE=pbe ;;
+            PATCHLINE=pbe
+            ;;
         --locale)
             LOCALE="${2-}"
             shift
             ;;
-        --) shift; break ;;
+        --)
+            shift
+            break
+            ;;
         -?*) die "Unknown option: ${1-}\n$(usage)" ;;
         *) break ;;
         esac
@@ -120,7 +129,7 @@ export_env_variables() {
 
     export WINEARCH="${WINEARCH:-win64}"
     export WINEDLLOVERRIDES="mscoree,mshtml=;winemenubuilder.exe=d"
-    export WINE_REQ_MOD=(vcrun2019 win10)
+    export WINE_REQ_MOD=(win10)
     export WINEPREFIX="${WINEPREFIX:-$DATA_HOME/leagueoflegends}"
     export INSTALL_DIR="$WINEPREFIX/drive_c/Riot Games"
     export RIOT_CLIENT="$INSTALL_DIR/Riot Client/RiotClientServices.exe"
@@ -240,40 +249,41 @@ install_LoL() {
     read -r -p "    #: " answer
 
     case "${answer}" in
-        1) # North America
-            export LANG_CODE="na" ;;
-        2) # EU West
-            export LANG_CODE="euw" ;;
-        3) # EU Nordic & East
-            export LANG_CODE="eune" ;;
-        4) # Latin America North
-            export LANG_CODE="la1" ;;
-        5) # Latin America South
-            export LANG_CODE="la2" ;;
-        6) # Brazil
-            export LANG_CODE="br" ;;
-        7) # Turkey
-            export LANG_CODE="tr" ;;
-        8) # Russia
-            export LANG_CODE="ru" ;;
-        9) # Japan
-            export LANG_CODE="jp" ;;
-        10) # Oceania
-            export LANG_CODE="oc1" ;;
-        11) # Republic of Korea
-            export LANG_CODE="kr" ;;
-        12) # Taiwan
-            export LANG_CODE="tw2" ;;
-        13) # Philippines
-            export LANG_CODE="ph2" ;;
-        14) # Singapore
-            export LANG_CODE="sg2" ;;
-        15) # Vietnam
-            export LANG_CODE="vn2" ;;
-        16) # Thailand
-            export LANG_CODE="th2" ;;
-        *)
-            die "Unknown region number: $answer" ;;
+    1) # North America
+        export LANG_CODE="na" ;;
+    2) # EU West
+        export LANG_CODE="euw" ;;
+    3) # EU Nordic & East
+        export LANG_CODE="eune" ;;
+    4) # Latin America North
+        export LANG_CODE="la1" ;;
+    5) # Latin America South
+        export LANG_CODE="la2" ;;
+    6) # Brazil
+        export LANG_CODE="br" ;;
+    7) # Turkey
+        export LANG_CODE="tr" ;;
+    8) # Russia
+        export LANG_CODE="ru" ;;
+    9) # Japan
+        export LANG_CODE="jp" ;;
+    10) # Oceania
+        export LANG_CODE="oc1" ;;
+    11) # Republic of Korea
+        export LANG_CODE="kr" ;;
+    12) # Taiwan
+        export LANG_CODE="tw2" ;;
+    13) # Philippines
+        export LANG_CODE="ph2" ;;
+    14) # Singapore
+        export LANG_CODE="sg2" ;;
+    15) # Vietnam
+        export LANG_CODE="vn2" ;;
+    16) # Thailand
+        export LANG_CODE="th2" ;;
+    *)
+        die "Unknown region number: $answer"
+        ;;
     esac
 
     INSTALLER="$CACHE_DIR/installer.$LANG_CODE.exe"
@@ -314,7 +324,7 @@ uninstall_LoL() {
 reinstall_LoL() {
     if [ -e "$INSTALL_DIR" ]; then
         while :; do
-            echo -n "[!] In addition to the wine prefix, do you also want to reinstall the game? [Y/n] "
+            echo -n "[!] Besides reinstalling the wine prefix, do you also want to reinstall the game? [Y/n] "
             read -r rm_game
             rm_game="$(echo "$rm_game" | tr '[:upper:]' '[:lower:]')"
             if [ -z "${rm_game##y*}" ]; then
@@ -399,7 +409,7 @@ start_LoL() {
     wait
 }
 
-replay_match()  {
+replay_match() {
     if [ ! -f "$GAME_EXE" ]; then
         die "The game is not installed. Please install it first"
     fi
@@ -572,20 +582,39 @@ EOF
 
 run_command() {
     case "${1-}" in
-        start) _32_to_64_transition_guard && start_LoL ;;
-        stop) wineserver --kill ;;
-        install) _32_to_64_transition_guard && install_LoL ;;
-        uninstall) uninstall_LoL ;;
-        reinstall) reinstall_LoL ;;
-        reset-wineprefix) reset_wineprefix ;;
-        replay) shift; _32_to_64_transition_guard && replay_match "${1-}" ;;
-        add-dxvk) _32_to_64_transition_guard && add_dxvk ;;
-        del-dxvk) _32_to_64_transition_guard && del_dxvk ;;
-        rm-dxvk-cache) rm_dxvk_cache ;;
-        cleanup-logs) cleanup_logs ;;
-        kill) wineserver --kill ;;
-        run) shift; _32_to_64_transition_guard && "$@" ;;
-        *) die "Unknown command: ${1-}\n$(usage)" ;;
+    start)
+        _32_to_64_transition_guard
+        start_LoL
+        ;;
+    stop) wineserver --kill ;;
+    install)
+        _32_to_64_transition_guard
+        install_LoL
+        ;;
+    uninstall) uninstall_LoL ;;
+    reinstall) reinstall_LoL ;;
+    reset-wineprefix) reset_wineprefix ;;
+    replay)
+        shift
+        _32_to_64_transition_guard
+        replay_match "${1-}"
+        ;;
+    add-dxvk)
+        _32_to_64_transition_guard
+        add_dxvk
+        ;;
+    del-dxvk)
+        _32_to_64_transition_guard
+        del_dxvk
+        ;;
+    rm-dxvk-cache) rm_dxvk_cache ;;
+    cleanup-logs) cleanup_logs ;;
+    kill) wineserver --kill ;;
+    run)
+        shift
+        _32_to_64_transition_guard && "$@"
+        ;;
+    *) die "Unknown command: ${1-}\n$(usage)" ;;
     esac
 }
 
@@ -598,7 +627,6 @@ main() {
     check_wine_lol
     run_command "${CMD[@]}"
 }
-
 
 main "$@"
 

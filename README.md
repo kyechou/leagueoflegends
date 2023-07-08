@@ -121,6 +121,10 @@ variable is not defined, the game would then be installed at
     * If the installation progress stucks at 100%, close the window, and run
     `leagueoflegends install` again.
         * For more detail, check out [this thread](https://www.reddit.com/r/leagueoflinux/comments/qavc89/install_stuck_on_downloading_100/).
+* You may want to prevent the Riot client from minimizing upon exit by
+  modifying the riot client settings. See
+  [here](#riot-client-keeps-running-after-the-league-client-exits) for more
+  details.
 * Exit the window when the game installation is finished. (The progress circle
   disappears.)
 * Start the game: `leagueoflegends start`.
@@ -150,9 +154,11 @@ variable is not defined, the game would then be installed at
     League of Legends - helper program
 
     Options:
-        -h, --help          Print this message and exit
+        -h, --help          Show help message
         -v, --verbose       Enable verbose output
+        -f, --config        Specify the configuration file
         --pbe               Launch the PBE patchline
+        --region <region>   Set region
         --locale <locale>   Set locale (if different from the region)
 
     Commands:
@@ -184,6 +190,17 @@ winecfg`, or `leagueoflegends run winetricks`, etc.
 
 
 ## Troubleshooting
+
+### Riot client keeps running after the league client exits
+
+Currently the Riot client will by default keep running in the background with
+the system tray icon after the league client exits. You may change the behavior
+by going to the Riot client settings and selecting the "Exit application" option
+upon closing the window.
+
+> Related issue: #99
+
+![Riot client settings](figures/riot-client-settings.png)
 
 ### Blank screen with Nvidia graphics card
 

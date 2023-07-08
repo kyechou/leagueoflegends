@@ -41,6 +41,7 @@ askQ() {
 parse_args() {
     VERBOSE=0
     PATCHLINE=live
+    REGION=
     LOCALE=
 
     while :; do
@@ -55,6 +56,10 @@ parse_args() {
             ;;
         --pbe)
             PATCHLINE=pbe
+            ;;
+        --region)
+            REGION="${2-}"
+            shift
             ;;
         --locale)
             LOCALE="${2-}"
@@ -73,6 +78,7 @@ parse_args() {
     CMD=("$@")
     export VERBOSE
     export PATCHLINE
+    export REGION
     export LOCALE
     export CMD
 }
@@ -398,18 +404,20 @@ start_LoL() {
         done
     fi
 
-    msg "Starting..."
-    _save_runes
-
-    if [ -n "$LOCALE" ]; then
-        wine "$(winepath -w "$LEAGUE_CLIENT")" \
-            --locale="$LOCALE"
-    else
-        wine "$(winepath -w "$RIOT_CLIENT")" \
-            --launch-product=league_of_legends \
-            --launch-patchline="$PATCHLINE"
+    local launch_flags=(
+        "--launch-product=league_of_legends"
+        "--launch-patchline=$PATCHLINE"
+    )
+    if [[ -n "$REGION" ]]; then
+        launch_flags+=("--region=$REGION")
+    fi
+    if [[ -n "$LOCALE" ]]; then
+        launch_flags+=("--locale=$LOCALE")
     fi
 
+    msg "Starting..."
+    _save_runes
+    wine "$(winepath -w "$RIOT_CLIENT")" "${launch_flags[@]}"
     wineserver --wait
     wait
 }
@@ -553,6 +561,7 @@ usage() {
         -h, --help          Show help message
         -v, --verbose       Enable verbose output
         --pbe               Launch the PBE patchline
+        --region <region>   Set region
         --locale <locale>   Set locale (if different from the region)
 
     Commands:

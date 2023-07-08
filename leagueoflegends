@@ -151,6 +151,11 @@ export_env_variables() {
     DXVKDLLOVERRIDES="$(join_array , "${DXVK_DLLS[@]}")=n,b"
     WINEDLLOVERRIDES="${WINEDLLOVERRIDES};${DXVKDLLOVERRIDES}"
 
+    # Prevents the zombie processes from remaining upon crashes.
+    # https://github.com/kyechou/leagueoflegends/issues/106
+    LOLDLLOVERRIDES="RiotClientCrashHandler.exe=d;LeagueCrashHandler64.exe=d"
+    WINEDLLOVERRIDES="${WINEDLLOVERRIDES};${LOLDLLOVERRIDES}"
+
     export MESA_GLTHREAD=true
     export STAGING_SHARED_MEMORY=1
     export WINE_LARGE_ADDRESS_AWARE=1

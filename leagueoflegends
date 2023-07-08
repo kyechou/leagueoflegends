@@ -201,14 +201,32 @@ check_vulkan() {
     if [ -z "${VK_DRIVER_FILES+x}" ]; then
         # VK_DRIVER_FILES has not been set
         # Get the active graphic card vendor
-        VENDOR_STRING="$(glxinfo -B | grep 'OpenGL vendor string' | cut -d: -f2)"
-        if echo "$VENDOR_STRING" | grep -iqF amd; then
-            VK_DRIVER_FILES="$(echo /usr/share/vulkan/icd.d/{radeon,amd}* | sed 's/ /:/g')"
-        elif echo "$VENDOR_STRING" | grep -iqF nvidia; then
-            VK_DRIVER_FILES="$(echo /usr/share/vulkan/icd.d/nvidia* | sed 's/ /:/g')"
-        elif echo "$VENDOR_STRING" | grep -iqF intel; then
-            VK_DRIVER_FILES="$(echo /usr/share/vulkan/icd.d/intel* | sed 's/ /:/g')"
+        local vk_icd_files=()
+        local vendor_string
+        vendor_string="$(glxinfo -B | grep 'OpenGL vendor string' | cut -d: -f2)"
+
+        if echo "$vendor_string" | grep -iqF amd; then
+            mapfile -t vk_icd_files < <(
+                find /usr/share/vulkan/icd.d/{radeon,amd}* -type f 2>/dev/null
+            )
+        elif echo "$vendor_string" | grep -iqF nvidia; then
+            mapfile -t vk_icd_files < <(
+                find /usr/share/vulkan/icd.d/nvidia* -type f 2>/dev/null
+            )
+        elif echo "$vendor_string" | grep -iqF intel; then
+            mapfile -t vk_icd_files < <(
+                find /usr/share/vulkan/icd.d/intel* -type f 2>/dev/null
+            )
         fi
+
+        if [[ "${#vk_icd_files[@]}" -eq 0 ]]; then
+            die "Vulkan ICD files not found\n    Please install the correct Vulkan driver"
+        fi
+
+        VK_DRIVER_FILES="$(
+            IFS=:
+            echo "${vk_icd_files[*]}"
+        )"
     fi
 
     export VK_DRIVER_FILES

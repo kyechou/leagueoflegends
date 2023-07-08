@@ -198,7 +198,7 @@ the system tray icon after the league client exits. You may change the behavior
 by going to the Riot client settings and selecting the "Exit application" option
 upon closing the window.
 
-> Related issue: #99
+> Related issue: [#99](https://github.com/kyechou/leagueoflegends/issues/99)
 
 ![Riot client settings](figures/riot-client-settings.png)
 

@@ -96,15 +96,15 @@ read_configs() {
         else
             CONFIG_FILE="$HOME/.config/league.sh"
         fi
-    fi
-
-    if [[ ! -e "$CONFIG_FILE" ]]; then
+    elif [[ ! -e "$CONFIG_FILE" ]]; then
         die "File not found: $CONFIG_FILE"
     fi
 
     # Load the config file.
-    # shellcheck source=/dev/null
-    source "$CONFIG_FILE"
+    if [[ -e "$CONFIG_FILE" ]]; then
+        # shellcheck source=/dev/null
+        source "$CONFIG_FILE"
+    fi
 
     if [ -z "${DATA_HOME+x}" ]; then
         if [ -n "${XDG_DATA_HOME+x}" ]; then

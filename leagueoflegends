@@ -40,6 +40,7 @@ askQ() {
 
 parse_args() {
     VERBOSE=0
+    CONFIG_FILE=
     PATCHLINE=live
     REGION=
     LOCALE=
@@ -53,6 +54,10 @@ parse_args() {
         -v | --verbose)
             VERBOSE=1
             set -x
+            ;;
+        -f | --config)
+            CONFIG_FILE="${2-}"
+            shift
             ;;
         --pbe)
             PATCHLINE=pbe
@@ -77,6 +82,7 @@ parse_args() {
 
     CMD=("$@")
     export VERBOSE
+    export CONFIG_FILE
     export PATCHLINE
     export REGION
     export LOCALE
@@ -84,16 +90,21 @@ parse_args() {
 }
 
 read_configs() {
-    if [ -n "${XDG_CONFIG_HOME+x}" ]; then
-        CONFIG_FILE="$XDG_CONFIG_HOME/league.sh"
-    else
-        CONFIG_FILE="$HOME/.config/league.sh"
+    if [[ -z "$CONFIG_FILE" ]]; then
+        if [ -n "${XDG_CONFIG_HOME+x}" ]; then
+            CONFIG_FILE="$XDG_CONFIG_HOME/league.sh"
+        else
+            CONFIG_FILE="$HOME/.config/league.sh"
+        fi
     fi
 
-    if [ -f "$CONFIG_FILE" ]; then
-        # shellcheck source=/dev/null
-        source "$CONFIG_FILE"
+    if [[ ! -e "$CONFIG_FILE" ]]; then
+        die "File not found: $CONFIG_FILE"
     fi
+
+    # Load the config file.
+    # shellcheck source=/dev/null
+    source "$CONFIG_FILE"
 
     if [ -z "${DATA_HOME+x}" ]; then
         if [ -n "${XDG_DATA_HOME+x}" ]; then
@@ -560,6 +571,7 @@ usage() {
     Options:
         -h, --help          Show help message
         -v, --verbose       Enable verbose output
+        -f, --config        Specify the configuration file
         --pbe               Launch the PBE patchline
         --region <region>   Set region
         --locale <locale>   Set locale (if different from the region)

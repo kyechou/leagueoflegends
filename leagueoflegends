@@ -255,37 +255,37 @@ install_LoL() {
 
     case "${answer}" in
     1) # North America
-        export LANG_CODE="na" ;;
+        LANG_CODE="na" ;;
     2) # EU West
-        export LANG_CODE="euw" ;;
+        LANG_CODE="euw" ;;
     3) # EU Nordic & East
-        export LANG_CODE="eune" ;;
+        LANG_CODE="eune" ;;
     4) # Latin America North
-        export LANG_CODE="la1" ;;
+        LANG_CODE="la1" ;;
     5) # Latin America South
-        export LANG_CODE="la2" ;;
+        LANG_CODE="la2" ;;
     6) # Brazil
-        export LANG_CODE="br" ;;
+        LANG_CODE="br" ;;
     7) # Turkey
-        export LANG_CODE="tr" ;;
+        LANG_CODE="tr" ;;
     8) # Russia
-        export LANG_CODE="ru" ;;
+        LANG_CODE="ru" ;;
     9) # Japan
-        export LANG_CODE="jp" ;;
+        LANG_CODE="jp" ;;
     10) # Oceania
-        export LANG_CODE="oc1" ;;
+        LANG_CODE="oc1" ;;
     11) # Republic of Korea
-        export LANG_CODE="kr" ;;
+        LANG_CODE="kr" ;;
     12) # Taiwan
-        export LANG_CODE="tw2" ;;
+        LANG_CODE="tw2" ;;
     13) # Philippines
-        export LANG_CODE="ph2" ;;
+        LANG_CODE="ph2" ;;
     14) # Singapore
-        export LANG_CODE="sg2" ;;
+        LANG_CODE="sg2" ;;
     15) # Vietnam
-        export LANG_CODE="vn2" ;;
+        LANG_CODE="vn2" ;;
     16) # Thailand
-        export LANG_CODE="th2" ;;
+        LANG_CODE="th2" ;;
     *)
         die "Unknown region number: $answer"
         ;;

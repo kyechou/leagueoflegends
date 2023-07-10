@@ -446,7 +446,7 @@ start_LoL() {
 
     msg "Starting..."
     _save_runes
-    wine "$(winepath -w "$RIOT_CLIENT")" "${launch_flags[@]}"
+    wine "$(winepath -w "$LEAGUE_CLIENT")" "${launch_flags[@]}"
     wineserver --wait
     wait
 }

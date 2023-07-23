@@ -3,13 +3,12 @@
 [League of Legends](https://www.leagueoflegends.com) helper script for
 installing and running on Linux.
 
-> **Note** <br/>
-> "Starting April 4, 2023, League will no longer be supported by 32-bit
-> operating systems." ([dev
-> news](https://www.leagueoflegends.com/en-gb/news/dev/tl-dw-skarner-skins-quick-play-dev-update/))
-> However, currently Riot still ships 32-bit binaries, so both 32-bit and 64-bit
-> dependencies will be needed until all 32-bit binaries are safely rolled out
-> and no longer shipped.
+> **Warning** <br/>
+> People have reported being permabanned for cheating since 13.14, though at the
+> moment it is not clear about the reasons for banning. Please proceed at your
+> own risk! If you encouter a similar situation, please comment on
+> [#109](https://github.com/kyechou/leagueoflegends/issues/109) to confirm the
+> issue.
 
 
 ## Installation
@@ -80,6 +79,14 @@ appreciated.
 > The above package names are based on Arch Linux. For other distributions, the
 > package names will be different. Please refer to the documentation of the
 > distribution for installing the correct Vulkan drivers and other dependencies.
+
+> **Note** <br/>
+> "Starting April 4, 2023, League will no longer be supported by 32-bit
+> operating systems." ([dev
+> news](https://www.leagueoflegends.com/en-gb/news/dev/tl-dw-skarner-skins-quick-play-dev-update/))
+> However, currently Riot still ships 32-bit binaries, so both 32-bit and 64-bit
+> dependencies will be needed until all 32-bit binaries are safely rolled out
+> and no longer shipped.
 
 
 ## Configuration

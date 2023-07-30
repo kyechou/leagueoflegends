@@ -8,6 +8,7 @@ Terminal=false
 Actions=kill;winecfg;
 Categories=Game;Wine;
 StartupWMClass=leagueclientux.exe
+PrefersNonDefaultGPU=true
 
 [Desktop Action kill]
 Name=kill LoL Processes

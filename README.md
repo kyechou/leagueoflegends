@@ -4,11 +4,20 @@
 installing and running on Linux.
 
 > **Warning** <br/>
-> People have reported being permabanned for cheating since 13.14, though at the
-> moment it is not clear about the reasons for banning. Please proceed at your
-> own risk! If you encouter a similar situation, please comment on
-> [#109](https://github.com/kyechou/leagueoflegends/issues/109) to confirm the
-> issue.
+> Playing LoL on Linux is not officially supported by Riot, so please proceed at
+> your own risk! From Riot: "We also can't guarantee that more restrictive
+> anti-cheat tools won't be introduced in the future, which could potentially
+> conflict with such environments."
+> ([#109](https://github.com/kyechou/leagueoflegends/issues/109#issuecomment-1702388487))
+
+> **Warning** <br/>
+> People have reported being banned for cheating since 13.14
+> ([#109](https://github.com/kyechou/leagueoflegends/issues/109)) or when using
+> `wine-lol-staging` from the AUR
+> ([#123](https://github.com/kyechou/leagueoflegends/issues/123)). At the
+> moment, it is recommended to use the `wine-lol` package (which uses
+> GloriousEggroll's version). However, if getting banned is unaffordable, it may
+> be worth considering playing it on Windows or Mac.
 
 
 ## Installation

@@ -1,16 +1,48 @@
+# Status: Archived
+
+**This repository has been archived and no longer maintained.**
+
+Due to the upcoming Vanguard kernel-level anti-cheat [\[1\]] [\[2\]], it will
+not be possible to play LoL on Linux through wine or its variant. Please see
+[\[3\]] [\[4\]] for more details about Vanguard, and [\[5\]] [\[6\]] [\[7\]] for
+the privacy and security implications of kernel-level anti-cheat systems.
+
+It is encouraged to remove LoL from your Linux machines once Vanguard is rolled
+out some time early 2024 (currently expected to be released with patch 14.5). To
+do so, please run `leagueoflegends uninstall` before removing the helper script
+(i.e., the AUR package).
+
+[\[1\]: Season 2024 Look Ahead - YouTube][\[1\]]<br/>
+[\[2\]: Vanguard Updates - Riot Games][\[2\]]<br/>
+[\[3\]: Riot Vanguard - League of Legends Wiki][\[3\]]<br/>
+[\[4\]: Riot Vanguard FAQ][\[4\]]<br/>
+[\[5\]: Security Concerns About Kernel-Level Anti-Cheat in Video Games][\[5\]]<br/>
+[\[6\]: Redefining the Risks of Kernel-Level Anti-Cheat in Online Gaming][\[6\]]<br/>
+[\[7\]: /dev/null: Anti-Cheat Kernel Driver][\[7\]]<br/>
+
+[\[1\]]: https://youtu.be/9U_jEzKf0_0?t=732
+[\[2\]]: https://www.riotgames.com/en/DevRel/vanguard
+[\[3\]]: https://leagueoflegends.fandom.com/wiki/Riot_Vanguard
+[\[4\]]: https://support-leagueoflegends.riotgames.com/hc/en-us/articles/24169857932435-Riot-Vanguard-League-of-Legends
+[\[5\]]: https://ritcsec.wordpress.com/2022/08/03/security-concerns-about-kernel-level-anti-cheat-in-video-games/
+[\[6\]]: https://doi.org/10.1109/SPIN52536.2021.9566108
+[\[7\]]: https://www.leagueoflegends.com/en-gb/news/dev/dev-null-anti-cheat-kernel-driver/
+
+---
+
 # League of Legends
 
 [League of Legends](https://www.leagueoflegends.com) helper script for
 installing and running on Linux.
 
-> **Warning** <br/>
+> **Warning**<br/>
 > Playing LoL on Linux is not officially supported by Riot, so please proceed at
 > your own risk! From Riot: "We also can't guarantee that more restrictive
 > anti-cheat tools won't be introduced in the future, which could potentially
 > conflict with such environments."
 > ([#109](https://github.com/kyechou/leagueoflegends/issues/109#issuecomment-1702388487))
 
-> **Warning** <br/>
+> **Warning**<br/>
 > People have reported being banned for cheating since 13.14
 > ([#109](https://github.com/kyechou/leagueoflegends/issues/109)) or when using
 > `wine-lol-staging` from the AUR
@@ -28,10 +60,10 @@ check all dependencies are installed properly if it's installed manually.
 | Distribution  | Installation method                                                                |
 |---------------|------------------------------------------------------------------------------------|
 | Arch Linux    | AUR: [leagueoflegends-git](https://aur.archlinux.org/packages/leagueoflegends-git) |
-| Debian/Ubuntu | `./package.sh debian` <br/> `sudo dpkg -i <deb_file>`                              |
+| Debian/Ubuntu | `./package.sh debian`<br/>`sudo dpkg -i <deb_file>`                                |
 | Others        | Manual installation: `sudo make install`                                           |
 
-> **Note** <br/>
+> **Note**<br/>
 > With package installation methods, packages specific to individual GPUs are
 > not included in the dependencies, even though we do include the virtual
 > packages `vulkan-driver` and `lib32-vulkan-driver` in the AUR package. So
@@ -46,7 +78,7 @@ The following dependencies are included in the AUR package and the generated
 `.deb` package. If there's anything incorrect or missing, pull requests are
 appreciated.
 
-> **Note** <br/>
+> **Note**<br/>
 > For non-Arch distributions, wine-lol is **not** included in the package
 > dependencies because they don't have those packages for now. So please be sure
 > to manually install wine-lol by either downloading from [a release of
@@ -149,7 +181,7 @@ variable is not defined, the game would then be installed at
   everything works.
 * To remove the game: `leagueoflegends uninstall`.
 
-> **Warning** <br/>
+> **Warning**<br/>
 > If you've run wine-lol-staging or other flavors of wine 8.0+ before and now
 > have issues with launching the client (especially if you're coming from
 > version 8 to 7), and it says something about `unimplemented function
@@ -157,7 +189,7 @@ variable is not defined, the game would then be installed at
 > difference in wine versions. You need to recreate the wine prefix for it to
 > work, by running `leagueoflegends reset-wineprefix`.
 
-> **Note** <br/>
+> **Note**<br/>
 > If you use Nvidia graphics card and have trouble launching the League client
 > or start the game (after champion selection), please check out [the
 > troubleshooting section](#blank-screen-with-nvidia-graphics-card).
